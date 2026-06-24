@@ -261,6 +261,15 @@ function TimetableGrid({
   const nowTop = (nowFestivalHour - startHour) * PX_PER_HOUR
   const showNowLine = nowFestivalHour >= startHour && nowFestivalHour <= endHour
 
+  // Scroll to current time on mount, centred in the viewport
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || !showNowLine) return
+    const offset = nowTop - el.clientHeight / 2 + HEADER_H
+    el.scrollTop = Math.max(0, offset)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div
       ref={scrollRef}
