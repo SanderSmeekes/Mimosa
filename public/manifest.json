@@ -1,0 +1,18 @@
+{
+  "name": "Memoris 2026",
+  "short_name": "Memoris",
+  "description": "Memori festival timetable 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2a2d1e",
+  "theme_color": "#2a2d1e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
