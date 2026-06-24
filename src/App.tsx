@@ -22,6 +22,13 @@ const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
   MENTIS: { bg: "#3d3c34", text: "#d2d2d0" },
 }
 
+const STAGE_ACCENT: Record<Stage, string> = {
+  LUX:    "#C0392B",
+  UNDA:   "#D9A227",
+  AURA:   "#7A8B3C",
+  MENTIS: "#4A9BC4",
+}
+
 const PX_PER_HOUR    = 88
 const STAGE_COL_W    = 148
 const TIME_GUTTER_W  = 52
@@ -76,6 +83,7 @@ function EventCard({
   const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
   const { bg, text } = STAGE_COLORS[stage]
+  const accent = STAGE_ACCENT[stage]
   const compact = height < 56
 
   return (
@@ -89,6 +97,7 @@ function EventCard({
         backgroundColor: bg,
         color: text,
         borderRadius: 8,
+        borderLeft: `3px solid ${accent}`,
         padding: compact ? "5px 8px" : "8px 10px",
         overflow: "hidden",
         display: "flex",
@@ -235,6 +244,7 @@ function TimetableGrid({
                 width: STAGE_COL_W,
                 flexShrink: 0,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 12,
@@ -244,7 +254,16 @@ function TimetableGrid({
                 borderRight: border,
               }}
             >
-              {stage}
+              <span>{stage}</span>
+              <div
+                style={{
+                  width: 8,
+                  height: 2,
+                  borderRadius: 9999,
+                  marginTop: 4,
+                  backgroundColor: STAGE_ACCENT[stage],
+                }}
+              />
             </div>
           ))}
         </div>
