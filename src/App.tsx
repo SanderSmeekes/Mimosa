@@ -547,7 +547,7 @@ function MarqueeBanner() {
       className="group"
       style={{
         flexShrink: 0,
-        borderTop: "1px solid hsl(var(--border))",
+        borderTop: "1px solid #1a1714",
         borderBottom: "1px solid hsl(var(--border))",
         paddingTop: "14px",
         paddingBottom: "14px",
