@@ -210,6 +210,7 @@ function TimetableGrid({
         overflow: "auto",
         WebkitOverflowScrolling: "touch" as never,
         overscrollBehavior: "contain",
+        paddingBottom: "64px",
       }}
     >
       <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, position: "relative" }}>
@@ -391,6 +392,65 @@ function TimetableGrid({
 }
 
 /* ─────────────────────────────────────────────
+   Marquee banner
+───────────────────────────────────────────── */
+const MARQUEE_TEXT = "Smile, dance and make Memoiries. Raargh!"
+const MARQUEE_SEPARATOR = " ◆ "
+const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR) + MARQUEE_SEPARATOR
+
+function MarqueeBanner() {
+  return (
+    <div
+      className="group"
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        borderTop: "1px solid #262626",
+        paddingTop: "14px",
+        paddingBottom: "14px",
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        backgroundColor: "rgba(10,10,10,0.95)",
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+      }}
+    >
+      <div
+        style={{
+          display: "inline-block",
+          animation: "marquee 22s linear infinite",
+        }}
+        className="group-hover:[animation-play-state:paused]"
+      >
+        <span
+          style={{
+            fontFamily: "'Courier Prime', 'Courier New', monospace",
+            fontSize: "0.875rem",
+            letterSpacing: "0.05em",
+            color: "#a5a4a1",
+          }}
+        >
+          {MARQUEE_CHUNK}
+        </span>
+        <span
+          style={{
+            fontFamily: "'Courier Prime', 'Courier New', monospace",
+            fontSize: "0.875rem",
+            letterSpacing: "0.05em",
+            color: "#a5a4a1",
+          }}
+        >
+          {MARQUEE_CHUNK}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────
    Root app
 ───────────────────────────────────────────── */
 const LS_KEY = "memoris-favourites"
@@ -510,6 +570,7 @@ export default function App() {
           </TabsContent>
         ))}
       </Tabs>
+      <MarqueeBanner />
     </div>
   )
 }
