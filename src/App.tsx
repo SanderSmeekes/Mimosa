@@ -26,14 +26,12 @@ const PX_PER_HOUR    = 88
 const STAGE_COL_W    = 148
 const TIME_GUTTER_W  = 52
 const HEADER_H       = 44
-const MIDNIGHT_THRESHOLD = 10
-
 /* ─────────────────────────────────────────────
    Time helpers
 ───────────────────────────────────────────── */
 function toFestivalHour(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number)
-  return (h < MIDNIGHT_THRESHOLD ? h + 24 : h) + m / 60
+  return h + m / 60
 }
 
 function topPx(time: string, startHour: number): number {
@@ -47,21 +45,8 @@ function heightPx(start: string, end: string): number {
   return (e - s) * PX_PER_HOUR
 }
 
-function dayBounds(day: Day): { startHour: number; endHour: number } {
-  const schedule = timetableData.schedule[day]
-  let min = 99, max = 0
-  for (const stage of ALL_STAGES) {
-    for (const slot of schedule[stage] ?? []) {
-      const s = toFestivalHour(slot.start_time)
-      const e = toFestivalHour(slot.end_time)
-      if (s < min) min = s
-      if (e > max) max = e
-    }
-  }
-  return {
-    startHour: min === 99 ? 10 : Math.floor(min),
-    endHour:   max === 0  ? 22 : Math.ceil(max),
-  }
+function dayBounds(_day: Day): { startHour: number; endHour: number } {
+  return { startHour: 0, endHour: 24 }
 }
 
 function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
