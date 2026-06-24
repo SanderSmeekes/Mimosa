@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { Heart } from "lucide-react"
+import Lottie from "lottie-react"
+import heartBurst from "@/assets/heart-burst.json"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -86,6 +88,18 @@ function EventCard({
   const accent = STAGE_ACCENT[stage]
   const compact = height < 56
 
+  // Play burst animation once when slot is first favourited
+  const [burst, setBurst] = useState(false)
+  const lottieRef = useRef<{ stop: () => void; play: () => void } | null>(null)
+
+  function handleToggle(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!isFav) setBurst(true)
+    onToggleFav()
+  }
+
+  const iconSize = compact ? 10 : 12
+
   return (
     <div
       style={{
@@ -129,7 +143,7 @@ function EventCard({
 
         {/* Favourite toggle */}
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleFav() }}
+          onClick={handleToggle}
           style={{
             background: "none",
             border: "none",
@@ -138,17 +152,31 @@ function EventCard({
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
-            transition: "color 0.15s ease",
+            justifyContent: "center",
             lineHeight: 1,
+            width: iconSize + 8,
+            height: iconSize + 8,
+            position: "relative",
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         >
-          <Heart
-            size={compact ? 10 : 12}
-            fill={isFav ? "#ff6b6b" : "none"}
-            strokeWidth={2}
-          />
+          {burst ? (
+            <Lottie
+              lottieRef={lottieRef as never}
+              animationData={heartBurst}
+              loop={false}
+              autoplay={true}
+              onComplete={() => setBurst(false)}
+              style={{ width: (iconSize + 8) * 2.5, height: (iconSize + 8) * 2.5, position: "absolute" }}
+            />
+          ) : (
+            <Heart
+              size={iconSize}
+              fill={isFav ? "#ff6b6b" : "none"}
+              stroke={isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)"}
+              strokeWidth={2}
+            />
+          )}
         </button>
       </div>
 
@@ -519,7 +547,8 @@ function MarqueeBanner() {
       className="group"
       style={{
         flexShrink: 0,
-        borderBottom: "1px solid #262626",
+        borderTop: "1px solid hsl(var(--border))",
+        borderBottom: "1px solid hsl(var(--border))",
         paddingTop: "14px",
         paddingBottom: "14px",
         overflow: "hidden",
@@ -671,7 +700,6 @@ export default function App() {
               justifyContent: "center",
               background: "none",
               border: "none",
-              borderLeft: "1px solid hsl(var(--border))",
               cursor: "pointer",
               color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
               transition: "color 0.15s ease",
