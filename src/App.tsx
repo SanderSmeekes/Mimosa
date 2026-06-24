@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { timetableData, type Day, type Stage, type SlotEntry } from "@/data/timetable"
+import { Heart } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -14,28 +15,25 @@ const DAY_LABELS: Record<Day, string> = {
   Sunday: "SUN",
 }
 
-const STAGE_COLORS: Record<Stage, { bg: string; text: string; header: string }> = {
-  LUX:    { bg: "#1a2e4a", text: "#fff", header: "#1a2e4a" },
-  UNDA:   { bg: "#1c3d6e", text: "#fff", header: "#1c3d6e" },
-  AURA:   { bg: "#3a1760", text: "#fff", header: "#3a1760" },
-  MENTIS: { bg: "#0f4a2e", text: "#fff", header: "#0f4a2e" },
+const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
+  LUX:    { bg: "#1a2e4a", text: "#fff" },
+  UNDA:   { bg: "#1c3d6e", text: "#fff" },
+  AURA:   { bg: "#3a1760", text: "#fff" },
+  MENTIS: { bg: "#0f4a2e", text: "#fff" },
 }
 
-/* Grid dimensions */
-const PX_PER_HOUR = 88     // px height per hour
-const STAGE_COL_W = 148    // px width per stage column (mobile friendly)
-const TIME_GUTTER_W = 52   // px for the left time label strip
-const HEADER_H = 44        // px for the sticky stage-name header
+const PX_PER_HOUR    = 88
+const STAGE_COL_W    = 148
+const TIME_GUTTER_W  = 52
+const HEADER_H       = 44
+const MIDNIGHT_THRESHOLD = 10
 
 /* ─────────────────────────────────────────────
-   Time helpers — "festival hours": 00–09 → 24–33
+   Time helpers
 ───────────────────────────────────────────── */
-const MIDNIGHT_THRESHOLD = 10 // hours below this are "next day"
-
 function toFestivalHour(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number)
-  const hour = h < MIDNIGHT_THRESHOLD ? h + 24 : h
-  return hour + m / 60
+  return (h < MIDNIGHT_THRESHOLD ? h + 24 : h) + m / 60
 }
 
 function topPx(time: string, startHour: number): number {
@@ -49,7 +47,6 @@ function heightPx(start: string, end: string): number {
   return (e - s) * PX_PER_HOUR
 }
 
-/* Compute earliest start and latest end for a day */
 function dayBounds(day: Day): { startHour: number; endHour: number } {
   const schedule = timetableData.schedule[day]
   let min = 99, max = 0
@@ -61,26 +58,35 @@ function dayBounds(day: Day): { startHour: number; endHour: number } {
       if (e > max) max = e
     }
   }
-  // floor start to hour, ceil end to hour, add small padding
   return {
     startHour: min === 99 ? 10 : Math.floor(min),
     endHour:   max === 0  ? 22 : Math.ceil(max),
   }
 }
 
+function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
+  return `${day}__${stage}__${slot.artist}__${slot.start_time}`
+}
+
 /* ─────────────────────────────────────────────
-   Event card — absolutely positioned in column
+   Event card
 ───────────────────────────────────────────── */
 function EventCard({
   slot,
   stage,
   startHour,
+  isFav,
+  dimmed,
+  onToggleFav,
 }: {
   slot: SlotEntry
   stage: Stage
   startHour: number
+  isFav: boolean
+  dimmed: boolean
+  onToggleFav: () => void
 }) {
-  const top = topPx(slot.start_time, startHour)
+  const top    = topPx(slot.start_time, startHour)
   const height = heightPx(slot.start_time, slot.end_time)
   const { bg, text } = STAGE_COLORS[stage]
   const compact = height < 56
@@ -104,26 +110,54 @@ function EventCard({
         boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
         cursor: "default",
         userSelect: "none",
+        opacity: dimmed ? 0.4 : 1,
+        transition: "opacity 0.2s ease",
       }}
     >
-      <span
-        style={{
-          fontSize: compact ? 11 : 12,
-          fontWeight: 700,
-          lineHeight: 1.25,
-          letterSpacing: "0.03em",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: compact ? "nowrap" : "normal",
-          display: "-webkit-box",
-          WebkitLineClamp: compact ? 1 : 2,
-          WebkitBoxOrient: "vertical",
-        }}
-      >
-        {slot.artist}
-      </span>
+      {/* Artist name row */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 4 }}>
+        <span
+          style={{
+            fontSize: compact ? 11 : 12,
+            fontWeight: 700,
+            lineHeight: 1.25,
+            letterSpacing: "0.03em",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: compact ? "nowrap" : "normal",
+            flex: 1,
+          }}
+        >
+          {slot.artist}
+        </span>
+
+        {/* Favourite toggle */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleFav() }}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
+            transition: "color 0.15s ease",
+            lineHeight: 1,
+          }}
+          aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+        >
+          <Heart
+            size={compact ? 10 : 12}
+            fill={isFav ? "#ff6b6b" : "none"}
+            strokeWidth={2}
+          />
+        </button>
+      </div>
+
       {!compact && (
-        <span style={{ fontSize: 10, opacity: 0.7, marginTop: 4, flexShrink: 0 }}>
+        <span style={{ fontSize: 10, opacity: 0.65, flexShrink: 0 }}>
           {slot.start_time}–{slot.end_time}
         </span>
       )}
@@ -134,19 +168,28 @@ function EventCard({
 /* ─────────────────────────────────────────────
    Timetable grid for one day
 ───────────────────────────────────────────── */
-function TimetableGrid({ day }: { day: Day }) {
+function TimetableGrid({
+  day,
+  favourites,
+  showFavs,
+  onToggleFav,
+}: {
+  day: Day
+  favourites: Set<string>
+  showFavs: boolean
+  onToggleFav: (key: string) => void
+}) {
   const schedule = timetableData.schedule[day]
   const { startHour, endHour } = dayBounds(day)
   const totalHours = endHour - startHour
-  const totalH = totalHours * PX_PER_HOUR
-  const hours = Array.from({ length: totalHours + 1 }, (_, i) => startHour + i)
+  const totalH     = totalHours * PX_PER_HOUR
+  const hours      = Array.from({ length: totalHours + 1 }, (_, i) => startHour + i)
 
-  const border = "1px solid hsl(var(--border))"
-  const bg = "hsl(var(--background))"
+  const border     = "1px solid hsl(var(--border))"
+  const bg         = "hsl(var(--background))"
   const mutedColor = "hsl(var(--muted-foreground))"
 
   return (
-    /* outer scroll container — both axes */
     <div
       style={{
         flex: 1,
@@ -155,14 +198,9 @@ function TimetableGrid({ day }: { day: Day }) {
         overscrollBehavior: "contain",
       }}
     >
-      {/* inner sizing wrapper */}
-      <div
-        style={{
-          minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W,
-          position: "relative",
-        }}
-      >
-        {/* ── Sticky stage-name header row ── */}
+      <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, position: "relative" }}>
+
+        {/* Sticky stage-name header */}
         <div
           style={{
             position: "sticky",
@@ -174,7 +212,6 @@ function TimetableGrid({ day }: { day: Day }) {
             borderBottom: border,
           }}
         >
-          {/* Corner cell */}
           <div
             style={{
               width: TIME_GUTTER_W,
@@ -186,7 +223,6 @@ function TimetableGrid({ day }: { day: Day }) {
               borderRight: border,
             }}
           />
-          {/* Stage name cells */}
           {ALL_STAGES.map((stage) => (
             <div
               key={stage}
@@ -199,7 +235,7 @@ function TimetableGrid({ day }: { day: Day }) {
                 fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: "0.12em",
-                color: STAGE_COLORS[stage].header,
+                color: STAGE_COLORS[stage].bg,
                 borderRight: border,
               }}
             >
@@ -208,9 +244,10 @@ function TimetableGrid({ day }: { day: Day }) {
           ))}
         </div>
 
-        {/* ── Scrollable body: time gutter + stage columns ── */}
+        {/* Body */}
         <div style={{ display: "flex", position: "relative" }}>
-          {/* Time gutter — sticky left */}
+
+          {/* Time gutter */}
           <div
             style={{
               width: TIME_GUTTER_W,
@@ -252,56 +289,62 @@ function TimetableGrid({ day }: { day: Day }) {
           </div>
 
           {/* Stage columns */}
-          {ALL_STAGES.map((stage) => {
-            const slots = schedule[stage] ?? []
-            return (
-              <div
-                key={stage}
-                style={{
-                  width: STAGE_COL_W,
-                  flexShrink: 0,
-                  height: totalH,
-                  position: "relative",
-                  borderRight: border,
-                }}
-              >
-                {/* Hour grid lines */}
-                {hours.map((h) => (
-                  <div
-                    key={h}
-                    style={{
-                      position: "absolute",
-                      top: (h - startHour) * PX_PER_HOUR,
-                      left: 0,
-                      right: 0,
-                      height: 1,
-                      backgroundColor: "hsl(var(--border))",
-                      opacity: h % 2 === 0 ? 0.7 : 0.3,
-                    }}
+          {ALL_STAGES.map((stage) => (
+            <div
+              key={stage}
+              style={{
+                width: STAGE_COL_W,
+                flexShrink: 0,
+                height: totalH,
+                position: "relative",
+                borderRight: border,
+              }}
+            >
+              {/* Hour lines */}
+              {hours.map((h) => (
+                <div
+                  key={h}
+                  style={{
+                    position: "absolute",
+                    top: (h - startHour) * PX_PER_HOUR,
+                    left: 0, right: 0, height: 1,
+                    backgroundColor: "hsl(var(--border))",
+                    opacity: h % 2 === 0 ? 0.7 : 0.3,
+                  }}
+                />
+              ))}
+              {hours.slice(0, -1).map((h) => (
+                <div
+                  key={`${h}h`}
+                  style={{
+                    position: "absolute",
+                    top: (h - startHour) * PX_PER_HOUR + PX_PER_HOUR / 2,
+                    left: 0, right: 0, height: 1,
+                    backgroundColor: "hsl(var(--border))",
+                    opacity: 0.15,
+                  }}
+                />
+              ))}
+
+              {/* Events */}
+              {(schedule[stage] ?? []).map((slot, i) => {
+                const key = slotKey(day, stage, slot)
+                const isFav  = favourites.has(key)
+                const dimmed = showFavs && !isFav
+                return (
+                  <EventCard
+                    key={i}
+                    slot={slot}
+                    stage={stage}
+                    startHour={startHour}
+                    isFav={isFav}
+                    dimmed={dimmed}
+                    onToggleFav={() => onToggleFav(key)}
                   />
-                ))}
-                {/* Half-hour sub-lines */}
-                {hours.slice(0, -1).map((h) => (
-                  <div
-                    key={`${h}-half`}
-                    style={{
-                      position: "absolute",
-                      top: (h - startHour) * PX_PER_HOUR + PX_PER_HOUR / 2,
-                      left: 0,
-                      right: 0,
-                      height: 1,
-                      backgroundColor: "hsl(var(--border))",
-                      opacity: 0.15,
-                    }}
-                  />
-                ))}
-                {/* Event cards */}
-                {slots.map((slot, i) => (
-                  <EventCard key={i} slot={slot} stage={stage} startHour={startHour} />
-                ))}
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -312,7 +355,19 @@ function TimetableGrid({ day }: { day: Day }) {
    Root app
 ───────────────────────────────────────────── */
 export default function App() {
-  const [activeDay, setActiveDay] = useState<Day>("Thursday")
+  const [activeDay, setActiveDay]   = useState<Day>("Thursday")
+  const [favourites, setFavourites] = useState<Set<string>>(new Set())
+  const [showFavs, setShowFavs]     = useState(false)
+
+  function toggleFav(key: string) {
+    setFavourites((prev) => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  const hasFavs = favourites.size > 0
 
   return (
     <div
@@ -329,22 +384,24 @@ export default function App() {
         onValueChange={(v) => setActiveDay(v as Day)}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
       >
-        {/* Day selector bar */}
+        {/* Top bar: full-width tabs + favourites toggle */}
         <div
           style={{
             flexShrink: 0,
             borderBottom: "1px solid hsl(var(--border))",
             display: "flex",
             alignItems: "center",
-            padding: "0 4px",
           }}
         >
+          {/* Tabs fill all available space */}
           <TabsList
             style={{
+              flex: 1,
               background: "none",
               height: 48,
-              gap: 4,
+              borderRadius: 0,
               padding: 0,
+              display: "flex",
             }}
           >
             {timetableData.days.map((day) => (
@@ -352,27 +409,51 @@ export default function App() {
                 key={day}
                 value={day}
                 style={{
+                  flex: 1,
                   fontSize: 13,
                   fontWeight: 700,
                   letterSpacing: "0.08em",
-                  height: 40,
-                  padding: "0 16px",
-                  borderRadius: 8,
+                  height: "100%",
+                  borderRadius: 0,
+                  padding: 0,
+                  borderBottom: activeDay === day
+                    ? "2px solid hsl(var(--foreground))"
+                    : "2px solid transparent",
                   ...(activeDay === day
-                    ? {
-                        backgroundColor: "hsl(var(--foreground))",
-                        color: "hsl(var(--background))",
-                      }
-                    : {
-                        backgroundColor: "transparent",
-                        color: "hsl(var(--muted-foreground))",
-                      }),
+                    ? { color: "hsl(var(--foreground))", backgroundColor: "transparent" }
+                    : { color: "hsl(var(--muted-foreground))", backgroundColor: "transparent" }),
                 }}
               >
                 {DAY_LABELS[day]}
               </TabsTrigger>
             ))}
           </TabsList>
+
+          {/* Favourites toggle button */}
+          <button
+            onClick={() => setShowFavs((s) => !s)}
+            aria-label={showFavs ? "Show all" : "Show favourites"}
+            style={{
+              flexShrink: 0,
+              width: 48,
+              height: 48,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "none",
+              borderLeft: "1px solid hsl(var(--border))",
+              cursor: "pointer",
+              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
+              transition: "color 0.15s ease",
+            }}
+          >
+            <Heart
+              size={18}
+              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
+              strokeWidth={2}
+            />
+          </button>
         </div>
 
         {/* Grid per day */}
@@ -388,7 +469,12 @@ export default function App() {
               flexDirection: "column",
             }}
           >
-            <TimetableGrid day={day} />
+            <TimetableGrid
+              day={day}
+              favourites={favourites}
+              showFavs={showFavs}
+              onToggleFav={toggleFav}
+            />
           </TabsContent>
         ))}
       </Tabs>
