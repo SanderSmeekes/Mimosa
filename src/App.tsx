@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { timetableData, type Day, type Stage, type SlotEntry } from "@/data/timetable"
 import { Heart } from "lucide-react"
@@ -155,6 +155,15 @@ function EventCard({
 /* ─────────────────────────────────────────────
    Timetable grid for one day
 ───────────────────────────────────────────── */
+function useNow() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+  return now
+}
+
 function TimetableGrid({
   day,
   favourites,
@@ -176,6 +185,14 @@ function TimetableGrid({
   const border     = "1px solid hsl(var(--border))"
   const bg         = "hsl(var(--background))"
   const mutedColor = "hsl(var(--muted-foreground))"
+
+  // Current time indicator
+  const now = useNow()
+  const nowFestivalHour = toFestivalHour(
+    `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+  )
+  const nowTop = (nowFestivalHour - startHour) * PX_PER_HOUR
+  const showNowLine = nowFestivalHour >= startHour && nowFestivalHour <= endHour
 
   return (
     <div
@@ -234,6 +251,23 @@ function TimetableGrid({
 
         {/* Body */}
         <div style={{ display: "flex", position: "relative" }}>
+
+          {/* Current time line */}
+          {showNowLine && (
+            <div
+              style={{
+                position: "absolute",
+                top: nowTop,
+                left: TIME_GUTTER_W,
+                right: 0,
+                height: 0,
+                borderTop: "1px dashed #d2d2d0",
+                opacity: 0.6,
+                zIndex: 15,
+                pointerEvents: "none",
+              }}
+            />
+          )}
 
           {/* Time gutter */}
           <div
