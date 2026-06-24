@@ -49,4 +49,11 @@
   #root {
     width: 100%;
   }
+
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
 }
