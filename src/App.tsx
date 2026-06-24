@@ -226,6 +226,7 @@ function TimetableGrid({
             height: HEADER_H,
             backgroundColor: bg,
             borderBottom: border,
+            boxShadow: "0 4px 12px 0 rgba(0,0,0,0.45)",
           }}
         >
           <div
