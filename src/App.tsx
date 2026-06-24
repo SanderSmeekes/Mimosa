@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { Heart } from "lucide-react"
@@ -162,6 +162,60 @@ function EventCard({
 }
 
 /* ─────────────────────────────────────────────
+   Axis-locking scroll: detects dominant direction
+   on first move and suppresses the other axis for
+   the entire gesture + momentum phase.
+───────────────────────────────────────────── */
+function useAxisLock(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    let startX = 0, startY = 0
+    let axis: "x" | "y" | null = null
+    let lockedTop = 0, lockedLeft = 0
+
+    const onStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+      axis = null
+    }
+
+    const onMove = (e: TouchEvent) => {
+      const dx = Math.abs(e.touches[0].clientX - startX)
+      const dy = Math.abs(e.touches[0].clientY - startY)
+      if (!axis && (dx > 6 || dy > 6)) {
+        axis = dx > dy ? "x" : "y"
+        lockedTop  = el.scrollTop
+        lockedLeft = el.scrollLeft
+      }
+      if (axis === "x") el.scrollTop  = lockedTop
+      if (axis === "y") el.scrollLeft = lockedLeft
+    }
+
+    // Keep lock alive during momentum too (scroll fires after touchend)
+    const onScroll = () => {
+      if (axis === "x") el.scrollTop  = lockedTop
+      if (axis === "y") el.scrollLeft = lockedLeft
+    }
+
+    // Release lock once momentum dies (next gesture resets it anyway)
+    const onEnd = () => { setTimeout(() => { axis = null }, 400) }
+
+    el.addEventListener("touchstart", onStart,  { passive: true })
+    el.addEventListener("touchmove",  onMove,   { passive: true })
+    el.addEventListener("touchend",   onEnd,    { passive: true })
+    el.addEventListener("scroll",     onScroll, { passive: true })
+    return () => {
+      el.removeEventListener("touchstart", onStart)
+      el.removeEventListener("touchmove",  onMove)
+      el.removeEventListener("touchend",   onEnd)
+      el.removeEventListener("scroll",     onScroll)
+    }
+  }, [ref])
+}
+
+/* ─────────────────────────────────────────────
    Timetable grid for one day
 ───────────────────────────────────────────── */
 function useNow() {
@@ -184,6 +238,9 @@ function TimetableGrid({
   showFavs: boolean
   onToggleFav: (key: string) => void
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useAxisLock(scrollRef)
+
   const schedule = timetableData.schedule[day]
   const { startHour, endHour } = dayBounds(day)
   const totalHours = endHour - startHour          // 24
@@ -206,12 +263,13 @@ function TimetableGrid({
 
   return (
     <div
+      ref={scrollRef}
       style={{
         flex: 1,
         overflow: "auto",
         WebkitOverflowScrolling: "touch" as never,
         overscrollBehavior: "none",
-        paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
+        paddingBottom: "16px",
       }}
     >
       <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, width: "100%", position: "relative" }}>
@@ -244,7 +302,7 @@ function TimetableGrid({
             }}
           >
             <img
-              src="/siley.png"
+              src="/mooney.png"
               alt=""
               className="animate-[spin_20s_linear_infinite]"
               style={{ width: 30, height: 30, objectFit: "contain" }}
@@ -451,19 +509,13 @@ function MarqueeBanner() {
     <div
       className="group"
       style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
+        flexShrink: 0,
         borderTop: "1px solid #262626",
         paddingTop: "14px",
         paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
         overflow: "hidden",
         whiteSpace: "nowrap",
         backgroundColor: "rgba(10,10,10,0.95)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
       }}
     >
       <div
@@ -534,6 +586,7 @@ export default function App() {
         flexDirection: "column",
         backgroundColor: "hsl(var(--background))",
         overflow: "hidden",
+        paddingTop: "env(safe-area-inset-top)",
       }}
     >
       <Tabs
@@ -541,65 +594,6 @@ export default function App() {
         onValueChange={(v) => setActiveDay(v as Day)}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
       >
-        {/* Top bar: favourites toggle (52px, mirrors time gutter) + full-width tabs */}
-        <div
-          style={{
-            flexShrink: 0,
-            borderBottom: "1px solid hsl(var(--border))",
-            display: "flex",
-            alignItems: "stretch",
-            paddingTop: "env(safe-area-inset-top)",
-            backgroundColor: "hsl(var(--background))",
-          }}
-        >
-          {/* Favourites toggle — width matches TIME_GUTTER_W so tab borders align with stage columns */}
-          <button
-            onClick={() => setShowFavs((s) => !s)}
-            aria-label={showFavs ? "Show all" : "Show favourites"}
-            style={{
-              flexShrink: 0,
-              width: TIME_GUTTER_W,
-              height: 48,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "none",
-              border: "none",
-              borderRight: "1px solid hsl(var(--border))",
-              cursor: "pointer",
-              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
-              transition: "color 0.15s ease",
-            }}
-          >
-            <Heart
-              size={18}
-              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
-              strokeWidth={2}
-            />
-          </button>
-
-          {/* Tabs fill remaining space — line variant gives the underline indicator */}
-          <TabsList
-            variant="line"
-            className="flex-1 w-auto h-12 rounded-none p-0 gap-0"
-          >
-            {timetableData.days.map((day) => (
-              <TabsTrigger
-                key={day}
-                value={day}
-                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:bottom-0"
-                style={
-                  activeDay === day
-                    ? { color: "#ffffff" }
-                    : { color: "#4a4943" }
-                }
-              >
-                {DAY_LABELS[day]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-
         {/* Grid per day */}
         {timetableData.days.map((day) => (
           <TabsContent
@@ -621,7 +615,66 @@ export default function App() {
             />
           </TabsContent>
         ))}
+
+        {/* Bottom day-selector bar */}
+        <div
+          style={{
+            flexShrink: 0,
+            borderTop: "1px solid hsl(var(--border))",
+            display: "flex",
+            alignItems: "stretch",
+            backgroundColor: "hsl(var(--background))",
+          }}
+        >
+          {/* Tabs fill available space */}
+          <TabsList
+            variant="line"
+            className="flex-1 w-auto h-12 rounded-none p-0 gap-0"
+          >
+            {timetableData.days.map((day) => (
+              <TabsTrigger
+                key={day}
+                value={day}
+                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:top-0"
+                style={
+                  activeDay === day
+                    ? { color: "#ffffff" }
+                    : { color: "#4a4943" }
+                }
+              >
+                {DAY_LABELS[day]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {/* Favourites toggle on the right */}
+          <button
+            onClick={() => setShowFavs((s) => !s)}
+            aria-label={showFavs ? "Show all" : "Show favourites"}
+            style={{
+              flexShrink: 0,
+              width: 48,
+              height: 48,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "none",
+              borderLeft: "1px solid hsl(var(--border))",
+              cursor: "pointer",
+              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
+              transition: "color 0.15s ease",
+            }}
+          >
+            <Heart
+              size={18}
+              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
+              strokeWidth={2}
+            />
+          </button>
+        </div>
       </Tabs>
+
       <MarqueeBanner />
     </div>
   )
