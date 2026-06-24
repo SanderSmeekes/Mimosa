@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
-import { Heart } from "lucide-react"
-import Lottie from "lottie-react"
-import heartBurst from "@/assets/heart-burst.json"
+import { Heart, Settings } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -88,16 +87,6 @@ function EventCard({
   const accent = STAGE_ACCENT[stage]
   const compact = height < 56
 
-  // Play burst animation once when slot is first favourited
-  const [burst, setBurst] = useState(false)
-  const lottieRef = useRef<{ stop: () => void; play: () => void } | null>(null)
-
-  function handleToggle(e: React.MouseEvent) {
-    e.stopPropagation()
-    if (!isFav) setBurst(true)
-    onToggleFav()
-  }
-
   const iconSize = compact ? 10 : 12
 
   return (
@@ -143,7 +132,7 @@ function EventCard({
 
         {/* Favourite toggle */}
         <button
-          onClick={handleToggle}
+          onClick={(e) => { e.stopPropagation(); onToggleFav() }}
           style={{
             background: "none",
             border: "none",
@@ -152,31 +141,13 @@ function EventCard({
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
+            transition: "color 0.15s ease",
             lineHeight: 1,
-            width: iconSize + 8,
-            height: iconSize + 8,
-            position: "relative",
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         >
-          {burst ? (
-            <Lottie
-              lottieRef={lottieRef as never}
-              animationData={heartBurst}
-              loop={false}
-              autoplay={true}
-              onComplete={() => setBurst(false)}
-              style={{ width: (iconSize + 8) * 2.5, height: (iconSize + 8) * 2.5, position: "absolute" }}
-            />
-          ) : (
-            <Heart
-              size={iconSize}
-              fill={isFav ? "#ff6b6b" : "none"}
-              stroke={isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)"}
-              strokeWidth={2}
-            />
-          )}
+          <Heart size={iconSize} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
         </button>
       </div>
 
@@ -622,7 +593,7 @@ export default function App() {
         height: "100dvh",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "hsl(var(--background))",
+        backgroundColor: "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
       }}
@@ -663,7 +634,7 @@ export default function App() {
             borderTop: "1px solid hsl(var(--border))",
             display: "flex",
             alignItems: "stretch",
-            backgroundColor: "hsl(var(--background))",
+            backgroundColor: "#0b0b0a",
           }}
         >
           {/* Tabs fill available space */}
@@ -687,13 +658,13 @@ export default function App() {
             ))}
           </TabsList>
 
-          {/* Favourites toggle on the right */}
+          {/* Favourites toggle */}
           <button
             onClick={() => setShowFavs((s) => !s)}
             aria-label={showFavs ? "Show all" : "Show favourites"}
             style={{
               flexShrink: 0,
-              width: 48,
+              width: 44,
               height: 48,
               display: "flex",
               alignItems: "center",
@@ -711,6 +682,40 @@ export default function App() {
               strokeWidth={2}
             />
           </button>
+
+          {/* Settings drawer */}
+          <Drawer>
+            <DrawerTrigger asChild>
+              <button
+                aria-label="Settings"
+                style={{
+                  flexShrink: 0,
+                  width: 44,
+                  height: 48,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                <Settings size={18} strokeWidth={1.5} />
+              </button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>SETTINGS</DrawerTitle>
+                <DrawerDescription>Memori 2026</DrawerDescription>
+              </DrawerHeader>
+              <div style={{ padding: "8px 24px 40px" }}>
+                <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
+                  More options coming soon.
+                </p>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </Tabs>
     </div>
