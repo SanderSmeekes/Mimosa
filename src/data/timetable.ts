@@ -96,8 +96,17 @@ export const timetableData = {
   },
   stages: ["LUX", "UNDA", "AURA", "MENTIS"] as const,
   days: ["Thursday", "Friday", "Saturday", "Sunday"] as const,
+  banners: {
+    Thursday: [
+      { label: "Arriving at the camping", start_time: "16:00", end_time: "20:00" },
+    ],
+    Friday:   [],
+    Saturday: [],
+    Sunday:   [],
+  } as Record<string, BannerEntry[]>,
 }
 
 export type Stage = (typeof timetableData.stages)[number]
 export type Day = (typeof timetableData.days)[number]
 export type SlotEntry = { artist: string; start_time: string; end_time: string }
+export type BannerEntry = { label: string; start_time: string; end_time: string }

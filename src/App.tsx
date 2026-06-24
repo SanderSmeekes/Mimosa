@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { timetableData, type Day, type Stage, type SlotEntry } from "@/data/timetable"
+import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { Heart } from "lucide-react"
 
 /* ─────────────────────────────────────────────
@@ -194,6 +194,7 @@ function TimetableGrid({
   const border     = "1px solid hsl(var(--border))"
   const bg         = "hsl(var(--background))"
   const mutedColor = "hsl(var(--muted-foreground))"
+  const banners: BannerEntry[] = timetableData.banners[day] ?? []
 
   // Current time indicator
   const now = useNow()
@@ -288,6 +289,42 @@ function TimetableGrid({
               }}
             />
           )}
+
+          {/* Full-width banner blocks (e.g. "Arriving at the camping") */}
+          {banners.map((b, i) => {
+            const bTop    = topPx(b.start_time)
+            const bHeight = heightPx(b.start_time, b.end_time)
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  top: bTop,
+                  left: TIME_GUTTER_W,
+                  right: 0,
+                  height: bHeight,
+                  backgroundColor: "rgba(212,162,75,0.07)",
+                  borderTop: "1px solid rgba(212,162,75,0.35)",
+                  borderBottom: "1px solid rgba(212,162,75,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 5,
+                  pointerEvents: "none",
+                }}
+              >
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  color: "rgba(212,162,75,0.75)",
+                  textTransform: "uppercase",
+                }}>
+                  {b.label}
+                </span>
+              </div>
+            )
+          })}
 
           {/* Time gutter */}
           <div
