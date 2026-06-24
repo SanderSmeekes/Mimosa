@@ -246,6 +246,7 @@ function TimetableGrid({
             <img
               src="/siley.png"
               alt=""
+              className="animate-[spin_20s_linear_infinite]"
               style={{ width: 30, height: 30, objectFit: "contain" }}
             />
           </div>
