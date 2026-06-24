@@ -541,7 +541,7 @@ export default function App() {
         onValueChange={(v) => setActiveDay(v as Day)}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
       >
-        {/* Top bar: full-width tabs + favourites toggle */}
+        {/* Top bar: favourites toggle (52px, mirrors time gutter) + full-width tabs */}
         <div
           style={{
             flexShrink: 0,
@@ -552,7 +552,33 @@ export default function App() {
             backgroundColor: "hsl(var(--background))",
           }}
         >
-          {/* Tabs fill all available space — line variant gives the underline indicator */}
+          {/* Favourites toggle — width matches TIME_GUTTER_W so tab borders align with stage columns */}
+          <button
+            onClick={() => setShowFavs((s) => !s)}
+            aria-label={showFavs ? "Show all" : "Show favourites"}
+            style={{
+              flexShrink: 0,
+              width: TIME_GUTTER_W,
+              height: 48,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "none",
+              borderRight: "1px solid hsl(var(--border))",
+              cursor: "pointer",
+              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
+              transition: "color 0.15s ease",
+            }}
+          >
+            <Heart
+              size={18}
+              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
+              strokeWidth={2}
+            />
+          </button>
+
+          {/* Tabs fill remaining space — line variant gives the underline indicator */}
           <TabsList
             variant="line"
             className="flex-1 w-auto h-12 rounded-none p-0 gap-0"
@@ -572,32 +598,6 @@ export default function App() {
               </TabsTrigger>
             ))}
           </TabsList>
-
-          {/* Favourites toggle button */}
-          <button
-            onClick={() => setShowFavs((s) => !s)}
-            aria-label={showFavs ? "Show all" : "Show favourites"}
-            style={{
-              flexShrink: 0,
-              width: 48,
-              height: 48,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "none",
-              border: "none",
-              borderLeft: "1px solid hsl(var(--border))",
-              cursor: "pointer",
-              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
-              transition: "color 0.15s ease",
-            }}
-          >
-            <Heart
-              size={18}
-              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
-              strokeWidth={2}
-            />
-          </button>
         </div>
 
         {/* Grid per day */}
