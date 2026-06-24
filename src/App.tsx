@@ -37,8 +37,8 @@ const HEADER_H       = 44
    Time helpers — grid runs 10:00 → 10:00 (+1 day)
    Hours 00–09 are treated as 24–33 (next day).
 ───────────────────────────────────────────── */
-const DAY_START = 10   // grid starts at 10:00
-const DAY_END   = 34   // grid ends at 10:00 next day (34 = 24 + 10)
+const DAY_START = 9    // grid starts at 09:00
+const DAY_END   = 31   // grid ends at 07:00 next day (24 + 7 = 31)
 
 function toFestivalHour(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number)
@@ -514,6 +514,11 @@ export default function App() {
                 key={day}
                 value={day}
                 className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:bottom-0"
+                style={
+                  activeDay === day
+                    ? { color: "#ffffff" }
+                    : { color: "#4a4943" }
+                }
               >
                 {DAY_LABELS[day]}
               </TabsTrigger>
