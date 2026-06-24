@@ -43,7 +43,7 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     margin: 0;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: "Courier Prime", "Courier New", monospace;
     -webkit-font-smoothing: antialiased;
   }
   #root {

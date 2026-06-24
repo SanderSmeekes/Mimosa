@@ -266,7 +266,6 @@ function TimetableGrid({
                   style={{
                     fontSize: 10,
                     color: mutedColor,
-                    fontFamily: "ui-monospace, monospace",
                     lineHeight: 1,
                   }}
                 >
