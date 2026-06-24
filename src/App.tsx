@@ -390,39 +390,19 @@ export default function App() {
             flexShrink: 0,
             borderBottom: "1px solid hsl(var(--border))",
             display: "flex",
-            alignItems: "center",
+            alignItems: "stretch",
           }}
         >
-          {/* Tabs fill all available space */}
+          {/* Tabs fill all available space — line variant gives the underline indicator */}
           <TabsList
-            style={{
-              flex: 1,
-              background: "none",
-              height: 48,
-              borderRadius: 0,
-              padding: 0,
-              display: "flex",
-            }}
+            variant="line"
+            className="flex-1 w-auto h-12 rounded-none p-0 gap-0"
           >
             {timetableData.days.map((day) => (
               <TabsTrigger
                 key={day}
                 value={day}
-                style={{
-                  flex: 1,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  height: "100%",
-                  borderRadius: 0,
-                  padding: 0,
-                  borderBottom: activeDay === day
-                    ? "2px solid hsl(var(--foreground))"
-                    : "2px solid transparent",
-                  ...(activeDay === day
-                    ? { color: "hsl(var(--foreground))", backgroundColor: "transparent" }
-                    : { color: "hsl(var(--muted-foreground))", backgroundColor: "transparent" }),
-                }}
+                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:bottom-0"
               >
                 {DAY_LABELS[day]}
               </TabsTrigger>
