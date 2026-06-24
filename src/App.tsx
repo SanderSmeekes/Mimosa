@@ -210,7 +210,7 @@ function TimetableGrid({
         overflow: "auto",
         WebkitOverflowScrolling: "touch" as never,
         overscrollBehavior: "contain",
-        paddingBottom: "64px",
+        paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
       }}
     >
       <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, position: "relative" }}>
@@ -410,7 +410,7 @@ function MarqueeBanner() {
         zIndex: 50,
         borderTop: "1px solid #262626",
         paddingTop: "14px",
-        paddingBottom: "14px",
+        paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
         overflow: "hidden",
         whiteSpace: "nowrap",
         backgroundColor: "rgba(10,10,10,0.95)",
@@ -486,7 +486,6 @@ export default function App() {
         flexDirection: "column",
         backgroundColor: "hsl(var(--background))",
         overflow: "hidden",
-        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <Tabs
