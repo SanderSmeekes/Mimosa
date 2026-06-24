@@ -244,9 +244,9 @@ function TimetableGrid({
             }}
           >
             <img
-              src="/sun.svg"
+              src="/siley.png"
               alt=""
-              style={{ width: 30, height: 30 }}
+              style={{ width: 30, height: 30, objectFit: "contain" }}
             />
           </div>
           {ALL_STAGES.map((stage) => (
