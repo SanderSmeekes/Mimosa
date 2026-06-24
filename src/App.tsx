@@ -210,7 +210,7 @@ function TimetableGrid({
         flex: 1,
         overflow: "auto",
         WebkitOverflowScrolling: "touch" as never,
-        overscrollBehavior: "contain",
+        overscrollBehavior: "none",
         paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
       }}
     >
