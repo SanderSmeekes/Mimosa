@@ -393,15 +393,25 @@ function TimetableGrid({
 /* ─────────────────────────────────────────────
    Root app
 ───────────────────────────────────────────── */
+const LS_KEY = "memoris-favourites"
+
 export default function App() {
   const [activeDay, setActiveDay]   = useState<Day>("Thursday")
-  const [favourites, setFavourites] = useState<Set<string>>(new Set())
-  const [showFavs, setShowFavs]     = useState(false)
+  const [favourites, setFavourites] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(LS_KEY)
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
+  const [showFavs, setShowFavs] = useState(false)
 
   function toggleFav(key: string) {
     setFavourites((prev) => {
       const next = new Set(prev)
       next.has(key) ? next.delete(key) : next.add(key)
+      try { localStorage.setItem(LS_KEY, JSON.stringify([...next])) } catch { /* quota */ }
       return next
     })
   }
@@ -416,6 +426,7 @@ export default function App() {
         flexDirection: "column",
         backgroundColor: "hsl(var(--background))",
         overflow: "hidden",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <Tabs
@@ -430,6 +441,8 @@ export default function App() {
             borderBottom: "1px solid hsl(var(--border))",
             display: "flex",
             alignItems: "stretch",
+            paddingTop: "env(safe-area-inset-top)",
+            backgroundColor: "hsl(var(--background))",
           }}
         >
           {/* Tabs fill all available space — line variant gives the underline indicator */}
