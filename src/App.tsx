@@ -226,7 +226,12 @@ function useNow() {
   return now
 }
 
-function TimetableGrid({
+/* ─────────────────────────────────────────────
+   List view — all acts for the day, sorted by
+   start time, stacked vertically. Card height
+   stays proportional to duration (same as grid).
+───────────────────────────────────────────── */
+function ListView({
   day,
   favourites,
   showFavs,
@@ -236,6 +241,109 @@ function TimetableGrid({
   favourites: Set<string>
   showFavs: boolean
   onToggleFav: (key: string) => void
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const schedule  = timetableData.schedule[day]
+  const border    = "1px solid hsl(var(--border))"
+
+  type Item = SlotEntry & { stage: Stage }
+  const items: Item[] = ALL_STAGES.flatMap((stage) =>
+    (schedule[stage] ?? []).map((slot) => ({ ...slot, stage }))
+  ).sort((a, b) => toFestivalHour(a.start_time) - toFestivalHour(b.start_time))
+
+  return (
+    <div
+      ref={scrollRef}
+      style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}
+    >
+      {items.map((item, i) => {
+        const key     = slotKey(day, item.stage, item)
+        const isFav   = favourites.has(key)
+        const dimmed  = showFavs && !isFav
+        const h       = heightPx(item.start_time, item.end_time)
+        const accent  = STAGE_ACCENT[item.stage]
+        const { bg, text } = STAGE_COLORS[item.stage]
+        const compact = h < 56
+
+        return (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "stretch",
+              borderBottom: border,
+              height: h,
+              opacity: dimmed ? 0.4 : 1,
+              transition: "opacity 0.2s ease",
+            }}
+          >
+            {/* Time gutter */}
+            <div style={{
+              width: TIME_GUTTER_W,
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              paddingRight: 8,
+              fontSize: 10,
+              color: "hsl(var(--muted-foreground))",
+              borderRight: border,
+            }}>
+              {item.start_time}
+            </div>
+
+            {/* Card */}
+            <div style={{
+              flex: 1,
+              margin: "4px",
+              backgroundColor: bg,
+              color: text,
+              borderRadius: 8,
+              borderLeft: `3px solid ${accent}`,
+              padding: compact ? "5px 10px" : "10px 12px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: compact ? "center" : "space-between",
+              overflow: "hidden",
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.03em", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: compact ? "nowrap" : "normal", lineHeight: 1.25 }}>
+                  {item.artist}
+                </span>
+                <button
+                  onClick={() => onToggleFav(key)}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.4)", lineHeight: 1 }}
+                >
+                  <Heart size={compact ? 10 : 12} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+                </button>
+              </div>
+              {!compact && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 10, opacity: 0.65 }}>{item.start_time}–{item.end_time}</span>
+                  <div style={{ width: 6, height: 6, borderRadius: 9999, backgroundColor: accent, opacity: 0.8 }} />
+                  <span style={{ fontSize: 10, opacity: 0.65, letterSpacing: "0.06em" }}>{item.stage}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function TimetableGrid({
+  day,
+  favourites,
+  showFavs,
+  onToggleFav,
+  listView,
+}: {
+  day: Day
+  favourites: Set<string>
+  showFavs: boolean
+  onToggleFav: (key: string) => void
+  listView: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   useAxisLock(scrollRef)
@@ -268,6 +376,17 @@ function TimetableGrid({
     el.scrollTop = Math.max(0, offset)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  if (listView) {
+    return (
+      <ListView
+        day={day}
+        favourites={favourites}
+        showFavs={showFavs}
+        onToggleFav={onToggleFav}
+      />
+    )
+  }
 
   return (
     <div
@@ -574,7 +693,8 @@ export default function App() {
       return new Set()
     }
   })
-  const [showFavs, setShowFavs] = useState(false)
+  const [showFavs, setShowFavs]   = useState(false)
+  const [listView, setListView]   = useState(false)
 
   function toggleFav(key: string) {
     setFavourites((prev) => {
@@ -623,6 +743,7 @@ export default function App() {
               favourites={favourites}
               showFavs={showFavs}
               onToggleFav={toggleFav}
+              listView={listView}
             />
           </TabsContent>
         ))}
@@ -709,10 +830,47 @@ export default function App() {
                 <DrawerTitle>SETTINGS</DrawerTitle>
                 <DrawerDescription>Memori 2026</DrawerDescription>
               </DrawerHeader>
-              <div style={{ padding: "8px 24px 40px" }}>
-                <p style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", lineHeight: 1.6 }}>
-                  More options coming soon.
-                </p>
+              <div style={{ padding: "8px 24px 40px", display: "flex", flexDirection: "column", gap: 0 }}>
+                {/* List view toggle */}
+                <button
+                  onClick={() => setListView((v) => !v)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    background: "none",
+                    border: "none",
+                    borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0",
+                    cursor: "pointer",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                    LIST VIEW
+                  </span>
+                  {/* pill toggle */}
+                  <div style={{
+                    width: 44,
+                    height: 24,
+                    borderRadius: 12,
+                    backgroundColor: listView ? "#d2d2d0" : "hsl(var(--muted))",
+                    position: "relative",
+                    transition: "background-color 0.2s ease",
+                    flexShrink: 0,
+                  }}>
+                    <div style={{
+                      position: "absolute",
+                      top: 3,
+                      left: listView ? 23 : 3,
+                      width: 18,
+                      height: 18,
+                      borderRadius: 9,
+                      backgroundColor: listView ? "#0b0b0a" : "#a5a4a1",
+                      transition: "left 0.2s ease",
+                    }} />
+                  </div>
+                </button>
               </div>
             </DrawerContent>
           </Drawer>
