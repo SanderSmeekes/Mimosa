@@ -519,9 +519,9 @@ function MarqueeBanner() {
       className="group"
       style={{
         flexShrink: 0,
-        borderTop: "1px solid #262626",
+        borderBottom: "1px solid #262626",
         paddingTop: "14px",
-        paddingBottom: "calc(14px + env(safe-area-inset-bottom))",
+        paddingBottom: "14px",
         overflow: "hidden",
         whiteSpace: "nowrap",
         backgroundColor: "rgba(10,10,10,0.95)",
@@ -598,6 +598,8 @@ export default function App() {
         paddingTop: "env(safe-area-inset-top)",
       }}
     >
+      <MarqueeBanner />
+
       <Tabs
         value={activeDay}
         onValueChange={(v) => setActiveDay(v as Day)}
@@ -683,8 +685,6 @@ export default function App() {
           </button>
         </div>
       </Tabs>
-
-      <MarqueeBanner />
     </div>
   )
 }
