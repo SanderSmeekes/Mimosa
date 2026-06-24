@@ -238,8 +238,17 @@ function TimetableGrid({
               zIndex: 40,
               backgroundColor: bg,
               borderRight: border,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
+          >
+            <img
+              src="/sun.svg"
+              alt=""
+              style={{ width: 30, height: 30 }}
+            />
+          </div>
           {ALL_STAGES.map((stage) => (
             <div
               key={stage}

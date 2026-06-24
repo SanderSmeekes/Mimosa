@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Rays -->
+  <g stroke="#c87050" stroke-width="2.5" stroke-linecap="round" fill="none">
+    <!-- 12 wavy rays around the circle -->
+    <path d="M50,8 Q52,14 50,18"/>
+    <path d="M67,12 Q67,18 64,21"/>
+    <path d="M80,25 Q76,30 74,33"/>
+    <path d="M88,42 Q83,44 80,47"/>
+    <path d="M90,60 Q84,60 82,63"/>
+    <path d="M82,76 Q77,74 75,77"/>
+    <path d="M67,87 Q65,82 62,81"/>
+    <path d="M50,92 Q50,86 47,83"/>
+    <path d="M33,87 Q35,82 33,79"/>
+    <path d="M18,76 Q23,74 24,71"/>
+    <path d="M10,60 Q15,60 17,57"/>
+    <path d="M12,42 Q17,44 19,41"/>
+    <path d="M20,25 Q24,30 27,31"/>
+    <path d="M33,12 Q34,18 37,20"/>
+  </g>
+  <!-- Sun body -->
+  <circle cx="50" cy="50" r="27" fill="#e8936a" stroke="#c87050" stroke-width="2"/>
+  <!-- Highlight -->
+  <ellipse cx="42" cy="38" rx="9" ry="6" fill="#f2b08a" opacity="0.5"/>
+  <!-- Eyes -->
+  <ellipse cx="42" cy="48" rx="5" ry="6" fill="#5a3820"/>
+  <ellipse cx="58" cy="48" rx="5" ry="6" fill="#5a3820"/>
+  <!-- Eye shine -->
+  <circle cx="44" cy="46" r="1.5" fill="white" opacity="0.6"/>
+  <circle cx="60" cy="46" r="1.5" fill="white" opacity="0.6"/>
+  <!-- Smile -->
+  <path d="M38,60 Q50,70 62,60" fill="none" stroke="#5a3820" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
