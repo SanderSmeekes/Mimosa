@@ -16,10 +16,10 @@ const DAY_LABELS: Record<Day, string> = {
 }
 
 const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "#1a2e4a", text: "#fff" },
-  UNDA:   { bg: "#1c3d6e", text: "#fff" },
-  AURA:   { bg: "#3a1760", text: "#fff" },
-  MENTIS: { bg: "#0f4a2e", text: "#fff" },
+  LUX:    { bg: "#4a4943", text: "#d2d2d0" },
+  UNDA:   { bg: "#393930", text: "#d2d2d0" },
+  AURA:   { bg: "#2e2d26", text: "#d2d2d0" },
+  MENTIS: { bg: "#3d3c34", text: "#d2d2d0" },
 }
 
 const PX_PER_HOUR    = 88
@@ -27,15 +27,19 @@ const STAGE_COL_W    = 148
 const TIME_GUTTER_W  = 52
 const HEADER_H       = 44
 /* ─────────────────────────────────────────────
-   Time helpers
+   Time helpers — grid runs 10:00 → 10:00 (+1 day)
+   Hours 00–09 are treated as 24–33 (next day).
 ───────────────────────────────────────────── */
+const DAY_START = 10   // grid starts at 10:00
+const DAY_END   = 34   // grid ends at 10:00 next day (34 = 24 + 10)
+
 function toFestivalHour(hhmm: string): number {
   const [h, m] = hhmm.split(":").map(Number)
-  return h + m / 60
+  return (h < DAY_START ? h + 24 : h) + m / 60
 }
 
-function topPx(time: string, startHour: number): number {
-  return (toFestivalHour(time) - startHour) * PX_PER_HOUR
+function topPx(time: string): number {
+  return (toFestivalHour(time) - DAY_START) * PX_PER_HOUR
 }
 
 function heightPx(start: string, end: string): number {
@@ -46,7 +50,7 @@ function heightPx(start: string, end: string): number {
 }
 
 function dayBounds(_day: Day): { startHour: number; endHour: number } {
-  return { startHour: 0, endHour: 24 }
+  return { startHour: DAY_START, endHour: DAY_END }
 }
 
 function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
@@ -59,19 +63,17 @@ function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
 function EventCard({
   slot,
   stage,
-  startHour,
   isFav,
   dimmed,
   onToggleFav,
 }: {
   slot: SlotEntry
   stage: Stage
-  startHour: number
   isFav: boolean
   dimmed: boolean
   onToggleFav: () => void
 }) {
-  const top    = topPx(slot.start_time, startHour)
+  const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
   const { bg, text } = STAGE_COLORS[stage]
   const compact = height < 56
@@ -166,8 +168,9 @@ function TimetableGrid({
 }) {
   const schedule = timetableData.schedule[day]
   const { startHour, endHour } = dayBounds(day)
-  const totalHours = endHour - startHour
+  const totalHours = endHour - startHour          // 24
   const totalH     = totalHours * PX_PER_HOUR
+  // hours 10..33 → display as 10..23, 00..09
   const hours      = Array.from({ length: totalHours + 1 }, (_, i) => startHour + i)
 
   const border     = "1px solid hsl(var(--border))"
@@ -220,7 +223,7 @@ function TimetableGrid({
                 fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: "0.12em",
-                color: STAGE_COLORS[stage].bg,
+                color: "hsl(var(--muted-foreground))",
                 borderRight: border,
               }}
             >
@@ -321,7 +324,6 @@ function TimetableGrid({
                     key={i}
                     slot={slot}
                     stage={stage}
-                    startHour={startHour}
                     isFav={isFav}
                     dimmed={dimmed}
                     onToggleFav={() => onToggleFav(key)}

@@ -2,26 +2,36 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* Dark palette from brand colours */
+    --background:         29 14% 9%;    /* #1d1c14 */
+    --background-deep:    26 22% 6%;    /* #171610 */
+    --foreground:         60 3% 82%;    /* #d2d2d0 */
+
+    --card:               26 22% 6%;    /* #171610 */
+    --card-foreground:    60 3% 82%;    /* #d2d2d0 */
+
+    --popover:            29 14% 9%;
+    --popover-foreground: 60 3% 82%;
+
+    --primary:            60 3% 82%;    /* #d2d2d0 — used for active/accent text */
+    --primary-foreground: 29 14% 9%;    /* #1d1c14 */
+
+    --secondary:          60 2% 29%;    /* #4a4943 */
+    --secondary-foreground: 60 3% 82%;
+
+    --muted:              60 2% 29%;    /* #4a4943 */
+    --muted-foreground:   60 2% 64%;    /* #a5a4a1 */
+
+    --accent:             60 2% 29%;
+    --accent-foreground:  60 3% 82%;
+
+    --destructive:        0 62% 50%;
+    --destructive-foreground: 60 3% 82%;
+
+    --border:             60 2% 29%;    /* #4a4943 */
+    --input:              60 2% 29%;
+    --ring:               60 3% 82%;
+    --radius:             0.5rem;
   }
 }
 
