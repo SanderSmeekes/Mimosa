@@ -30,7 +30,7 @@ const STAGE_ACCENT: Record<Stage, string> = {
 }
 
 const PX_PER_HOUR    = 88
-const STAGE_COL_W    = 148
+const STAGE_COL_W    = 148  // minimum column width; columns expand to fill screen
 const TIME_GUTTER_W  = 52
 const HEADER_H       = 44
 /* ─────────────────────────────────────────────
@@ -214,7 +214,7 @@ function TimetableGrid({
         paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
       }}
     >
-      <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, position: "relative" }}>
+      <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, width: "100%", position: "relative" }}>
 
         {/* Sticky stage-name header */}
         <div
@@ -244,8 +244,8 @@ function TimetableGrid({
             <div
               key={stage}
               style={{
-                width: STAGE_COL_W,
-                flexShrink: 0,
+                flex: 1,
+                minWidth: STAGE_COL_W,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -372,8 +372,8 @@ function TimetableGrid({
             <div
               key={stage}
               style={{
-                width: STAGE_COL_W,
-                flexShrink: 0,
+                flex: 1,
+                minWidth: STAGE_COL_W,
                 height: totalH,
                 position: "relative",
                 borderRight: border,
