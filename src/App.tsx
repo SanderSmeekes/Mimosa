@@ -1020,7 +1020,7 @@ function ArtistDrawer({
 
   return (
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DrawerContent style={{ maxHeight: "85dvh" }}>
+      <DrawerContent style={{ height: "85dvh", display: "flex", flexDirection: "column" }}>
         {/* Top bar */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
           {view.page === "main" ? (
@@ -1066,7 +1066,7 @@ function ArtistDrawer({
 
         {/* Main artist page */}
         {view.page === "main" && artist && (
-          <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
@@ -1102,7 +1102,7 @@ function ArtistDrawer({
 
         {/* Savers list */}
         {view.page === "savers" && (
-          <div style={{ overflowY: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column" }}>
+          <div style={{ overflowY: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column", flex: 1 }}>
             {view.loading ? (
               <div style={{ padding: "20px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
             ) : view.list.length === 0 ? (
@@ -1135,7 +1135,7 @@ function ArtistDrawer({
 
         {/* User picks */}
         {view.page === "user-picks" && (
-          <div style={{ overflowY: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column" }}>
+          <div style={{ overflowY: "auto", padding: "4px 20px 40px", display: "flex", flexDirection: "column", flex: 1 }}>
             <UserPicksList
               favs={(view as { favs: string[] }).favs}
               loading={(view as { loading: boolean }).loading}
