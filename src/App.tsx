@@ -994,6 +994,7 @@ export default function App() {
               </DrawerHeader>
               <div style={{ padding: "8px 24px 40px", display: "flex", flexDirection: "column", gap: 0 }}>
                 {/* List view toggle */}
+
                 <button
                   onClick={() => setListView((v) => !v)}
                   style={{
@@ -1033,6 +1034,20 @@ export default function App() {
                     }} />
                   </div>
                 </button>
+
+                {/* Disclaimer */}
+                <p style={{ marginTop: 32, fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
+                  This app is not official from Memòri Festival.{"\n"}
+                  For the latest info, visit{" "}
+                  <a
+                    href="https://memori-festival.fr/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
+                  >
+                    memori-festival.fr
+                  </a>
+                </p>
               </div>
             </DrawerContent>
           </Drawer>
