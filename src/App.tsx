@@ -880,7 +880,7 @@ type DrawerPage =
   | { page: "savers"; loading: boolean; list: { name_key: string; display_name: string; favourites: string[] }[] }
   | { page: "user-picks"; displayName: string; nameKey: string; loading: boolean; favs: string[] }
 
-function UserPicksList({ favs, loading, border }: { favs: string[]; loading: boolean; border: string }) {
+function UserPicksList({ favs, loading, border, myFavourites }: { favs: string[]; loading: boolean; border: string; myFavourites: Set<string> }) {
   const parsed = favs.map(parseSlotKey).filter(Boolean) as { day: string; stage: string; artist: string; time: string }[]
   const DAY_ORDER = ["Thursday", "Friday", "Saturday", "Sunday"]
   const byDay = DAY_ORDER.map((day) => ({
@@ -899,13 +899,17 @@ function UserPicksList({ favs, loading, border }: { favs: string[]; loading: boo
           </div>
           {group.items.map((p, i) => {
             const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
+            const isShared = myFavourites.has(`${p.day}__${p.stage}__${p.artist}__${p.time}`)
             return (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: border }}>
                 <div style={{ width: 3, height: 34, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
-                <div>
+                <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
                   <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>{p.stage} · {p.time}</div>
                 </div>
+                {isShared && (
+                  <Heart size={13} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))", opacity: 0.45, flexShrink: 0 }} />
+                )}
               </div>
             )
           })}
@@ -1094,6 +1098,7 @@ function ArtistDrawer({
               favs={(view as { favs: string[] }).favs}
               loading={(view as { loading: boolean }).loading}
               border={border}
+              myFavourites={myFavourites}
             />
           </div>
         )}
