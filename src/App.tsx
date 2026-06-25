@@ -219,6 +219,8 @@ function ListRow({
   const [animKey, setAnimKey] = useState(0)
   const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
 
+  const isNow = status === "now"
+
   return (
     <div
       onClick={() => onOpenArtist(item.artist_id)}
@@ -226,11 +228,12 @@ function ListRow({
         display: "flex",
         alignItems: "stretch",
         borderBottom: border,
+        borderLeft: isNow ? `2px solid ${accent}` : "2px solid transparent",
         minHeight: 64,
         opacity: dimmed ? 0.35 : status === "earlier" ? 0.38 : 1,
         transition: "opacity 0.2s ease",
         cursor: "pointer",
-        backgroundColor: status === "now" ? "rgba(255,255,255,0.03)" : "transparent",
+        backgroundColor: isNow ? "rgba(255,255,255,0.025)" : "transparent",
       }}
     >
       {/* Time column */}
@@ -245,10 +248,10 @@ function ListRow({
         paddingLeft: 6,
         gap: 2,
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: status === "now" ? "#d2d2d0" : "hsl(var(--muted-foreground))", lineHeight: 1 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: isNow ? accent : "#86847B", lineHeight: 1 }}>
           {item.start_time}
         </span>
-        {status === "now" && (
+        {isNow && (
           <span className="now-pulse" style={{ fontSize: 9, color: accent, letterSpacing: "0.04em", lineHeight: 1 }}>NOW</span>
         )}
       </div>
@@ -261,7 +264,7 @@ function ListRow({
             fontSize: 13,
             fontWeight: 700,
             letterSpacing: "0.03em",
-            color: "hsl(var(--foreground))",
+            color: "#ECEAE2",
             lineHeight: 1.2,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -274,12 +277,11 @@ function ListRow({
               fontSize: 8,
               fontWeight: 600,
               letterSpacing: "0.08em",
-              color: "hsl(var(--muted-foreground))",
-              border: "1px solid hsl(var(--border))",
+              color: "#6B6A62",
+              border: "1px solid #3E3D38",
               borderRadius: 3,
               padding: "1px 4px",
               flexShrink: 0,
-              opacity: 0.6,
             }}>live</span>
           )}
         </div>
@@ -287,20 +289,19 @@ function ListRow({
         {/* Secondary line */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <div style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accent, flexShrink: 0 }} />
-          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
+          <span style={{ fontSize: 10, color: "#6B6A62", letterSpacing: "0.06em" }}>
             {item.stage}
           </span>
-          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>·</span>
-          {status === "now" && (
+          <span style={{ fontSize: 10, color: "#4F4E48" }}>·</span>
+          {isNow && (
             <span style={{ fontSize: 10, color: accent }}>until {item.end_time}</span>
           )}
           {status === "later" && (
-            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>until {item.end_time}</span>
+            <span style={{ fontSize: 10, color: "#4F4E48" }}>until {item.end_time}</span>
           )}
           {status === "earlier" && (
-            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>ended {item.end_time}</span>
+            <span style={{ fontSize: 10, color: "#4F4E48" }}>ended {item.end_time}</span>
           )}
-          {/* Clash indicator — only on fav rows */}
           {isFav && clashWith && (
             <span style={{ fontSize: 10, color: "#e8a838", letterSpacing: "0.03em" }}>
               ↔ {clashWith}
@@ -322,7 +323,7 @@ function ListRow({
           justifyContent: "center",
           minWidth: 44,
           minHeight: 64,
-          color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.25)",
+          color: isFav ? "#ff6b6b" : "#3E3D38",
           transition: "color 150ms ease-out",
         }}
         aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
@@ -335,15 +336,15 @@ function ListRow({
   )
 }
 
-function SectionHeader({ label }: { label: string }) {
+function SectionHeader({ label, dim }: { label: string; dim?: boolean }) {
   return (
     <div style={{
-      padding: "8px 16px 6px",
+      padding: "10px 16px 7px",
       fontSize: 10,
-      fontWeight: 800,
+      fontWeight: 700,
       letterSpacing: "0.12em",
-      color: "hsl(var(--muted-foreground))",
-      backgroundColor: "hsl(var(--background))",
+      color: dim ? "#6B6A62" : "#A9A79D",
+      backgroundColor: "#0b0b0a",
       borderBottom: "1px solid hsl(var(--border))",
       position: "sticky",
       top: 0,
@@ -465,6 +466,13 @@ function ListView({
         </>
       )}
 
+      {/* End cap */}
+      {!nowInDay && later.length > 0 && (
+        <div style={{ padding: "20px 0 32px", textAlign: "center", fontSize: 10, letterSpacing: "0.12em", color: "#3A3935" }}>
+          — END OF {day.toUpperCase()} —
+        </div>
+      )}
+
       {/* EARLIER TODAY */}
       {nowInDay && earlier.length > 0 && (
         <>
@@ -481,7 +489,7 @@ function ListView({
               borderTop: border,
               borderBottom: earlierExpanded ? border : "none",
               cursor: "pointer",
-              color: "hsl(var(--muted-foreground))",
+              color: "#6B6A62",
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: "0.1em",
@@ -1034,7 +1042,7 @@ function ArtistDrawer({
                 }}
               >
                 <Heart size={14} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
-                {isFav ? "SAVED" : "SAVE"}
+                {isFav ? "FAVOURITED" : "FAVOURITE"}
               </button>
               <button
                 onClick={openSavers}
