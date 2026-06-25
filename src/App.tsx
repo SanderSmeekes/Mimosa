@@ -1359,13 +1359,13 @@ export default function App() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              color: showFavs ? "#ff6b6b" : hasFavs ? "#ff6b6b" : "hsl(var(--muted-foreground))",
+              color: "hsl(var(--muted-foreground))",
               transition: "color 0.15s ease",
             }}
           >
             <Heart
               size={18}
-              fill={showFavs ? "#ff6b6b" : hasFavs ? "rgba(255,107,107,0.25)" : "none"}
+              fill="none"
               strokeWidth={2}
             />
           </button>
