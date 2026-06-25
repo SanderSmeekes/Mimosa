@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
@@ -918,15 +920,50 @@ function MarqueeBanner() {
 /* ─────────────────────────────────────────────
    Artist detail drawer
 ───────────────────────────────────────────── */
-type DrawerView =
-  | { page: "main" }
-  | { page: "savers"; loading: boolean; list: { name_key: string; display_name: string }[] }
-  | { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }
-
 function parseSlotKey(key: string): { day: string; stage: string; artist: string; time: string } | null {
   const parts = key.split("__")
   if (parts.length < 4) return null
   return { day: parts[0], stage: parts[1], artist: parts[2], time: parts[3] }
+}
+
+type SaversDialogState =
+  | { open: false }
+  | { open: true; page: "savers"; loading: boolean; list: { name_key: string; display_name: string }[] }
+  | { open: true; page: "user-picks"; displayName: string; nameKey: string; loading: boolean; favs: string[] }
+
+function UserPicksList({ favs, loading, border }: { favs: string[]; loading: boolean; border: string }) {
+  const parsed = favs.map(parseSlotKey).filter(Boolean) as { day: string; stage: string; artist: string; time: string }[]
+  const DAY_ORDER = ["Thursday", "Friday", "Saturday", "Sunday"]
+  const byDay = DAY_ORDER.map((day) => ({
+    day,
+    items: parsed.filter((p) => p.day === day).sort((a, b) => a.time.localeCompare(b.time)),
+  })).filter((g) => g.items.length > 0)
+
+  if (loading) return <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
+  if (parsed.length === 0) return <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>nothing saved yet</div>
+  return (
+    <>
+      {byDay.map((group) => (
+        <React.Fragment key={group.day}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", color: "hsl(var(--muted-foreground))", opacity: 0.5, padding: "12px 0 4px", textTransform: "uppercase" }}>
+            {group.day}
+          </div>
+          {group.items.map((p, i) => {
+            const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: border }}>
+                <div style={{ width: 3, height: 34, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
+                  <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>{p.stage} · {p.time}</div>
+                </div>
+              </div>
+            )
+          })}
+        </React.Fragment>
+      ))}
+    </>
+  )
 }
 
 function ArtistDrawer({
@@ -948,7 +985,7 @@ function ArtistDrawer({
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
   const border = "1px solid hsl(var(--border))"
   const [saveCount, setSaveCount] = useState<number | null>(null)
-  const [view, setView] = useState<DrawerView>({ page: "main" })
+  const [dialog, setDialog] = useState<SaversDialogState>({ open: false })
 
   useEffect(() => {
     if (!open || !slotKey) { setSaveCount(null); return }
@@ -956,21 +993,16 @@ function ArtistDrawer({
     countSaves(slotKey).then(setSaveCount)
   }, [open, slotKey])
 
-  // Reset sub-view when drawer closes or artist changes
-  useEffect(() => {
-    if (!open) setView({ page: "main" })
-  }, [open, artistId])
-
   function openSavers() {
     if (!slotKey) return
-    setView({ page: "savers", loading: true, list: [] })
-    getSavers(slotKey).then((list) => setView({ page: "savers", loading: false, list }))
+    setDialog({ open: true, page: "savers", loading: true, list: [] })
+    getSavers(slotKey).then((list) => setDialog({ open: true, page: "savers", loading: false, list }))
   }
 
   function openUserPicks(nameKey: string, displayName: string) {
-    setView({ page: "user-picks", displayName, loading: true, favs: [] })
+    setDialog({ open: true, page: "user-picks", displayName, nameKey, loading: true, favs: [] })
     getUserFavourites(nameKey).then((favs) =>
-      setView({ page: "user-picks", displayName, loading: false, favs })
+      setDialog({ open: true, page: "user-picks", displayName, nameKey, loading: false, favs })
     )
   }
 
@@ -981,34 +1013,21 @@ function ArtistDrawer({
   }
 
   return (
-    <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DrawerContent style={{ maxHeight: "85dvh" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
-          {view.page === "main" ? (
+    <>
+      <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+        <DrawerContent style={{ maxHeight: "85dvh" }}>
+          {/* Top bar */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
             <DrawerClose asChild>
               <button style={iconBtn}><X size={20} strokeWidth={1.5} /></button>
             </DrawerClose>
-          ) : (
-            <button style={iconBtn} onClick={() => setView({ page: "main" })}>
-              <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
-            </button>
-          )}
-
-          {view.page === "main" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {saveCount !== null && saveCount > 0 && (
-                <button
-                  onClick={openSavers}
-                  style={{
-                    background: "none", border: "none", cursor: "pointer",
-                    fontSize: 11, letterSpacing: "0.06em", fontFamily: "inherit",
-                    color: "hsl(var(--muted-foreground))", opacity: 0.7,
-                    display: "flex", alignItems: "center", gap: 4, padding: "8px 4px",
-                  }}
-                >
-                  <Heart size={10} fill="rgba(255,107,107,0.5)" stroke="none" />
-                  {saveCount} {saveCount === 1 ? "person" : "people"} saved this
+                <button onClick={openSavers} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  <Badge variant="secondary" style={{ gap: 5, cursor: "pointer", fontFamily: "inherit" }}>
+                    <Heart size={10} fill="#ff6b6b" stroke="none" />
+                    {saveCount} {saveCount === 1 ? "person" : "people"} saved this
+                  </Badge>
                 </button>
               )}
               <button
@@ -1019,133 +1038,95 @@ function ArtistDrawer({
                 {isFav ? "SAVED" : "SAVE"}
               </button>
             </div>
-          )}
+          </div>
 
-          {view.page === "savers" && (
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>
-              WHO SAVED THIS
-            </span>
-          )}
-
-          {view.page === "user-picks" && (
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>
-              {(view as { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }).displayName.toUpperCase()}
-            </span>
-          )}
-
-          {/* spacer to balance close btn on left */}
-          {view.page !== "main" && <div style={{ width: 44 }} />}
-        </div>
-
-        {/* Main artist page */}
-        {view.page === "main" && artist && (
-          <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
-                  {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
-                </span>
+          {/* Artist content */}
+          {artist && (
+            <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
+                    {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
+                  </span>
+                </div>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>
+                  {artist.name}
+                </h2>
               </div>
-              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>
-                {artist.name}
-              </h2>
+              {artist.bio ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
+              ) : (
+                <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
+              )}
+              {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: border, borderBottom: border }}>
+                  {([
+                    { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
+                    { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
+                    { key: "ra",         label: "RA",         href: artist.links.ra          },
+                  ] as const).filter(l => l.href).map((l) => (
+                    <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
+                    >
+                      {l.label}
+                      <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
-            {artist.bio ? (
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
+          )}
+        </DrawerContent>
+      </Drawer>
+
+      {/* Savers dialog */}
+      <Dialog open={dialog.open} onOpenChange={(o) => { if (!o) setDialog({ open: false }) }}>
+        <DialogContent>
+          <DialogHeader>
+            {dialog.open && dialog.page === "user-picks" ? (
+              <>
+                <button style={iconBtn} onClick={() => dialog.open && openSavers()}>
+                  <ChevronDown size={18} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
+                </button>
+                <DialogTitle>{(dialog as { displayName: string }).displayName}</DialogTitle>
+              </>
             ) : (
-              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
+              <DialogTitle style={{ paddingLeft: 4 }}>who saved this</DialogTitle>
             )}
-            {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: border, borderBottom: border }}>
-                {([
-                  { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
-                  { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
-                  { key: "ra",         label: "RA",         href: artist.links.ra          },
-                ] as const).filter(l => l.href).map((l) => (
-                  <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
-                  >
-                    {l.label}
-                    <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
-                  </a>
-                ))}
-              </div>
+            <DialogClose asChild>
+              <button style={{ ...iconBtn, marginLeft: "auto" }}><X size={18} strokeWidth={1.5} /></button>
+            </DialogClose>
+          </DialogHeader>
+
+          <div style={{ overflowY: "auto", padding: "4px 20px 24px", display: "flex", flexDirection: "column" }}>
+            {dialog.open && dialog.page === "savers" && (
+              dialog.loading ? (
+                <div style={{ padding: "20px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
+              ) : dialog.list.length === 0 ? (
+                <div style={{ padding: "20px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>no one yet</div>
+              ) : dialog.list.map((u) => (
+                <button
+                  key={u.name_key}
+                  onClick={() => openUserPicks(u.name_key, u.display_name)}
+                  style={{ background: "none", border: "none", borderBottom: border, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", color: "hsl(var(--foreground))", fontFamily: "inherit", fontSize: 14, fontWeight: 700, letterSpacing: "0.04em", textAlign: "left" }}
+                >
+                  {u.display_name}
+                  <ChevronDown size={14} strokeWidth={1.5} style={{ transform: "rotate(-90deg)", color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+                </button>
+              ))
+            )}
+            {dialog.open && dialog.page === "user-picks" && (
+              <UserPicksList
+                favs={(dialog as { favs: string[] }).favs}
+                loading={(dialog as { loading: boolean }).loading}
+                border={border}
+              />
             )}
           </div>
-        )}
-
-        {/* Savers list */}
-        {view.page === "savers" && (
-          <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column" }}>
-            {view.loading ? (
-              <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
-            ) : view.list.length === 0 ? (
-              <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>no one yet</div>
-            ) : view.list.map((u) => (
-              <button
-                key={u.name_key}
-                onClick={() => openUserPicks(u.name_key, u.display_name)}
-                style={{
-                  background: "none", border: "none", borderBottom: border,
-                  cursor: "pointer", display: "flex", alignItems: "center",
-                  justifyContent: "space-between", padding: "14px 0",
-                  color: "hsl(var(--foreground))", fontFamily: "inherit",
-                  fontSize: 14, fontWeight: 700, letterSpacing: "0.04em", textAlign: "left",
-                }}
-              >
-                {u.display_name}
-                <ChevronDown size={14} strokeWidth={1.5} style={{ transform: "rotate(-90deg)", color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* User picks */}
-        {view.page === "user-picks" && (() => {
-          const v = view as { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }
-          const parsed = v.favs.map(parseSlotKey).filter(Boolean) as { day: string; stage: string; artist: string; time: string }[]
-          const DAY_ORDER = ["Thursday", "Friday", "Saturday", "Sunday"]
-          const byDay = DAY_ORDER.map((day) => ({
-            day,
-            items: parsed.filter((p) => p.day === day).sort((a, b) => a.time.localeCompare(b.time)),
-          })).filter((g) => g.items.length > 0)
-          return (
-            <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column" }}>
-              {v.loading ? (
-                <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
-              ) : parsed.length === 0 ? (
-                <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>nothing saved yet</div>
-              ) : byDay.map((group) => (
-                <React.Fragment key={group.day}>
-                  <div style={{
-                    fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
-                    color: "hsl(var(--muted-foreground))", opacity: 0.5,
-                    padding: "14px 0 6px", textTransform: "uppercase",
-                  }}>
-                    {group.day}
-                  </div>
-                  {group.items.map((p, i) => {
-                    const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
-                    return (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: border }}>
-                        <div style={{ width: 3, height: 34, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
-                        <div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
-                          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>
-                            {p.stage} · {p.time}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </React.Fragment>
-              ))}
-            </div>
-          )
-        })()}
-      </DrawerContent>
-    </Drawer>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
