@@ -1267,7 +1267,6 @@ export default function App() {
     try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
   }
 
-  const hasFavs = favourites.size > 0
 
   if (!userName) {
     return <Onboarding onComplete={handleOnboardingComplete} />
