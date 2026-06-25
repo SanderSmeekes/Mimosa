@@ -194,7 +194,12 @@ export function Onboarding({ onComplete }: Props) {
       confirmInput.trim().toLowerCase() === newRecord.display_name.toLowerCase()
     return (
       <div style={bg}>
-        <div style={card}>
+        <div style={{ ...card, maxWidth: 380 }}>
+          <img
+            src="/memosa-glass.png"
+            alt=""
+            style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }}
+          />
           <div style={{ fontSize: 20, fontWeight: 700 }}>save your name</div>
           <div
             style={{
@@ -218,14 +223,18 @@ export function Onboarding({ onComplete }: Props) {
           <div
             style={{
               fontSize: 12,
-              lineHeight: 1.6,
+              lineHeight: 1.7,
               color: "#d4a820",
               background: "rgba(212,168,32,0.1)",
               borderRadius: 4,
-              padding: "10px 12px",
+              padding: "12px 14px",
+              borderLeft: "3px solid #d4a820",
             }}
           >
-            ⚠ there are no passwords. anyone who knows this name can access your picks. write it down somewhere safe.
+            <strong style={{ display: "block", marginBottom: 4, fontSize: 13 }}>⚠ don't forget this name</strong>
+            there are no passwords and no recovery. anyone who types this exact name gets your picks.
+            write it down — in your notes app, a text to yourself, anywhere.
+            if you lose it, your picks are gone forever.
           </div>
           <div style={{ fontSize: 13, opacity: 0.7 }}>type your name again to confirm:</div>
           <input
