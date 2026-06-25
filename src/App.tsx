@@ -1327,7 +1327,7 @@ export default function App() {
         ))}
 
         {/* Bottom day-selector bar */}
-        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
