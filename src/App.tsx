@@ -992,7 +992,7 @@ export default function App() {
             <DrawerContent>
               <DrawerHeader>
                 <DrawerTitle>SETTINGS</DrawerTitle>
-                <DrawerDescription>Memori 2026</DrawerDescription>
+                <DrawerDescription>memosa 2026</DrawerDescription>
               </DrawerHeader>
               <div style={{ padding: "8px 24px 40px", display: "flex", flexDirection: "column", gap: 0 }}>
                 {/* List view toggle */}
