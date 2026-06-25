@@ -145,9 +145,12 @@ function EventCard({
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
+            minWidth: 44,
+            minHeight: 44,
+            margin: "-14px -10px -14px 0",
             color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
             transition: "color 0.15s ease",
-            lineHeight: 1,
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         >
@@ -320,7 +323,7 @@ function ListView({
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); onToggleFav(key) }}
-                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.4)", lineHeight: 1 }}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", minWidth: 44, minHeight: 44, margin: "-14px -10px -14px 0", color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.4)" }}
                 >
                   <Heart size={compact ? 10 : 12} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
                 </button>
@@ -727,15 +730,15 @@ function ArtistDrawer({
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
       <DrawerContent style={{ maxHeight: "85dvh" }}>
         {/* Close + fav row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 0" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0" }}>
           <DrawerClose asChild>
-            <button style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}>
+            <button style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", justifyContent: "center", minWidth: 44, minHeight: 44 }}>
               <X size={20} strokeWidth={1.5} />
             </button>
           </DrawerClose>
           <button
             onClick={onToggleFav}
-            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
           >
             <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
             {isFav ? "SAVED" : "SAVE"}
