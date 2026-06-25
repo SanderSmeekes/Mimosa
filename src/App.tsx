@@ -1276,7 +1276,8 @@ export default function App() {
   return (
     <div
       style={{
-        height: "100dvh",
+        position: "fixed",
+        inset: 0,
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#0b0b0a",
