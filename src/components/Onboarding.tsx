@@ -7,6 +7,10 @@ type Props = {
   onComplete: (record: UserRecord) => void
 }
 
+function offlineRecord(displayName: string): UserRecord {
+  return { name_key: toNameKey(displayName), display_name: displayName, favourites: [] }
+}
+
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("welcome")
   const [nameInput, setNameInput] = useState("")
@@ -14,6 +18,7 @@ export function Onboarding({ onComplete }: Props) {
   const [existingRecord, setExistingRecord] = useState<UserRecord | null>(null)
   const [newRecord, setNewRecord] = useState<UserRecord | null>(null)
   const [error, setError] = useState("")
+  const [errorDetail, setErrorDetail] = useState("")
   const [copied, setCopied] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -21,6 +26,7 @@ export function Onboarding({ onComplete }: Props) {
     const trimmed = nameInput.trim()
     if (!trimmed) return
     setError("")
+    setErrorDetail("")
     setStep("loading")
     try {
       const existing = await lookupUser(toNameKey(trimmed))
@@ -32,10 +38,21 @@ export function Onboarding({ onComplete }: Props) {
         setNewRecord(record)
         setStep("confirm")
       }
-    } catch {
-      setError("Connection error. Try again.")
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setError("Could not reach sync server.")
+      setErrorDetail(msg)
       setStep("enter")
     }
+  }
+
+  function handleSkipSync() {
+    const trimmed = nameInput.trim()
+    if (!trimmed) return
+    // Use offline — picks stay local only
+    const record = offlineRecord(trimmed)
+    setNewRecord(record)
+    setStep("confirm")
   }
 
   function handleCopyName() {
@@ -142,7 +159,16 @@ export function Onboarding({ onComplete }: Props) {
             autoFocus
             disabled={step === "loading"}
           />
-          {error && <div style={{ fontSize: 13, color: "#e07070" }}>{error}</div>}
+          {error && (
+            <div style={{ fontSize: 12, color: "#e07070", lineHeight: 1.6 }}>
+              <div>{error}</div>
+              {errorDetail && (
+                <div style={{ marginTop: 4, opacity: 0.6, fontFamily: "monospace", fontSize: 11, wordBreak: "break-all" }}>
+                  {errorDetail}
+                </div>
+              )}
+            </div>
+          )}
           <button
             style={{ ...btn(), opacity: step === "loading" ? 0.5 : 1 }}
             onClick={handleContinue}
@@ -150,6 +176,11 @@ export function Onboarding({ onComplete }: Props) {
           >
             {step === "loading" ? "checking…" : "continue"}
           </button>
+          {error && nameInput.trim() && (
+            <button style={{ ...btn("secondary"), fontSize: 12 }} onClick={handleSkipSync}>
+              continue without sync (local only)
+            </button>
+          )}
           <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => setStep("welcome")}>
             back
           </button>
