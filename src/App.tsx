@@ -1283,6 +1283,7 @@ export default function App() {
         backgroundColor: "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       {favsLoading && (
@@ -1327,14 +1328,7 @@ export default function App() {
         ))}
 
         {/* Bottom day-selector bar */}
-        <div
-          style={{
-            flexShrink: 0,
-            backgroundColor: "#0b0b0a",
-            paddingBottom: "env(safe-area-inset-bottom)",
-          }}
-        >
-        <div style={{ borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "center" }}>
+        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "center" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
@@ -1491,10 +1485,7 @@ export default function App() {
             </DrawerContent>
           </Drawer>
         </div>
-        </div>
       </Tabs>
-
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: "env(safe-area-inset-bottom)", backgroundColor: "#0b0b0a", zIndex: 9 }} />
 
       <ArtistDrawerPortal
         artistId={selectedArtistId}
