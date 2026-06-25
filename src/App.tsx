@@ -1282,6 +1282,7 @@ export default function App() {
         flexDirection: "column",
         backgroundColor: "#0b0b0a",
         overflow: "hidden",
+        paddingTop: "env(safe-area-inset-top)",
       }}
     >
       {favsLoading && (
