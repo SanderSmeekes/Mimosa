@@ -655,7 +655,6 @@ const marqueeImgStyle: React.CSSProperties = {
 function MarqueeSegment() {
   return (
     <>
-      <img src="/mooney.png" alt="" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
       <span
         style={{
           fontFamily: "'Courier Prime', 'Courier New', monospace",
