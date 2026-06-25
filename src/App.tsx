@@ -4,7 +4,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
-import { lookupUser, saveFavourites, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
@@ -938,7 +938,14 @@ function ArtistDrawer({
   const artist = artistId ? artistsData[artistId] : null
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
   const border = "1px solid hsl(var(--border))"
+  const [saveCount, setSaveCount] = useState<number | null>(null)
   const [view, setView] = useState<DrawerPage>({ page: "main" })
+
+  useEffect(() => {
+    if (!open || !slotKey) { setSaveCount(null); return }
+    setSaveCount(null)
+    countSaves(slotKey).then(setSaveCount)
+  }, [open, slotKey])
 
   useEffect(() => {
     if (!open) setView({ page: "main" })
@@ -985,92 +992,91 @@ function ArtistDrawer({
             </span>
           )}
 
-          {/* Save circle button — top right on main page */}
-          {view.page === "main" ? (
-            <button
-              onClick={onToggleFav}
-              style={{
-                width: 40, height: 40, borderRadius: 20, flexShrink: 0,
-                backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
-                border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: isFav ? "#0b0b0a" : "hsl(var(--muted-foreground))",
-                transition: "background-color 150ms ease-out, color 150ms ease-out",
-              }}
-            >
-              <Heart size={16} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
-            </button>
-          ) : (
-            <div style={{ width: 44 }} />
-          )}
+          <div style={{ width: 44 }} />
         </div>
 
         {/* Main artist page */}
         {view.page === "main" && artist && (
-          <>
-            <div style={{ overflowY: "auto", padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
-                  <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
-                    {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
-                  </span>
-                </div>
-                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
-                {slotKey && (() => {
-                  const parsed = parseSlotKey(slotKey)
-                  if (!parsed) return null
-                  const daySlots = timetableData.schedule[parsed.day as Day]
-                  const stageSlots = daySlots?.[parsed.stage as Stage] ?? []
-                  const slot = stageSlots.find(s => s.start_time === parsed.time)
-                  return (
-                    <div style={{ marginTop: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
-                      {parsed.day} · {parsed.time}{slot ? `–${slot.end_time}` : ""}
-                    </div>
-                  )
-                })()}
+          <div style={{ overflowY: "auto", padding: "16px 20px 40px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
+                  {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
+                </span>
               </div>
-              {artist.bio ? (
-                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
-              ) : (
-                <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
-              )}
-              {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
-                <div style={{ display: "flex", flexDirection: "column", borderTop: border, borderBottom: border }}>
-                  {([
-                    { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
-                    { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
-                    { key: "ra",         label: "RA",         href: artist.links.ra          },
-                  ] as const).filter(l => l.href).map((l) => (
-                    <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
-                    >
-                      {l.label}
-                      <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
-                    </a>
-                  ))}
-                </div>
-              )}
+              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
+              {slotKey && (() => {
+                const parsed = parseSlotKey(slotKey)
+                if (!parsed) return null
+                const daySlots = timetableData.schedule[parsed.day as Day]
+                const stageSlots = daySlots?.[parsed.stage as Stage] ?? []
+                const slot = stageSlots.find(s => s.start_time === parsed.time)
+                return (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
+                    {parsed.day} · {parsed.time}{slot ? `–${slot.end_time}` : ""}
+                  </div>
+                )
+              })()}
             </div>
 
-            {/* Bottom action row */}
-            <div style={{ flexShrink: 0, padding: "12px 20px 36px", borderTop: border }}>
+            {/* 50/50 action buttons */}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={onToggleFav}
+                style={{
+                  flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
+                  color: isFav ? "#0b0b0a" : "hsl(var(--foreground))",
+                  fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", fontFamily: "inherit",
+                  transition: "background-color 150ms ease-out, color 150ms ease-out",
+                }}
+              >
+                <Heart size={14} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
+                {isFav ? "SAVED" : "SAVE"}
+              </button>
               <button
                 onClick={openSavers}
                 style={{
-                  width: "100%",
+                  flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  height: 48, borderRadius: 8,
                   backgroundColor: "hsl(var(--muted))",
-                  border: "none", cursor: "pointer",
                   color: "hsl(var(--muted-foreground))",
-                  fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "inherit",
+                  fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", fontFamily: "inherit",
+                  textAlign: "center",
                 }}
               >
-                SEE WHO ELSE
+                {saveCount !== null && saveCount > 1
+                  ? `SAVED BY ${saveCount} OTHERS`
+                  : saveCount === 1
+                  ? "SAVED BY 1 OTHER"
+                  : "SEE WHO ELSE"}
               </button>
             </div>
-          </>
+
+            {artist.bio ? (
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
+            ) : (
+              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
+            )}
+            {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
+              <div style={{ display: "flex", flexDirection: "column", borderTop: border, borderBottom: border }}>
+                {([
+                  { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
+                  { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
+                  { key: "ra",         label: "RA",         href: artist.links.ra          },
+                ] as const).filter(l => l.href).map((l) => (
+                  <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
+                  >
+                    {l.label}
+                    <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Savers list */}
