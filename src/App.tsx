@@ -499,7 +499,7 @@ function ListView({
   const border = "1px solid hsl(var(--border))"
 
   return (
-    <div style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}>
+    <div style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never, paddingBottom: "env(safe-area-inset-bottom)" }}>
 
       {/* ON NOW */}
       {nowInDay && onNow.length > 0 && (
@@ -620,7 +620,7 @@ function TimetableGrid({
         overflow: "auto",
         WebkitOverflowScrolling: "touch" as never,
         overscrollBehavior: "none",
-        paddingBottom: "16px",
+        paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
       }}
     >
       <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, width: "100%", position: "relative" }}>
@@ -1327,6 +1327,7 @@ export default function App() {
             display: "flex",
             alignItems: "stretch",
             backgroundColor: "#0b0b0a",
+            paddingBottom: "env(safe-area-inset-bottom)",
           }}
         >
           {/* Tabs fill available space */}
