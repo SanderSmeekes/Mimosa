@@ -1256,11 +1256,9 @@ export default function App() {
   function handleOnboardingComplete(record: UserRecord) {
     setUserName(record)
     try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(record)) } catch { /* quota */ }
-    if (record.favourites.length > 0) {
-      const loaded = new Set(record.favourites)
-      setFavourites(loaded)
-      try { localStorage.setItem(LS_KEY, JSON.stringify([...loaded])) } catch { /* quota */ }
-    }
+    const loaded = new Set(record.favourites)
+    setFavourites(loaded)
+    try { localStorage.setItem(LS_KEY, JSON.stringify([...loaded])) } catch { /* quota */ }
   }
 
   function handleSwitchAccount() {
