@@ -653,7 +653,7 @@ function TimetableGrid({
             }}
           >
             <img
-              src="/mooney.png"
+              src={({ Thursday: "/siley.png", Friday: "/mooney.png", Saturday: "/mooney.png", Sunday: "/siley.png" } as Record<Day, string>)[day]}
               alt=""
               className="animate-[spin_20s_linear_infinite]"
               style={{ width: 30, height: 30, objectFit: "contain" }}
