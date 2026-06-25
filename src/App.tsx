@@ -329,15 +329,15 @@ function ListRow({
           {item.live && (
             <span style={{
               fontSize: 8,
-              fontWeight: 800,
-              letterSpacing: "0.1em",
-              color: accent,
-              border: `1px solid ${accent}`,
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              color: "hsl(var(--muted-foreground))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 3,
               padding: "1px 4px",
               flexShrink: 0,
-              opacity: 0.85,
-            }}>LIVE</span>
+              opacity: 0.6,
+            }}>live</span>
           )}
         </div>
 
@@ -433,10 +433,11 @@ function ListView({
     (schedule[stage] ?? []).map((slot): ListItem => ({ ...slot, stage }))
   ).sort((a, b) => toFestivalHour(a.start_time) - toFestivalHour(b.start_time))
 
-  // Detect if now falls within this day's festival window
+  // Detect if now falls within this day's festival window AND the selected tab is today
   const dayStart = DAY_START
   const dayEnd   = DAY_END
-  const nowInDay = nowFh >= dayStart && nowFh <= dayEnd
+  const todayName = now.toLocaleDateString("en-US", { weekday: "long" }) // "Thursday" etc.
+  const nowInDay = day === todayName && nowFh >= dayStart && nowFh <= dayEnd
 
   // Bucket items
   const onNow:   ListItem[] = []
@@ -928,7 +929,7 @@ function parseSlotKey(key: string): { day: string; stage: string; artist: string
 
 type SaversDialogState =
   | { open: false }
-  | { open: true; page: "savers"; loading: boolean; list: { name_key: string; display_name: string }[] }
+  | { open: true; page: "savers"; loading: boolean; list: { name_key: string; display_name: string; favourites: string[] }[] }
   | { open: true; page: "user-picks"; displayName: string; nameKey: string; loading: boolean; favs: string[] }
 
 function UserPicksList({ favs, loading, border }: { favs: string[]; loading: boolean; border: string }) {
@@ -973,6 +974,7 @@ function ArtistDrawer({
   onClose,
   isFav,
   onToggleFav,
+  myFavourites,
 }: {
   artistId: string | null
   slotKey: string | null
@@ -980,6 +982,7 @@ function ArtistDrawer({
   onClose: () => void
   isFav: boolean
   onToggleFav: () => void
+  myFavourites: Set<string>
 }) {
   const artist = artistId ? artistsData[artistId] : null
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
@@ -1105,16 +1108,29 @@ function ArtistDrawer({
                 <div style={{ padding: "20px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
               ) : dialog.list.length === 0 ? (
                 <div style={{ padding: "20px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>no one yet</div>
-              ) : dialog.list.map((u) => (
-                <button
-                  key={u.name_key}
-                  onClick={() => openUserPicks(u.name_key, u.display_name)}
-                  style={{ background: "none", border: "none", borderBottom: border, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0", color: "hsl(var(--foreground))", fontFamily: "inherit", fontSize: 14, fontWeight: 700, letterSpacing: "0.04em", textAlign: "left" }}
-                >
-                  {u.display_name}
-                  <ChevronDown size={14} strokeWidth={1.5} style={{ transform: "rotate(-90deg)", color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
-                </button>
-              ))
+              ) : dialog.list.map((u) => {
+                const theirFavs = new Set(u.favourites)
+                const shared = [...myFavourites].filter(k => theirFavs.has(k)).length
+                const union = new Set([...myFavourites, ...theirFavs]).size
+                const pct = union > 0 ? Math.round((shared / union) * 100) : 0
+                return (
+                  <button
+                    key={u.name_key}
+                    onClick={() => openUserPicks(u.name_key, u.display_name)}
+                    style={{ background: "none", border: "none", borderBottom: border, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 0", color: "hsl(var(--foreground))", fontFamily: "inherit", fontSize: 14, fontWeight: 700, letterSpacing: "0.04em", textAlign: "left", width: "100%" }}
+                  >
+                    <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.display_name}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      {pct > 0 && (
+                        <span style={{ fontSize: 11, fontWeight: 400, letterSpacing: "0.04em", color: "hsl(var(--muted-foreground))", opacity: 0.7 }}>
+                          {pct}% match
+                        </span>
+                      )}
+                      <ChevronDown size={14} strokeWidth={1.5} style={{ transform: "rotate(-90deg)", color: "hsl(var(--muted-foreground))" }} />
+                    </div>
+                  </button>
+                )
+              })
             )}
             {dialog.open && dialog.page === "user-picks" && (
               <UserPicksList
@@ -1143,7 +1159,7 @@ function ArtistDrawerPortal({
   onClose: () => void
   onToggleFav: (key: string) => void
 }) {
-  if (!artistId) return <ArtistDrawer artistId={null} slotKey={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} />
+  if (!artistId) return <ArtistDrawer artistId={null} slotKey={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} myFavourites={favourites} />
 
   const a = artistsData[artistId]
   const stage = a?.stage as Stage | undefined
@@ -1160,6 +1176,7 @@ function ArtistDrawerPortal({
       onClose={onClose}
       isFav={isFav}
       onToggleFav={() => key && onToggleFav(key)}
+      myFavourites={favourites}
     />
   )
 }

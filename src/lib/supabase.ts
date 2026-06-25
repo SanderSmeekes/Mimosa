@@ -51,10 +51,10 @@ export async function countSaves(slotKey: string): Promise<number> {
   return count ?? 0
 }
 
-export async function getSavers(slotKey: string): Promise<{ name_key: string; display_name: string }[]> {
+export async function getSavers(slotKey: string): Promise<{ name_key: string; display_name: string; favourites: string[] }[]> {
   const { data, error } = await supabase
     .from("user_favourites")
-    .select("name_key, display_name")
+    .select("name_key, display_name, favourites")
     .contains("favourites", JSON.stringify([slotKey]))
   if (error || !data) return []
   return data
