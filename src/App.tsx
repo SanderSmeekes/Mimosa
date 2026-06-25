@@ -1341,7 +1341,9 @@ export default function App() {
                 style={activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
-                <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: activeDay === day ? "#ffffff" : "transparent" }} />
+                {activeDay === day && (
+                  <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: "#ffffff", animation: "indicator-in 0.25s ease forwards" }} />
+                )}
               </TabsTrigger>
             ))}
           </TabsList>

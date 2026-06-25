@@ -68,3 +68,8 @@
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
+
+@keyframes indicator-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
