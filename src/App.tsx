@@ -4,7 +4,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
-import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
@@ -938,14 +938,7 @@ function ArtistDrawer({
   const artist = artistId ? artistsData[artistId] : null
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
   const border = "1px solid hsl(var(--border))"
-  const [saveCount, setSaveCount] = useState<number | null>(null)
   const [view, setView] = useState<DrawerPage>({ page: "main" })
-
-  useEffect(() => {
-    if (!open || !slotKey) { setSaveCount(null); return }
-    setSaveCount(null)
-    countSaves(slotKey).then(setSaveCount)
-  }, [open, slotKey])
 
   useEffect(() => {
     if (!open) setView({ page: "main" })
@@ -973,23 +966,44 @@ function ArtistDrawer({
   return (
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
       <DrawerContent style={{ height: "85dvh", display: "flex", flexDirection: "column" }}>
-        {/* Top bar — back navigation for sub-pages only */}
-        {view.page !== "main" && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
+        {/* Top bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0, minHeight: 44 }}>
+          {view.page !== "main" ? (
             <button style={iconBtn} onClick={() => view.page === "user-picks" ? openSavers() : setView({ page: "main" })}>
               <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
             </button>
-            {view.page === "savers" && (
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
-            )}
-            {view.page === "user-picks" && (
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
-                {(view as { displayName: string }).displayName.toUpperCase()}
-              </span>
-            )}
-            <div style={{ width: 44, flexShrink: 0 }} />
-          </div>
-        )}
+          ) : (
+            <div style={{ width: 44 }} />
+          )}
+
+          {view.page === "savers" && (
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
+          )}
+          {view.page === "user-picks" && (
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
+              {(view as { displayName: string }).displayName.toUpperCase()}
+            </span>
+          )}
+
+          {/* Save circle button — top right on main page */}
+          {view.page === "main" ? (
+            <button
+              onClick={onToggleFav}
+              style={{
+                width: 40, height: 40, borderRadius: 20, flexShrink: 0,
+                backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: isFav ? "#0b0b0a" : "hsl(var(--muted-foreground))",
+                transition: "background-color 150ms ease-out, color 150ms ease-out",
+              }}
+            >
+              <Heart size={16} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
+            </button>
+          ) : (
+            <div style={{ width: 44 }} />
+          )}
+        </div>
 
         {/* Main artist page */}
         {view.page === "main" && artist && (
@@ -1040,36 +1054,20 @@ function ArtistDrawer({
             </div>
 
             {/* Bottom action row */}
-            <div style={{ flexShrink: 0, display: "flex", gap: 10, padding: "12px 20px 36px", borderTop: border }}>
-              <button
-                onClick={onToggleFav}
-                style={{
-                  flex: 1,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  height: 48, borderRadius: 8,
-                  backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
-                  border: "none", cursor: "pointer",
-                  color: isFav ? "#0b0b0a" : "hsl(var(--foreground))",
-                  fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "inherit",
-                  transition: "background-color 150ms ease-out, color 150ms ease-out",
-                }}
-              >
-                <Heart size={15} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
-                {isFav ? "SAVED" : "SAVE"}
-              </button>
+            <div style={{ flexShrink: 0, padding: "12px 20px 36px", borderTop: border }}>
               <button
                 onClick={openSavers}
                 style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  height: 48, paddingInline: 16, borderRadius: 8,
+                  width: "100%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  height: 48, borderRadius: 8,
                   backgroundColor: "hsl(var(--muted))",
                   border: "none", cursor: "pointer",
                   color: "hsl(var(--muted-foreground))",
-                  fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "inherit",
-                  whiteSpace: "nowrap",
+                  fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "inherit",
                 }}
               >
-                {saveCount !== null && saveCount > 0 ? `${saveCount} saved` : "who saved"}
+                SEE WHO ELSE
               </button>
             </div>
           </>
