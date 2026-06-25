@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
-import { Heart, Settings } from "lucide-react"
+import { artistsData } from "@/data/artists"
+import { Heart, Settings, ExternalLink, X } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -74,12 +75,14 @@ function EventCard({
   isFav,
   dimmed,
   onToggleFav,
+  onOpenArtist,
 }: {
   slot: SlotEntry
   stage: Stage
   isFav: boolean
   dimmed: boolean
   onToggleFav: () => void
+  onOpenArtist: (id: string) => void
 }) {
   const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
@@ -91,6 +94,7 @@ function EventCard({
 
   return (
     <div
+      onClick={() => onOpenArtist(slot.artist_id)}
       style={{
         position: "absolute",
         top: top + 2,
@@ -98,6 +102,7 @@ function EventCard({
         right: 4,
         height: height - 4,
         backgroundColor: bg,
+        cursor: "pointer",
         color: text,
         borderRadius: 8,
         borderLeft: `3px solid ${accent}`,
@@ -107,7 +112,6 @@ function EventCard({
         flexDirection: "column",
         justifyContent: compact ? "center" : "space-between",
         boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-        cursor: "default",
         userSelect: "none",
         opacity: dimmed ? 0.4 : 1,
         transition: "opacity 0.2s ease",
@@ -236,11 +240,13 @@ function ListView({
   favourites,
   showFavs,
   onToggleFav,
+  onOpenArtist,
 }: {
   day: Day
   favourites: Set<string>
   showFavs: boolean
   onToggleFav: (key: string) => void
+  onOpenArtist: (id: string) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const schedule  = timetableData.schedule[day]
@@ -268,6 +274,7 @@ function ListView({
         return (
           <div
             key={i}
+            onClick={() => onOpenArtist(item.artist_id)}
             style={{
               display: "flex",
               alignItems: "stretch",
@@ -275,6 +282,7 @@ function ListView({
               height: h,
               opacity: dimmed ? 0.4 : 1,
               transition: "opacity 0.2s ease",
+              cursor: "pointer",
             }}
           >
             {/* Time gutter */}
@@ -311,7 +319,7 @@ function ListView({
                   {item.artist}
                 </span>
                 <button
-                  onClick={() => onToggleFav(key)}
+                  onClick={(e) => { e.stopPropagation(); onToggleFav(key) }}
                   style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.4)", lineHeight: 1 }}
                 >
                   <Heart size={compact ? 10 : 12} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
@@ -337,12 +345,14 @@ function TimetableGrid({
   favourites,
   showFavs,
   onToggleFav,
+  onOpenArtist,
   listView,
 }: {
   day: Day
   favourites: Set<string>
   showFavs: boolean
   onToggleFav: (key: string) => void
+  onOpenArtist: (id: string) => void
   listView: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -384,6 +394,7 @@ function TimetableGrid({
         favourites={favourites}
         showFavs={showFavs}
         onToggleFav={onToggleFav}
+        onOpenArtist={onOpenArtist}
       />
     )
   }
@@ -613,6 +624,7 @@ function TimetableGrid({
                     isFav={isFav}
                     dimmed={dimmed}
                     onToggleFav={() => onToggleFav(key)}
+                    onOpenArtist={onOpenArtist}
                   />
                 )
               })}
@@ -681,6 +693,143 @@ function MarqueeBanner() {
 /* ─────────────────────────────────────────────
    Root app
 ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────
+   Artist detail drawer
+───────────────────────────────────────────── */
+function ArtistDrawer({
+  artistId,
+  open,
+  onClose,
+  isFav,
+  onToggleFav,
+}: {
+  artistId: string | null
+  open: boolean
+  onClose: () => void
+  isFav: boolean
+  onToggleFav: () => void
+}) {
+  const artist = artistId ? artistsData[artistId] : null
+  const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
+  const border = "1px solid hsl(var(--border))"
+
+  return (
+    <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DrawerContent style={{ maxHeight: "85dvh" }}>
+        {/* Close + fav row */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 0" }}>
+          <DrawerClose asChild>
+            <button style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center" }}>
+              <X size={20} strokeWidth={1.5} />
+            </button>
+          </DrawerClose>
+          <button
+            onClick={onToggleFav}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
+          >
+            <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+            {isFav ? "SAVED" : "SAVE"}
+          </button>
+        </div>
+
+        {artist ? (
+          <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Name + meta */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
+                  {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
+                </span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>
+                {artist.name}
+              </h2>
+            </div>
+
+            {/* Bio */}
+            {artist.bio ? (
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>
+                {artist.bio}
+              </p>
+            ) : (
+              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>
+                No bio available.
+              </p>
+            )}
+
+            {/* Links */}
+            {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: border, borderBottom: border }}>
+                {([
+                  { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
+                  { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
+                  { key: "ra",         label: "RA",         href: artist.links.ra          },
+                ] as const).filter(l => l.href).map((l) => (
+                  <a
+                    key={l.key}
+                    href={l.href!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "13px 0",
+                      borderBottom: border,
+                      color: "hsl(var(--foreground))",
+                      textDecoration: "none",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {l.label}
+                    <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function ArtistDrawerPortal({
+  artistId,
+  activeDay,
+  favourites,
+  onClose,
+  onToggleFav,
+}: {
+  artistId: string | null
+  activeDay: Day
+  favourites: Set<string>
+  onClose: () => void
+  onToggleFav: (key: string) => void
+}) {
+  if (!artistId) return <ArtistDrawer artistId={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} />
+
+  const a = artistsData[artistId]
+  const stage = a?.stage as Stage | undefined
+  const daySchedule = timetableData.schedule[activeDay]
+  const slot = stage ? (daySchedule[stage] ?? []).find(s => s.artist_id === artistId) : undefined
+  const key = slot && stage ? slotKey(activeDay, stage, slot) : null
+  const isFav = key ? favourites.has(key) : false
+
+  return (
+    <ArtistDrawer
+      artistId={artistId}
+      open
+      onClose={onClose}
+      isFav={isFav}
+      onToggleFav={() => key && onToggleFav(key)}
+    />
+  )
+}
+
 const LS_KEY = "memoris-favourites"
 
 export default function App() {
@@ -693,8 +842,9 @@ export default function App() {
       return new Set()
     }
   })
-  const [showFavs, setShowFavs]   = useState(false)
-  const [listView, setListView]   = useState(false)
+  const [showFavs, setShowFavs]         = useState(false)
+  const [listView, setListView]         = useState(false)
+  const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
 
   function toggleFav(key: string) {
     setFavourites((prev) => {
@@ -743,6 +893,7 @@ export default function App() {
               favourites={favourites}
               showFavs={showFavs}
               onToggleFav={toggleFav}
+              onOpenArtist={setSelectedArtistId}
               listView={listView}
             />
           </TabsContent>
@@ -876,6 +1027,14 @@ export default function App() {
           </Drawer>
         </div>
       </Tabs>
+
+      <ArtistDrawerPortal
+        artistId={selectedArtistId}
+        activeDay={activeDay}
+        favourites={favourites}
+        onClose={() => setSelectedArtistId(null)}
+        onToggleFav={toggleFav}
+      />
     </div>
   )
 }
