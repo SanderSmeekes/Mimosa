@@ -1326,23 +1326,19 @@ export default function App() {
           </TabsContent>
         ))}
 
-        {/* Bottom day-selector bar — items extend into safe area so no gap shows */}
-        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "flex-start", backgroundColor: "#0b0b0a" }}>
+        {/* Bottom day-selector bar */}
+        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a", paddingBottom: "env(safe-area-inset-bottom)" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
-            className="flex-1 w-auto rounded-none p-0 gap-0"
-            style={{ height: "calc(48px + env(safe-area-inset-bottom))" }}
+            className="flex-1 w-auto h-12 rounded-none p-0 gap-0"
           >
             {timetableData.days.map((day) => (
               <TabsTrigger
                 key={day}
                 value={day}
-                className="flex-1 rounded-none text-[13px] font-bold tracking-[0.08em] after:top-0"
-                style={{
-                  height: 48,
-                  ...(activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }),
-                }}
+                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:top-0"
+                style={activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
               </TabsTrigger>
@@ -1356,11 +1352,9 @@ export default function App() {
             style={{
               flexShrink: 0,
               width: 44,
-              height: "calc(48px + env(safe-area-inset-bottom))",
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "center",
               justifyContent: "center",
-              paddingTop: 15,
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -1383,11 +1377,9 @@ export default function App() {
                 style={{
                   flexShrink: 0,
                   width: 44,
-                  height: "calc(48px + env(safe-area-inset-bottom))",
                   display: "flex",
-                  alignItems: "flex-start",
+                  alignItems: "center",
                   justifyContent: "center",
-                  paddingTop: 15,
                   background: "none",
                   border: "none",
                   cursor: "pointer",
