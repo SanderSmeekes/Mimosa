@@ -3,7 +3,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
-import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
+import { lookupUser, saveFavourites, type UserRecord } from "./lib/supabase"
+import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -239,13 +241,6 @@ function useNow() {
 ───────────────────────────────────────────── */
 type ListItem = SlotEntry & { stage: Stage }
 
-function relativeLabel(startFh: number, nowFh: number): string {
-  const diffMin = Math.round((startFh - nowFh) * 60)
-  if (diffMin < 60) return `in ${diffMin} min`
-  const h = Math.floor(diffMin / 60)
-  const m = diffMin % 60
-  return m === 0 ? `in ${h}h` : `in ${h}h ${m}m`
-}
 
 function ListRow({
   item,
@@ -1058,8 +1053,18 @@ function ArtistDrawerPortal({
 }
 
 const LS_KEY = "memoris-favourites"
+const ACCOUNT_KEY = "memosa-account"
 
 export default function App() {
+  const [userName, setUserName] = useState<UserRecord | null>(() => {
+    try {
+      const raw = localStorage.getItem(ACCOUNT_KEY)
+      return raw ? (JSON.parse(raw) as UserRecord) : null
+    } catch {
+      return null
+    }
+  })
+  const [favsLoading, setFavsLoading] = useState(false)
   const [activeDay, setActiveDay]   = useState<Day>("Thursday")
   const [favourites, setFavourites] = useState<Set<string>>(() => {
     try {
@@ -1072,17 +1077,59 @@ export default function App() {
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Load favourites from Supabase when account is set
+  useEffect(() => {
+    if (!userName) return
+    setFavsLoading(true)
+    lookupUser(userName.name_key).then((record) => {
+      if (record && record.favourites.length > 0) {
+        const loaded = new Set(record.favourites)
+        setFavourites(loaded)
+        try { localStorage.setItem(LS_KEY, JSON.stringify([...loaded])) } catch { /* quota */ }
+      }
+      setFavsLoading(false)
+    }).catch(() => setFavsLoading(false))
+  }, [userName?.name_key])
+
+  function scheduleSave(nameKey: string, favs: Set<string>) {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      saveFavourites(nameKey, [...favs]).catch(() => {})
+    }, 800)
+  }
 
   function toggleFav(key: string) {
     setFavourites((prev) => {
       const next = new Set(prev)
       next.has(key) ? next.delete(key) : next.add(key)
       try { localStorage.setItem(LS_KEY, JSON.stringify([...next])) } catch { /* quota */ }
+      if (userName) scheduleSave(userName.name_key, next)
       return next
     })
   }
 
+  function handleOnboardingComplete(record: UserRecord) {
+    setUserName(record)
+    try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(record)) } catch { /* quota */ }
+    if (record.favourites.length > 0) {
+      const loaded = new Set(record.favourites)
+      setFavourites(loaded)
+      try { localStorage.setItem(LS_KEY, JSON.stringify([...loaded])) } catch { /* quota */ }
+    }
+  }
+
+  function handleSwitchAccount() {
+    setUserName(null)
+    try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
+  }
+
   const hasFavs = favourites.size > 0
+
+  if (!userName) {
+    return <Onboarding onComplete={handleOnboardingComplete} />
+  }
 
   return (
     <div
@@ -1095,6 +1142,16 @@ export default function App() {
         paddingTop: "env(safe-area-inset-top)",
       }}
     >
+      {favsLoading && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9998,
+          background: "rgba(11,11,10,0.85)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "'Courier Prime', monospace", color: "#f0ece0", fontSize: 14, letterSpacing: "0.06em",
+        }}>
+          loading your picks…
+        </div>
+      )}
       <MarqueeBanner />
 
       <Tabs
@@ -1250,6 +1307,30 @@ export default function App() {
                     }} />
                   </div>
                 </button>
+
+                {/* Account row */}
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  borderBottom: "1px solid hsl(var(--border))",
+                  padding: "16px 0",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <User size={14} style={{ opacity: 0.5 }} />
+                    <span style={{ fontSize: 13, color: "hsl(var(--foreground))", fontWeight: 700, letterSpacing: "0.08em" }}>
+                      {userName?.display_name ?? ""}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSwitchAccount}
+                    style={{
+                      fontSize: 11, letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))",
+                      background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    switch
+                  </button>
+                </div>
 
                 {/* Disclaimer */}
                 <p style={{ marginTop: 32, fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
