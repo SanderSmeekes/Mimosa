@@ -1337,7 +1337,7 @@ export default function App() {
               <TabsTrigger
                 key={day}
                 value={day}
-                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:top-0"
+                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:bottom-0"
                 style={activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
