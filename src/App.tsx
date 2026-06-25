@@ -1218,6 +1218,7 @@ export default function App() {
   })
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -1347,49 +1348,10 @@ export default function App() {
             ))}
           </TabsList>
 
-          {/* Favourites toggle */}
-          <button
-            onClick={() => setShowFavs((s) => !s)}
-            aria-label={showFavs ? "Show all" : "Show favourites"}
-            style={{
-              flexShrink: 0,
-              width: 44,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "hsl(var(--muted-foreground))",
-              transition: "color 0.15s ease",
-            }}
-          >
-            <Heart
-              size={18}
-              fill="none"
-              strokeWidth={2}
-            />
-          </button>
-
           {/* Settings drawer */}
-          <Drawer>
+          <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
             <DrawerTrigger asChild>
-              <button
-                aria-label="Settings"
-                style={{
-                  flexShrink: 0,
-                  width: 44,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "hsl(var(--muted-foreground))",
-                }}
-              >
-                <Settings size={18} strokeWidth={1.5} />
-              </button>
+              <button style={{ display: "none" }} aria-hidden />
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
@@ -1439,6 +1401,23 @@ export default function App() {
                   </div>
                 </button>
 
+                {/* Show favourites toggle */}
+                <button
+                  onClick={() => setShowFavs((v) => !v)}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0", cursor: "pointer", width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                    SHOW FAVOURITES
+                  </span>
+                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showFavs ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 3, left: showFavs ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showFavs ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                  </div>
+                </button>
+
                 {/* Account row */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1481,6 +1460,31 @@ export default function App() {
           </Drawer>
         </div>
       </Tabs>
+
+      {/* Floating settings button */}
+      <button
+        onClick={() => setSettingsOpen(true)}
+        aria-label="Settings"
+        style={{
+          position: "fixed",
+          bottom: 68,
+          right: 16,
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: "#1d1c14",
+          border: "1px solid hsl(var(--border))",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          color: "hsl(var(--muted-foreground))",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+          zIndex: 40,
+        }}
+      >
+        <Settings size={18} strokeWidth={1.5} />
+      </button>
 
       <ArtistDrawerPortal
         artistId={selectedArtistId}
