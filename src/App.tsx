@@ -275,7 +275,7 @@ function ListRow({
         alignItems: "stretch",
         borderBottom: border,
         minHeight: 64,
-        opacity: dimmed ? 0.35 : 1,
+        opacity: dimmed ? 0.35 : status === "earlier" ? 0.38 : 1,
         transition: "opacity 0.2s ease",
         cursor: "pointer",
         backgroundColor: status === "now" ? "rgba(255,255,255,0.03)" : "transparent",
@@ -286,7 +286,6 @@ function ListRow({
         width: 3,
         flexShrink: 0,
         backgroundColor: accent,
-        opacity: status === "earlier" ? 0.4 : 1,
       }} />
 
       {/* Time column */}
