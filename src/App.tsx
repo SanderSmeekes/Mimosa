@@ -1329,12 +1329,11 @@ export default function App() {
         <div
           style={{
             flexShrink: 0,
-            borderTop: "1px solid hsl(var(--border))",
-            display: "flex",
-            alignItems: "stretch",
             backgroundColor: "#0b0b0a",
+            paddingBottom: "env(safe-area-inset-bottom)",
           }}
         >
+        <div style={{ borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "center" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
@@ -1491,7 +1490,7 @@ export default function App() {
             </DrawerContent>
           </Drawer>
         </div>
-        <div style={{ height: "env(safe-area-inset-bottom)", backgroundColor: "#0b0b0a", flexShrink: 0 }} />
+        </div>
       </Tabs>
 
       <ArtistDrawerPortal
