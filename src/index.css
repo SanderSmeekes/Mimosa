@@ -43,7 +43,7 @@
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
-    background-color: hsl(var(--background));
+    background-color: #0b0b0a;
   }
   body {
     color: hsl(var(--foreground));
