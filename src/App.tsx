@@ -1337,10 +1337,11 @@ export default function App() {
               <TabsTrigger
                 key={day}
                 value={day}
-                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] after:bottom-0"
+                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] flex-col gap-1 after:hidden"
                 style={activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
+                <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: activeDay === day ? "#ffffff" : "transparent" }} />
               </TabsTrigger>
             ))}
           </TabsList>
