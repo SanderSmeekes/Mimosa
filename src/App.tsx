@@ -1105,26 +1105,42 @@ function ArtistDrawer({
         {view.page === "user-picks" && (() => {
           const v = view as { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }
           const parsed = v.favs.map(parseSlotKey).filter(Boolean) as { day: string; stage: string; artist: string; time: string }[]
+          const DAY_ORDER = ["Thursday", "Friday", "Saturday", "Sunday"]
+          const byDay = DAY_ORDER.map((day) => ({
+            day,
+            items: parsed.filter((p) => p.day === day).sort((a, b) => a.time.localeCompare(b.time)),
+          })).filter((g) => g.items.length > 0)
           return (
             <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column" }}>
               {v.loading ? (
                 <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
               ) : parsed.length === 0 ? (
                 <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>nothing saved yet</div>
-              ) : parsed.map((p, i) => {
-                const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
-                return (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: border }}>
-                    <div style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
-                      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>
-                        {p.stage} · {p.day.slice(0, 3).toUpperCase()} {p.time}
-                      </div>
-                    </div>
+              ) : byDay.map((group) => (
+                <React.Fragment key={group.day}>
+                  <div style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+                    color: "hsl(var(--muted-foreground))", opacity: 0.5,
+                    padding: "14px 0 6px", textTransform: "uppercase",
+                  }}>
+                    {group.day}
                   </div>
-                )
-              })}
+                  {group.items.map((p, i) => {
+                    const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: border }}>
+                        <div style={{ width: 3, height: 34, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
+                          <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>
+                            {p.stage} · {p.time}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </React.Fragment>
+              ))}
             </div>
           )
         })()}
