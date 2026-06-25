@@ -87,6 +87,8 @@ function EventCard({
   onToggleFav: () => void
   onOpenArtist: (id: string) => void
 }) {
+  const [animKey, setAnimKey] = useState(0)
+  const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
   const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
   const { bg, text } = STAGE_COLORS[stage]
@@ -139,7 +141,7 @@ function EventCard({
 
         {/* Favourite toggle */}
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleFav() }}
+          onClick={(e) => { e.stopPropagation(); setAnimKey(k => k + 1); onToggleFav() }}
           style={{
             background: "none",
             border: "none",
@@ -153,11 +155,13 @@ function EventCard({
             minHeight: 44,
             margin: "-14px -10px -14px 0",
             color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
-            transition: "color 0.15s ease",
+            transition: "color 150ms ease-out",
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         >
-          <Heart size={iconSize} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+          <span key={animKey} className={animClass} style={{ display: "flex" }}>
+            <Heart size={iconSize} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+          </span>
         </button>
       </div>
 
@@ -266,6 +270,8 @@ function ListRow({
   const border = "1px solid hsl(var(--border))"
   const key    = slotKey(day, item.stage, item)
   void key
+  const [animKey, setAnimKey] = useState(0)
+  const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
 
   return (
     <div
@@ -304,7 +310,7 @@ function ListRow({
           {item.start_time}
         </span>
         {status === "now" && (
-          <span style={{ fontSize: 9, color: accent, letterSpacing: "0.04em", lineHeight: 1 }}>NOW</span>
+          <span className="now-pulse" style={{ fontSize: 9, color: accent, letterSpacing: "0.04em", lineHeight: 1 }}>NOW</span>
         )}
       </div>
 
@@ -365,7 +371,7 @@ function ListRow({
 
       {/* Heart */}
       <button
-        onClick={(e) => { e.stopPropagation(); onToggleFav() }}
+        onClick={(e) => { e.stopPropagation(); setAnimKey(k => k + 1); onToggleFav() }}
         style={{
           background: "none",
           border: "none",
@@ -377,11 +383,13 @@ function ListRow({
           minWidth: 44,
           minHeight: 64,
           color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.25)",
-          transition: "color 0.15s ease",
+          transition: "color 150ms ease-out",
         }}
         aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
       >
-        <Heart size={14} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+        <span key={animKey} className={animClass} style={{ display: "flex" }}>
+          <Heart size={14} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+        </span>
       </button>
     </div>
   )
@@ -499,7 +507,7 @@ function ListView({
   const border = "1px solid hsl(var(--border))"
 
   return (
-    <div style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}>
+    <div className="view-fade" style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}>
 
       {/* ON NOW */}
       {nowInDay && onNow.length > 0 && (
@@ -603,6 +611,7 @@ function TimetableGrid({
   if (listView) {
     return (
       <ListView
+        key="list"
         day={day}
         favourites={favourites}
         showFavs={showFavs}
@@ -614,7 +623,9 @@ function TimetableGrid({
 
   return (
     <div
+      key="grid"
       ref={scrollRef}
+      className="view-fade"
       style={{
         flex: 1,
         overflow: "auto",
@@ -696,6 +707,7 @@ function TimetableGrid({
           {/* Current time line */}
           {showNowLine && (
             <div
+              className="now-pulse"
               style={{
                 position: "absolute",
                 top: nowTop,
@@ -1230,6 +1242,9 @@ export default function App() {
   const [showMarquee, setShowMarquee] = useState(() => {
     try { return localStorage.getItem(MARQUEE_HIDDEN_KEY) !== "1" } catch { return true }
   })
+  const [minimal, setMinimal] = useState(() => {
+    try { return localStorage.getItem("memosa-minimal") === "1" } catch { return false }
+  })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load favourites from Supabase when account is set
@@ -1289,6 +1304,14 @@ export default function App() {
     })
   }
 
+  function toggleMinimal() {
+    setMinimal((v) => {
+      const next = !v
+      try { localStorage.setItem("memosa-minimal", next ? "1" : "0") } catch { /* ok */ }
+      return next
+    })
+  }
+
   function handleSwitchAccount() {
     setUserName(null)
     try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
@@ -1301,6 +1324,7 @@ export default function App() {
 
   return (
     <div
+      className={minimal ? "font-minimal" : undefined}
       style={{
         position: "fixed",
         inset: 0,
@@ -1486,6 +1510,23 @@ export default function App() {
                   </span>
                   <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showMarquee ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
                     <div style={{ position: "absolute", top: 3, left: showMarquee ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showMarquee ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                  </div>
+                </button>
+
+                {/* Minimal mode toggle */}
+                <button
+                  onClick={toggleMinimal}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0", cursor: "pointer", width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                    MINIMAL MODE
+                  </span>
+                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: minimal ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 3, left: minimal ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: minimal ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
                   </div>
                 </button>
 

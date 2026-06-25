@@ -64,6 +64,47 @@
   }
 }
 
+/* ── Heart pop ──────────────────────────────── */
+@keyframes heart-on {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+@keyframes heart-off {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.heart-anim-on  { animation: heart-on  200ms ease-out; }
+.heart-anim-off { animation: heart-off 150ms ease-out; }
+
+/* ── View cross-fade ────────────────────────── */
+@keyframes fade-slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.view-fade { animation: fade-slide-in 200ms ease-out; }
+
+/* ── Now pulse ──────────────────────────────── */
+@keyframes now-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+.now-pulse { animation: now-pulse 2.5s ease-in-out infinite; }
+
+/* ── Reduced motion ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .heart-anim-on, .heart-anim-off, .view-fade, .now-pulse {
+    animation: none !important;
+  }
+}
+
+/* ── Minimal mode ───────────────────────────── */
+.font-minimal, .font-minimal * {
+  font-family: "Inter", system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
