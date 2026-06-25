@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { Badge } from "@/components/ui/badge"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
@@ -234,13 +234,6 @@ function ListRow({
         backgroundColor: status === "now" ? "rgba(255,255,255,0.03)" : "transparent",
       }}
     >
-      {/* Stage accent bar */}
-      <div style={{
-        width: 3,
-        flexShrink: 0,
-        backgroundColor: accent,
-      }} />
-
       {/* Time column */}
       <div style={{
         width: 46,
@@ -980,33 +973,26 @@ function ArtistDrawer({
         {/* Top bar */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
           {view.page === "main" ? (
-            <DrawerClose asChild>
-              <button style={iconBtn}><X size={20} strokeWidth={1.5} /></button>
-            </DrawerClose>
+            <button
+              onClick={onToggleFav}
+              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, minHeight: 44, padding: "0 8px 0 4px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
+            >
+              <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+              {isFav ? "SAVED" : "SAVE"}
+            </button>
           ) : (
             <button style={iconBtn} onClick={() => view.page === "user-picks" ? openSavers() : setView({ page: "main" })}>
               <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
             </button>
           )}
 
-          {view.page === "main" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {saveCount !== null && saveCount > 0 && (
-                <button onClick={openSavers} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                  <Badge variant="secondary" style={{ gap: 5, cursor: "pointer", fontFamily: "inherit" }}>
-                    <Heart size={10} fill="#ff6b6b" stroke="none" />
-                    {saveCount} {saveCount === 1 ? "person" : "people"} saved this
-                  </Badge>
-                </button>
-              )}
-              <button
-                onClick={onToggleFav}
-                style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
-              >
-                <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
-                {isFav ? "SAVED" : "SAVE"}
-              </button>
-            </div>
+          {view.page === "main" && saveCount !== null && saveCount > 0 && (
+            <button onClick={openSavers} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <Badge variant="secondary" style={{ gap: 5, cursor: "pointer", fontFamily: "inherit" }}>
+                <Heart size={10} fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth={2} />
+                {saveCount} {saveCount === 1 ? "person" : "people"} saved this
+              </Badge>
+            </button>
           )}
 
           {view.page === "savers" && (
