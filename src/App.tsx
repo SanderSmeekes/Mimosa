@@ -1494,6 +1494,8 @@ export default function App() {
         </div>
       </Tabs>
 
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: "env(safe-area-inset-bottom)", backgroundColor: "#0b0b0a", zIndex: 9 }} />
+
       <ArtistDrawerPortal
         artistId={selectedArtistId}
         activeDay={activeDay}
