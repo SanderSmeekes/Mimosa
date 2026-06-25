@@ -1039,9 +1039,10 @@ function ArtistDrawer({
               <button
                 onClick={openSavers}
                 style={{
-                  flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
+                  flex: 1, height: 48, borderRadius: 8, cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  backgroundColor: "hsl(var(--muted))",
+                  backgroundColor: saveCount ? "transparent" : "hsl(var(--muted))",
+                  border: saveCount ? "1px solid hsl(var(--border))" : "none",
                   color: "hsl(var(--muted-foreground))",
                   fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", fontFamily: "inherit",
                   textAlign: "center",
