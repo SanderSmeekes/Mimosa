@@ -125,6 +125,11 @@ export function Onboarding({ onComplete }: Props) {
     return (
       <div style={bg}>
         <div style={card}>
+          <img
+            src="/memosa-glass.png"
+            alt=""
+            style={{ width: 96, height: 96, objectFit: "contain", marginBottom: 8 }}
+          />
           <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>memosa</div>
           <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>
             your personal timetable for memòri festival 2026
