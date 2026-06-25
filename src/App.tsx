@@ -1074,6 +1074,18 @@ function ArtistDrawer({
                 </span>
               </div>
               <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
+              {slotKey && (() => {
+                const parsed = parseSlotKey(slotKey)
+                if (!parsed) return null
+                const daySlots = timetableData.schedule[parsed.day as Day]
+                const stageSlots = daySlots?.[parsed.stage as Stage] ?? []
+                const slot = stageSlots.find(s => s.start_time === parsed.time)
+                return (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
+                    {parsed.day} · {parsed.time}{slot ? `–${slot.end_time}` : ""}
+                  </div>
+                )
+              })()}
             </div>
             {artist.bio ? (
               <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
@@ -1184,8 +1196,6 @@ function ArtistDrawerPortal({
 
 const LS_KEY = "memoris-favourites"
 const ACCOUNT_KEY = "memosa-account"
-const TEXT_SIZE_KEY = "memosa-textsize"
-const TEXT_SIZES = [0.88, 1, 1.14] as const
 
 export default function App() {
   const [userName, setUserName] = useState<UserRecord | null>(() => {
@@ -1208,9 +1218,6 @@ export default function App() {
   })
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
-  const [textSizeIdx, setTextSizeIdx]   = useState<0|1|2>(() => {
-    try { return (Number(localStorage.getItem(TEXT_SIZE_KEY)) || 1) as 0|1|2 } catch { return 1 }
-  })
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -1275,7 +1282,6 @@ export default function App() {
         backgroundColor: "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
-        zoom: TEXT_SIZES[textSizeIdx],
       }}
     >
       {favsLoading && (
@@ -1327,7 +1333,6 @@ export default function App() {
             display: "flex",
             alignItems: "stretch",
             backgroundColor: "#0b0b0a",
-            paddingBottom: "env(safe-area-inset-bottom)",
           }}
         >
           {/* Tabs fill available space */}
@@ -1445,34 +1450,6 @@ export default function App() {
                   </div>
                 </button>
 
-                {/* Text size slider */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid hsl(var(--border))", padding: "16px 0" }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))" }}>TEXT SIZE</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 0, background: "hsl(var(--muted))", borderRadius: 20, padding: 3 }}>
-                    {(["A", "A", "A"] as const).map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setTextSizeIdx(i as 0|1|2)
-                          try { localStorage.setItem(TEXT_SIZE_KEY, String(i)) } catch { /* quota */ }
-                        }}
-                        style={{
-                          width: 36, height: 28, borderRadius: 17,
-                          border: "none", cursor: "pointer", fontFamily: "inherit",
-                          fontWeight: 700,
-                          fontSize: [10, 13, 16][i],
-                          background: textSizeIdx === i ? "#d2d2d0" : "transparent",
-                          color: textSizeIdx === i ? "#0b0b0a" : "hsl(var(--muted-foreground))",
-                          transition: "background 0.15s ease, color 0.15s ease",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                        }}
-                      >
-                        A
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Account row */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1514,6 +1491,7 @@ export default function App() {
             </DrawerContent>
           </Drawer>
         </div>
+        <div style={{ height: "env(safe-area-inset-bottom)", backgroundColor: "#0b0b0a", flexShrink: 0 }} />
       </Tabs>
 
       <ArtistDrawerPortal
