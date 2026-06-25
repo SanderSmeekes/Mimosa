@@ -1196,6 +1196,12 @@ function ArtistDrawerPortal({
 
 const LS_KEY = "memoris-favourites"
 const ACCOUNT_KEY = "memosa-account"
+const A2HS_KEY = "memosa-a2hs-shown"
+const MARQUEE_HIDDEN_KEY = "memosa-marquee-hidden"
+
+const isStandalone = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  (window.navigator as { standalone?: boolean }).standalone === true
 
 export default function App() {
   const [userName, setUserName] = useState<UserRecord | null>(() => {
@@ -1220,6 +1226,10 @@ export default function App() {
   const [listView, setListView]         = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
+  const [showA2HS, setShowA2HS] = useState(false)
+  const [showMarquee, setShowMarquee] = useState(() => {
+    try { return localStorage.getItem(MARQUEE_HIDDEN_KEY) !== "1" } catch { return true }
+  })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load favourites from Supabase when account is set
@@ -1259,6 +1269,24 @@ export default function App() {
     const loaded = new Set(record.favourites)
     setFavourites(loaded)
     try { localStorage.setItem(LS_KEY, JSON.stringify([...loaded])) } catch { /* quota */ }
+    if (!isStandalone()) {
+      try {
+        if (!localStorage.getItem(A2HS_KEY)) setShowA2HS(true)
+      } catch { /* ok */ }
+    }
+  }
+
+  function dismissA2HS() {
+    setShowA2HS(false)
+    try { localStorage.setItem(A2HS_KEY, "1") } catch { /* ok */ }
+  }
+
+  function toggleMarquee() {
+    setShowMarquee((v) => {
+      const next = !v
+      try { localStorage.setItem(MARQUEE_HIDDEN_KEY, next ? "0" : "1") } catch { /* ok */ }
+      return next
+    })
   }
 
   function handleSwitchAccount() {
@@ -1293,7 +1321,35 @@ export default function App() {
           loading your picks…
         </div>
       )}
-      <MarqueeBanner />
+      {showMarquee && <MarqueeBanner />}
+
+      {/* Add to Home Screen hint */}
+      {showA2HS && (
+        <div style={{
+          position: "fixed", bottom: 128, left: 16, right: 16,
+          backgroundColor: "#1d1c14", border: "1px solid hsl(var(--border))",
+          borderRadius: 12, padding: "14px 16px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          zIndex: 50, display: "flex", alignItems: "flex-start", gap: 12,
+          animation: "indicator-in 0.3s ease forwards",
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.05em", color: "hsl(var(--foreground))", marginBottom: 4 }}>
+              ADD TO HOME SCREEN
+            </div>
+            <div style={{ fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))" }}>
+              Tap the share icon and choose "Add to Home Screen" for the best experience — works offline too.
+            </div>
+          </div>
+          <button
+            onClick={dismissA2HS}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 4, flexShrink: 0, marginTop: -2 }}
+            aria-label="Dismiss"
+          >
+            <X size={16} strokeWidth={1.5} />
+          </button>
+        </div>
+      )}
 
       <Tabs
         value={activeDay}
@@ -1409,10 +1465,27 @@ export default function App() {
                   }}
                 >
                   <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    SHOW FAVOURITES
+                    HIGHLIGHT FAVOURITES
                   </span>
                   <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showFavs ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
                     <div style={{ position: "absolute", top: 3, left: showFavs ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showFavs ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                  </div>
+                </button>
+
+                {/* Ticker banner toggle */}
+                <button
+                  onClick={toggleMarquee}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0", cursor: "pointer", width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                    TICKER BANNER
+                  </span>
+                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showMarquee ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 3, left: showMarquee ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showMarquee ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
                   </div>
                 </button>
 
