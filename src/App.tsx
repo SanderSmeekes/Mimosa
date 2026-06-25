@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
@@ -640,8 +640,37 @@ function TimetableGrid({
    Marquee banner
 ───────────────────────────────────────────── */
 const MARQUEE_TEXT = "Smile, dance and make Memoiries. Raargh!"
-const MARQUEE_SEPARATOR = " ◆ "
-const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR) + MARQUEE_SEPARATOR
+const MARQUEE_SEPARATOR = "   "
+const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR)
+
+const marqueeImgStyle: React.CSSProperties = {
+  width: 24,
+  height: 24,
+  objectFit: "contain",
+  verticalAlign: "middle",
+  display: "inline-block",
+  marginBottom: 1,
+}
+
+function MarqueeSegment() {
+  return (
+    <>
+      <img src="/mooney.png" alt="" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
+      <span
+        style={{
+          fontFamily: "'Courier Prime', 'Courier New', monospace",
+          fontSize: "0.875rem",
+          letterSpacing: "0.05em",
+          color: "#a5a4a1",
+          verticalAlign: "middle",
+        }}
+      >
+        {MARQUEE_CHUNK}
+      </span>
+      <img src="/siley.png" alt="" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
+    </>
+  )
+}
 
 function MarqueeBanner() {
   return (
@@ -651,8 +680,8 @@ function MarqueeBanner() {
         flexShrink: 0,
         borderTop: "1px solid #1a1714",
         borderBottom: "1px solid hsl(var(--border))",
-        paddingTop: "14px",
-        paddingBottom: "14px",
+        paddingTop: "10px",
+        paddingBottom: "10px",
         overflow: "hidden",
         whiteSpace: "nowrap",
         backgroundColor: "rgba(10,10,10,0.95)",
@@ -665,26 +694,8 @@ function MarqueeBanner() {
         }}
         className="group-hover:[animation-play-state:paused]"
       >
-        <span
-          style={{
-            fontFamily: "'Courier Prime', 'Courier New', monospace",
-            fontSize: "0.875rem",
-            letterSpacing: "0.05em",
-            color: "#a5a4a1",
-          }}
-        >
-          {MARQUEE_CHUNK}
-        </span>
-        <span
-          style={{
-            fontFamily: "'Courier Prime', 'Courier New', monospace",
-            fontSize: "0.875rem",
-            letterSpacing: "0.05em",
-            color: "#a5a4a1",
-          }}
-        >
-          {MARQUEE_CHUNK}
-        </span>
+        <MarqueeSegment />
+        <MarqueeSegment />
       </div>
     </div>
   )
