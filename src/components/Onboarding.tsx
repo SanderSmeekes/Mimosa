@@ -39,7 +39,14 @@ export function Onboarding({ onComplete }: Props) {
         setStep("confirm")
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
+      let msg = ""
+      if (err instanceof Error) {
+        msg = err.message
+      } else if (err && typeof err === "object" && "message" in err) {
+        msg = String((err as { message: unknown }).message)
+      } else {
+        msg = String(err)
+      }
       setError("Could not reach sync server.")
       setErrorDetail(msg)
       setStep("enter")
@@ -90,6 +97,8 @@ export function Onboarding({ onComplete }: Props) {
     maxWidth: 360,
     display: "flex",
     flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
     gap: 20,
   }
 
@@ -104,6 +113,7 @@ export function Onboarding({ onComplete }: Props) {
     padding: "12px 14px",
     outline: "none",
     boxSizing: "border-box",
+    textAlign: "left",
   }
 
   const btn = (variant: "primary" | "secondary" = "primary"): React.CSSProperties => ({
@@ -265,6 +275,8 @@ export function Onboarding({ onComplete }: Props) {
               borderRadius: 4,
               padding: "12px 14px",
               borderLeft: "3px solid #d4a820",
+              textAlign: "left",
+              alignSelf: "stretch",
             }}
           >
             <strong style={{ display: "block", marginBottom: 4, fontSize: 13 }}>⚠ don't forget this name</strong>
