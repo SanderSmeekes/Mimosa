@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
-import { Heart, Settings, ExternalLink, X } from "lucide-react"
+import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp } from "lucide-react"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -234,10 +234,183 @@ function useNow() {
 }
 
 /* ─────────────────────────────────────────────
-   List view — all acts for the day, sorted by
-   start time, stacked vertically. Card height
-   stays proportional to duration (same as grid).
+   List view — chronological, grouped into
+   On now / Later / Earlier today sections.
 ───────────────────────────────────────────── */
+type ListItem = SlotEntry & { stage: Stage }
+
+function relativeLabel(startFh: number, nowFh: number): string {
+  const diffMin = Math.round((startFh - nowFh) * 60)
+  if (diffMin < 60) return `in ${diffMin} min`
+  const h = Math.floor(diffMin / 60)
+  const m = diffMin % 60
+  return m === 0 ? `in ${h}h` : `in ${h}h ${m}m`
+}
+
+function ListRow({
+  item,
+  day,
+  isFav,
+  dimmed,
+  onToggleFav,
+  onOpenArtist,
+  clashWith,
+  status,
+}: {
+  item: ListItem
+  day: Day
+  isFav: boolean
+  dimmed: boolean
+  onToggleFav: () => void
+  onOpenArtist: (id: string) => void
+  clashWith: string | null
+  status: "now" | "later" | "earlier"
+}) {
+  const accent = STAGE_ACCENT[item.stage]
+  const border = "1px solid hsl(var(--border))"
+  const key    = slotKey(day, item.stage, item)
+  void key
+
+  return (
+    <div
+      onClick={() => onOpenArtist(item.artist_id)}
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        borderBottom: border,
+        minHeight: 64,
+        opacity: dimmed ? 0.35 : 1,
+        transition: "opacity 0.2s ease",
+        cursor: "pointer",
+        backgroundColor: status === "now" ? "rgba(255,255,255,0.03)" : "transparent",
+      }}
+    >
+      {/* Stage accent bar */}
+      <div style={{
+        width: 3,
+        flexShrink: 0,
+        backgroundColor: accent,
+        opacity: status === "earlier" ? 0.4 : 1,
+      }} />
+
+      {/* Time column */}
+      <div style={{
+        width: 46,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        paddingRight: 10,
+        paddingLeft: 6,
+        gap: 2,
+      }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: status === "now" ? "#d2d2d0" : "hsl(var(--muted-foreground))", lineHeight: 1 }}>
+          {item.start_time}
+        </span>
+        {status === "now" && (
+          <span style={{ fontSize: 9, color: accent, letterSpacing: "0.04em", lineHeight: 1 }}>NOW</span>
+        )}
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "10px 0 10px 2px", gap: 4, overflow: "hidden" }}>
+        {/* Artist name + live tag */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            color: "hsl(var(--foreground))",
+            lineHeight: 1.2,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {item.artist}
+          </span>
+          {item.live && (
+            <span style={{
+              fontSize: 8,
+              fontWeight: 800,
+              letterSpacing: "0.1em",
+              color: accent,
+              border: `1px solid ${accent}`,
+              borderRadius: 3,
+              padding: "1px 4px",
+              flexShrink: 0,
+              opacity: 0.85,
+            }}>LIVE</span>
+          )}
+        </div>
+
+        {/* Secondary line */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
+            {item.stage}
+          </span>
+          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>·</span>
+          {status === "now" && (
+            <span style={{ fontSize: 10, color: accent }}>ends {item.end_time}</span>
+          )}
+          {status === "later" && (
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{item.end_time}</span>
+          )}
+          {status === "earlier" && (
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>ended {item.end_time}</span>
+          )}
+          {/* Clash indicator — only on fav rows */}
+          {isFav && clashWith && (
+            <span style={{ fontSize: 10, color: "#e8a838", letterSpacing: "0.03em" }}>
+              ↔ {clashWith}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Heart */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleFav() }}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: 44,
+          minHeight: 64,
+          color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.25)",
+          transition: "color 0.15s ease",
+        }}
+        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+      >
+        <Heart size={14} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+      </button>
+    </div>
+  )
+}
+
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div style={{
+      padding: "8px 16px 6px",
+      fontSize: 10,
+      fontWeight: 800,
+      letterSpacing: "0.12em",
+      color: "hsl(var(--muted-foreground))",
+      backgroundColor: "hsl(var(--background))",
+      borderBottom: "1px solid hsl(var(--border))",
+      position: "sticky",
+      top: 0,
+      zIndex: 10,
+    }}>
+      {label}
+    </div>
+  )
+}
+
 function ListView({
   day,
   favourites,
@@ -251,94 +424,135 @@ function ListView({
   onToggleFav: (key: string) => void
   onOpenArtist: (id: string) => void
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const schedule  = timetableData.schedule[day]
-  const border    = "1px solid hsl(var(--border))"
+  const now = useNow()
+  const [earlierExpanded, setEarlierExpanded] = useState(false)
+  const schedule = timetableData.schedule[day]
 
-  type Item = SlotEntry & { stage: Stage }
-  const items: Item[] = ALL_STAGES.flatMap((stage) =>
-    (schedule[stage] ?? []).map((slot) => ({ ...slot, stage }))
+  const nowFh = toFestivalHour(
+    `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+  )
+
+  const allItems: ListItem[] = ALL_STAGES.flatMap((stage) =>
+    (schedule[stage] ?? []).map((slot): ListItem => ({ ...slot, stage }))
   ).sort((a, b) => toFestivalHour(a.start_time) - toFestivalHour(b.start_time))
 
-  return (
-    <div
-      ref={scrollRef}
-      style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}
-    >
-      {items.map((item, i) => {
-        const key     = slotKey(day, item.stage, item)
-        const isFav   = favourites.has(key)
-        const dimmed  = showFavs && !isFav
-        const h       = heightPx(item.start_time, item.end_time)
-        const accent  = STAGE_ACCENT[item.stage]
-        const { bg, text } = STAGE_COLORS[item.stage]
-        const compact = h < 56
+  // Detect if now falls within this day's festival window
+  const dayStart = DAY_START
+  const dayEnd   = DAY_END
+  const nowInDay = nowFh >= dayStart && nowFh <= dayEnd
 
-        return (
-          <div
-            key={i}
-            onClick={() => onOpenArtist(item.artist_id)}
+  // Bucket items
+  const onNow:   ListItem[] = []
+  const later:   ListItem[] = []
+  const earlier: ListItem[] = []
+
+  for (const item of allItems) {
+    const s = toFestivalHour(item.start_time)
+    let   e = toFestivalHour(item.end_time)
+    if (e <= s) e += 24
+
+    if (!nowInDay) {
+      later.push(item)
+    } else if (nowFh >= s && nowFh < e) {
+      onNow.push(item)
+    } else if (s > nowFh) {
+      later.push(item)
+    } else {
+      earlier.push(item)
+    }
+  }
+
+  // Clash detection among favourited items (all items regardless of bucket)
+  function clashName(item: ListItem): string | null {
+    const key = slotKey(day, item.stage, item)
+    if (!favourites.has(key)) return null
+    const s1 = toFestivalHour(item.start_time)
+    let   e1 = toFestivalHour(item.end_time)
+    if (e1 <= s1) e1 += 24
+    for (const other of allItems) {
+      if (other.artist_id === item.artist_id && other.stage === item.stage) continue
+      const otherKey = slotKey(day, other.stage, other)
+      if (!favourites.has(otherKey)) continue
+      const s2 = toFestivalHour(other.start_time)
+      let   e2 = toFestivalHour(other.end_time)
+      if (e2 <= s2) e2 += 24
+      if (s1 < e2 && s2 < e1) return other.artist
+    }
+    return null
+  }
+
+  function renderRow(item: ListItem, status: "now" | "later" | "earlier") {
+    const key    = slotKey(day, item.stage, item)
+    const isFav  = favourites.has(key)
+    const dimmed = showFavs && !isFav
+    return (
+      <ListRow
+        key={`${item.stage}-${item.start_time}-${item.artist_id}`}
+        item={item}
+        day={day}
+        isFav={isFav}
+        dimmed={dimmed}
+        onToggleFav={() => onToggleFav(key)}
+        onOpenArtist={onOpenArtist}
+        clashWith={clashName(item)}
+        status={status}
+      />
+    )
+  }
+
+  const border = "1px solid hsl(var(--border))"
+
+  return (
+    <div style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}>
+
+      {/* ON NOW */}
+      {nowInDay && onNow.length > 0 && (
+        <>
+          <SectionHeader label="ON NOW" />
+          {onNow.map(item => renderRow(item, "now"))}
+        </>
+      )}
+
+      {/* LATER */}
+      {later.length > 0 && (
+        <>
+          {nowInDay && <SectionHeader label="LATER" />}
+          {later.map(item => renderRow(item, "later"))}
+        </>
+      )}
+
+      {/* EARLIER TODAY */}
+      {nowInDay && earlier.length > 0 && (
+        <>
+          <button
+            onClick={() => setEarlierExpanded(v => !v)}
             style={{
-              display: "flex",
-              alignItems: "stretch",
-              borderBottom: border,
-              height: h,
-              opacity: dimmed ? 0.4 : 1,
-              transition: "opacity 0.2s ease",
-              cursor: "pointer",
-            }}
-          >
-            {/* Time gutter */}
-            <div style={{
-              width: TIME_GUTTER_W,
-              flexShrink: 0,
+              width: "100%",
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-end",
-              paddingRight: 8,
-              fontSize: 10,
+              justifyContent: "space-between",
+              padding: "12px 16px",
+              background: "none",
+              border: "none",
+              borderTop: border,
+              borderBottom: earlierExpanded ? border : "none",
+              cursor: "pointer",
               color: "hsl(var(--muted-foreground))",
-              borderRight: border,
-            }}>
-              {item.start_time}
-            </div>
-
-            {/* Card */}
-            <div style={{
-              flex: 1,
-              margin: "4px",
-              backgroundColor: bg,
-              color: text,
-              borderRadius: 8,
-              borderLeft: `3px solid ${accent}`,
-              padding: compact ? "5px 10px" : "10px 12px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: compact ? "center" : "space-between",
-              overflow: "hidden",
-            }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.03em", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: compact ? "nowrap" : "normal", lineHeight: 1.25 }}>
-                  {item.artist}
-                </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onToggleFav(key) }}
-                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", minWidth: 44, minHeight: 44, margin: "-14px -10px -14px 0", color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.4)" }}
-                >
-                  <Heart size={compact ? 10 : 12} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
-                </button>
-              </div>
-              {!compact && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 10, opacity: 0.65 }}>{item.start_time}–{item.end_time}</span>
-                  <div style={{ width: 6, height: 6, borderRadius: 9999, backgroundColor: accent, opacity: 0.8 }} />
-                  <span style={{ fontSize: 10, opacity: 0.65, letterSpacing: "0.06em" }}>{item.stage}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      })}
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              fontFamily: "inherit",
+            }}
+          >
+            <span>EARLIER TODAY · {earlier.length} ended</span>
+            {earlierExpanded
+              ? <ChevronUp size={14} strokeWidth={2} />
+              : <ChevronDown size={14} strokeWidth={2} />
+            }
+          </button>
+          {earlierExpanded && earlier.map(item => renderRow(item, "earlier"))}
+        </>
+      )}
     </div>
   )
 }
