@@ -100,9 +100,13 @@
 }
 
 /* ── Minimal mode ───────────────────────────── */
+.font-minimal {
+  --app-font: "Inter", system-ui, sans-serif;
+  --app-tracking: 0em;
+}
 .font-minimal, .font-minimal * {
-  font-family: "Inter", system-ui, sans-serif !important;
-  letter-spacing: 0 !important;
+  font-family: var(--app-font) !important;
+  letter-spacing: var(--app-tracking) !important;
 }
 
 @keyframes marquee {

@@ -174,59 +174,6 @@ function EventCard({
   )
 }
 
-/* ─────────────────────────────────────────────
-   Axis-locking scroll: detects dominant direction
-   on first move and suppresses the other axis for
-   the entire gesture + momentum phase.
-───────────────────────────────────────────── */
-function useAxisLock(ref: React.RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    let startX = 0, startY = 0
-    let axis: "x" | "y" | null = null
-    let lockedTop = 0, lockedLeft = 0
-
-    const onStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX
-      startY = e.touches[0].clientY
-      axis = null
-    }
-
-    const onMove = (e: TouchEvent) => {
-      const dx = Math.abs(e.touches[0].clientX - startX)
-      const dy = Math.abs(e.touches[0].clientY - startY)
-      if (!axis && (dx > 6 || dy > 6)) {
-        axis = dx > dy ? "x" : "y"
-        lockedTop  = el.scrollTop
-        lockedLeft = el.scrollLeft
-      }
-      if (axis === "x") el.scrollTop  = lockedTop
-      if (axis === "y") el.scrollLeft = lockedLeft
-    }
-
-    // Keep lock alive during momentum too (scroll fires after touchend)
-    const onScroll = () => {
-      if (axis === "x") el.scrollTop  = lockedTop
-      if (axis === "y") el.scrollLeft = lockedLeft
-    }
-
-    // Release lock once momentum dies (next gesture resets it anyway)
-    const onEnd = () => { setTimeout(() => { axis = null }, 400) }
-
-    el.addEventListener("touchstart", onStart,  { passive: true })
-    el.addEventListener("touchmove",  onMove,   { passive: true })
-    el.addEventListener("touchend",   onEnd,    { passive: true })
-    el.addEventListener("scroll",     onScroll, { passive: true })
-    return () => {
-      el.removeEventListener("touchstart", onStart)
-      el.removeEventListener("touchmove",  onMove)
-      el.removeEventListener("touchend",   onEnd)
-      el.removeEventListener("scroll",     onScroll)
-    }
-  }, [ref])
-}
 
 /* ─────────────────────────────────────────────
    Timetable grid for one day
@@ -577,7 +524,6 @@ function TimetableGrid({
   listView: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  useAxisLock(scrollRef)
 
   const schedule = timetableData.schedule[day]
   const { startHour, endHour } = dayBounds(day)
@@ -629,8 +575,7 @@ function TimetableGrid({
       style={{
         flex: 1,
         overflow: "auto",
-        WebkitOverflowScrolling: "touch" as never,
-        overscrollBehavior: "none",
+        overscrollBehavior: "contain",
         paddingBottom: "16px",
       }}
     >
@@ -646,7 +591,6 @@ function TimetableGrid({
             height: HEADER_H,
             backgroundColor: bg,
             borderBottom: border,
-            boxShadow: "0 4px 12px 0 rgba(0,0,0,0.45)",
           }}
         >
           <div
