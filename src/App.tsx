@@ -4,7 +4,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
-import { lookupUser, saveFavourites, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, countSaves, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
@@ -920,12 +920,14 @@ function MarqueeBanner() {
 ───────────────────────────────────────────── */
 function ArtistDrawer({
   artistId,
+  slotKey,
   open,
   onClose,
   isFav,
   onToggleFav,
 }: {
   artistId: string | null
+  slotKey: string | null
   open: boolean
   onClose: () => void
   isFav: boolean
@@ -934,6 +936,13 @@ function ArtistDrawer({
   const artist = artistId ? artistsData[artistId] : null
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
   const border = "1px solid hsl(var(--border))"
+  const [saveCount, setSaveCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!open || !slotKey) { setSaveCount(null); return }
+    setSaveCount(null)
+    countSaves(slotKey).then(setSaveCount)
+  }, [open, slotKey])
 
   return (
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
@@ -945,13 +954,24 @@ function ArtistDrawer({
               <X size={20} strokeWidth={1.5} />
             </button>
           </DrawerClose>
-          <button
-            onClick={onToggleFav}
-            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
-          >
-            <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
-            {isFav ? "SAVED" : "SAVE"}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {saveCount !== null && saveCount > 0 && (
+              <span style={{
+                fontSize: 11, letterSpacing: "0.06em",
+                color: "hsl(var(--muted-foreground))",
+                opacity: 0.7,
+              }}>
+                {saveCount} {saveCount === 1 ? "person" : "people"} saved this
+              </span>
+            )}
+            <button
+              onClick={onToggleFav}
+              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
+            >
+              <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+              {isFav ? "SAVED" : "SAVE"}
+            </button>
+          </div>
         </div>
 
         {artist ? (
@@ -1032,7 +1052,7 @@ function ArtistDrawerPortal({
   onClose: () => void
   onToggleFav: (key: string) => void
 }) {
-  if (!artistId) return <ArtistDrawer artistId={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} />
+  if (!artistId) return <ArtistDrawer artistId={null} slotKey={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} />
 
   const a = artistsData[artistId]
   const stage = a?.stage as Stage | undefined
@@ -1044,6 +1064,7 @@ function ArtistDrawerPortal({
   return (
     <ArtistDrawer
       artistId={artistId}
+      slotKey={key}
       open
       onClose={onClose}
       isFav={isFav}

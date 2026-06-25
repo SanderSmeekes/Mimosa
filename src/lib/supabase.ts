@@ -41,3 +41,12 @@ export async function saveFavourites(nameKey: string, favourites: string[]): Pro
     .eq("name_key", nameKey)
   if (error) throw error
 }
+
+export async function countSaves(slotKey: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("user_favourites")
+    .select("*", { count: "exact", head: true })
+    .contains("favourites", JSON.stringify([slotKey]))
+  if (error) return 0
+  return count ?? 0
+}

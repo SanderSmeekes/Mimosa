@@ -162,7 +162,7 @@ export function Onboarding({ onComplete }: Props) {
         <div style={card}>
           <div style={{ fontSize: 20, fontWeight: 700 }}>choose your name</div>
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            pick anything — a nickname, alias, anything you'll remember. this is your only password.
+            pick a nickname — something personal enough that no one else would use it, easy enough that you'll remember it. this is your only password.
           </div>
           <input
             ref={inputRef}
