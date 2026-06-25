@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
-import { Badge } from "@/components/ui/badge"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
@@ -974,88 +973,106 @@ function ArtistDrawer({
   return (
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
       <DrawerContent style={{ height: "85dvh", display: "flex", flexDirection: "column" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
-          {view.page === "main" ? (
-            <button
-              onClick={onToggleFav}
-              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, minHeight: 44, padding: "0 8px 0 4px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
-            >
-              <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
-              {isFav ? "SAVED" : "SAVE"}
-            </button>
-          ) : (
+        {/* Top bar — back navigation for sub-pages only */}
+        {view.page !== "main" && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
             <button style={iconBtn} onClick={() => view.page === "user-picks" ? openSavers() : setView({ page: "main" })}>
               <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
             </button>
-          )}
-
-          {view.page === "main" && saveCount !== null && saveCount > 0 && (
-            <button onClick={openSavers} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-              <Badge variant="secondary" style={{ gap: 5, cursor: "pointer", fontFamily: "inherit" }}>
-                <Heart size={10} fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth={2} />
-                {saveCount} {saveCount === 1 ? "person" : "people"} saved this
-              </Badge>
-            </button>
-          )}
-
-          {view.page === "savers" && (
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
-          )}
-          {view.page === "user-picks" && (
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
-              {(view as { displayName: string }).displayName.toUpperCase()}
-            </span>
-          )}
-          {view.page !== "main" && <div style={{ width: 44, flexShrink: 0 }} />}
-        </div>
+            {view.page === "savers" && (
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
+            )}
+            {view.page === "user-picks" && (
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
+                {(view as { displayName: string }).displayName.toUpperCase()}
+              </span>
+            )}
+            <div style={{ width: 44, flexShrink: 0 }} />
+          </div>
+        )}
 
         {/* Main artist page */}
         {view.page === "main" && artist && (
-          <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
-                  {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
-                </span>
+          <>
+            <div style={{ overflowY: "auto", padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
+                    {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
+                  </span>
+                </div>
+                <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
+                {slotKey && (() => {
+                  const parsed = parseSlotKey(slotKey)
+                  if (!parsed) return null
+                  const daySlots = timetableData.schedule[parsed.day as Day]
+                  const stageSlots = daySlots?.[parsed.stage as Stage] ?? []
+                  const slot = stageSlots.find(s => s.start_time === parsed.time)
+                  return (
+                    <div style={{ marginTop: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
+                      {parsed.day} · {parsed.time}{slot ? `–${slot.end_time}` : ""}
+                    </div>
+                  )
+                })()}
               </div>
-              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
-              {slotKey && (() => {
-                const parsed = parseSlotKey(slotKey)
-                if (!parsed) return null
-                const daySlots = timetableData.schedule[parsed.day as Day]
-                const stageSlots = daySlots?.[parsed.stage as Stage] ?? []
-                const slot = stageSlots.find(s => s.start_time === parsed.time)
-                return (
-                  <div style={{ marginTop: 8, fontSize: 12, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
-                    {parsed.day} · {parsed.time}{slot ? `–${slot.end_time}` : ""}
-                  </div>
-                )
-              })()}
+              {artist.bio ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
+              ) : (
+                <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
+              )}
+              {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
+                <div style={{ display: "flex", flexDirection: "column", borderTop: border, borderBottom: border }}>
+                  {([
+                    { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
+                    { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
+                    { key: "ra",         label: "RA",         href: artist.links.ra          },
+                  ] as const).filter(l => l.href).map((l) => (
+                    <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
+                    >
+                      {l.label}
+                      <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
-            {artist.bio ? (
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
-            ) : (
-              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
-            )}
-            {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
-              <div style={{ display: "flex", flexDirection: "column", borderTop: border, borderBottom: border }}>
-                {([
-                  { key: "soundcloud", label: "SOUNDCLOUD", href: artist.links.soundcloud },
-                  { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
-                  { key: "ra",         label: "RA",         href: artist.links.ra          },
-                ] as const).filter(l => l.href).map((l) => (
-                  <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
-                  >
-                    {l.label}
-                    <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
+
+            {/* Bottom action row */}
+            <div style={{ flexShrink: 0, display: "flex", gap: 10, padding: "12px 20px 36px", borderTop: border }}>
+              <button
+                onClick={onToggleFav}
+                style={{
+                  flex: 1,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  height: 48, borderRadius: 8,
+                  backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
+                  border: "none", cursor: "pointer",
+                  color: isFav ? "#0b0b0a" : "hsl(var(--foreground))",
+                  fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "inherit",
+                  transition: "background-color 150ms ease-out, color 150ms ease-out",
+                }}
+              >
+                <Heart size={15} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
+                {isFav ? "SAVED" : "SAVE"}
+              </button>
+              <button
+                onClick={openSavers}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  height: 48, paddingInline: 16, borderRadius: 8,
+                  backgroundColor: "hsl(var(--muted))",
+                  border: "none", cursor: "pointer",
+                  color: "hsl(var(--muted-foreground))",
+                  fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "inherit",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {saveCount !== null && saveCount > 0 ? `${saveCount} saved` : "who saved"}
+              </button>
+            </div>
+          </>
         )}
 
         {/* Savers list */}
