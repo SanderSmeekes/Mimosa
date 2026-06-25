@@ -294,15 +294,16 @@ function ListRow({
 
         {/* Secondary line */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <div style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accent, flexShrink: 0 }} />
           <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", letterSpacing: "0.06em" }}>
             {item.stage}
           </span>
           <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>·</span>
           {status === "now" && (
-            <span style={{ fontSize: 10, color: accent }}>ends {item.end_time}</span>
+            <span style={{ fontSize: 10, color: accent }}>until {item.end_time}</span>
           )}
           {status === "later" && (
-            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{item.end_time}</span>
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>until {item.end_time}</span>
           )}
           {status === "earlier" && (
             <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>ended {item.end_time}</span>
@@ -1153,7 +1154,6 @@ function ArtistDrawerPortal({
 const LS_KEY = "memoris-favourites"
 const ACCOUNT_KEY = "memosa-account"
 const A2HS_KEY = "memosa-a2hs-shown"
-const MARQUEE_HIDDEN_KEY = "memosa-marquee-hidden"
 
 const isStandalone = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
@@ -1183,9 +1183,6 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const [showA2HS, setShowA2HS] = useState(false)
-  const [showMarquee, setShowMarquee] = useState(() => {
-    try { return localStorage.getItem(MARQUEE_HIDDEN_KEY) !== "1" } catch { return true }
-  })
   const [minimal, setMinimal] = useState(() => {
     try { return localStorage.getItem("memosa-minimal") === "1" } catch { return false }
   })
@@ -1240,14 +1237,6 @@ export default function App() {
     try { localStorage.setItem(A2HS_KEY, "1") } catch { /* ok */ }
   }
 
-  function toggleMarquee() {
-    setShowMarquee((v) => {
-      const next = !v
-      try { localStorage.setItem(MARQUEE_HIDDEN_KEY, next ? "0" : "1") } catch { /* ok */ }
-      return next
-    })
-  }
-
   function toggleMinimal() {
     setMinimal((v) => {
       const next = !v
@@ -1289,7 +1278,7 @@ export default function App() {
           loading your picks…
         </div>
       )}
-      {showMarquee && <MarqueeBanner />}
+      {!minimal && <MarqueeBanner />}
 
       {/* Add to Home Screen hint */}
       {showA2HS && (
@@ -1440,23 +1429,6 @@ export default function App() {
                   </div>
                 </button>
 
-                {/* Ticker banner toggle */}
-                <button
-                  onClick={toggleMarquee}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0", cursor: "pointer", width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    TICKER BANNER
-                  </span>
-                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showMarquee ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: showMarquee ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showMarquee ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
-                  </div>
-                </button>
-
                 {/* Minimal mode toggle */}
                 <button
                   onClick={toggleMinimal}
@@ -1521,13 +1493,14 @@ export default function App() {
       <button
         onClick={() => setSettingsOpen(true)}
         aria-label="Settings"
+        className="fab-settings"
         style={{
           position: "fixed",
-          bottom: 68,
+          bottom: 72,
           right: 16,
-          width: 48,
-          height: 48,
-          borderRadius: 24,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
           backgroundColor: "#1d1c14",
           border: "1px solid hsl(var(--border))",
           display: "flex",
@@ -1539,7 +1512,7 @@ export default function App() {
           zIndex: 40,
         }}
       >
-        <Settings size={18} strokeWidth={1.5} />
+        <Settings size={20} strokeWidth={1.5} />
       </button>
 
       <ArtistDrawerPortal

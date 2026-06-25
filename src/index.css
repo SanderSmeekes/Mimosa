@@ -92,9 +92,19 @@
 }
 .now-pulse { animation: now-pulse 2.5s ease-in-out infinite; }
 
+/* ── FAB press ──────────────────────────────── */
+@keyframes fab-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.fab-settings:active {
+  animation: fab-press 200ms ease-out;
+}
+
 /* ── Reduced motion ─────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .heart-anim-on, .heart-anim-off, .view-fade, .now-pulse {
+  .heart-anim-on, .heart-anim-off, .view-fade, .now-pulse, .fab-settings:active {
     animation: none !important;
   }
 }
