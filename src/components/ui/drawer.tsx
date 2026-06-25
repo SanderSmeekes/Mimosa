@@ -42,7 +42,7 @@ function DrawerContent({ className, children, ...props }: React.ComponentProps<t
         )}
         {...props}
       >
-        <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-[hsl(var(--muted))]" />
+        <div className="mx-auto mt-4 h-1.5 w-12 rounded-full bg-[hsl(var(--muted))] animate-[drawer-hint_2s_ease-in-out_0.3s_2_forwards]" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>

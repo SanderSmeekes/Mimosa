@@ -64,6 +64,12 @@
   }
 }
 
+/* ── Drawer handle hint ─────────────────────── */
+@keyframes drawer-hint {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.9; }
+}
+
 /* ── Heart pop ──────────────────────────────── */
 @keyframes heart-on {
   0%   { transform: scale(1); }
