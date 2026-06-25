@@ -50,3 +50,22 @@ export async function countSaves(slotKey: string): Promise<number> {
   if (error) return 0
   return count ?? 0
 }
+
+export async function getSavers(slotKey: string): Promise<{ name_key: string; display_name: string }[]> {
+  const { data, error } = await supabase
+    .from("user_favourites")
+    .select("name_key, display_name")
+    .contains("favourites", JSON.stringify([slotKey]))
+  if (error || !data) return []
+  return data
+}
+
+export async function getUserFavourites(nameKey: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("user_favourites")
+    .select("favourites")
+    .eq("name_key", nameKey)
+    .single()
+  if (error || !data) return []
+  return data.favourites as string[]
+}

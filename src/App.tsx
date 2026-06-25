@@ -4,7 +4,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
-import { lookupUser, saveFavourites, countSaves, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
@@ -918,6 +918,17 @@ function MarqueeBanner() {
 /* ─────────────────────────────────────────────
    Artist detail drawer
 ───────────────────────────────────────────── */
+type DrawerView =
+  | { page: "main" }
+  | { page: "savers"; loading: boolean; list: { name_key: string; display_name: string }[] }
+  | { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }
+
+function parseSlotKey(key: string): { day: string; stage: string; artist: string; time: string } | null {
+  const parts = key.split("__")
+  if (parts.length < 4) return null
+  return { day: parts[0], stage: parts[1], artist: parts[2], time: parts[3] }
+}
+
 function ArtistDrawer({
   artistId,
   slotKey,
@@ -937,6 +948,7 @@ function ArtistDrawer({
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
   const border = "1px solid hsl(var(--border))"
   const [saveCount, setSaveCount] = useState<number | null>(null)
+  const [view, setView] = useState<DrawerView>({ page: "main" })
 
   useEffect(() => {
     if (!open || !slotKey) { setSaveCount(null); return }
@@ -944,39 +956,90 @@ function ArtistDrawer({
     countSaves(slotKey).then(setSaveCount)
   }, [open, slotKey])
 
+  // Reset sub-view when drawer closes or artist changes
+  useEffect(() => {
+    if (!open) setView({ page: "main" })
+  }, [open, artistId])
+
+  function openSavers() {
+    if (!slotKey) return
+    setView({ page: "savers", loading: true, list: [] })
+    getSavers(slotKey).then((list) => setView({ page: "savers", loading: false, list }))
+  }
+
+  function openUserPicks(nameKey: string, displayName: string) {
+    setView({ page: "user-picks", displayName, loading: true, favs: [] })
+    getUserFavourites(nameKey).then((favs) =>
+      setView({ page: "user-picks", displayName, loading: false, favs })
+    )
+  }
+
+  const iconBtn: React.CSSProperties = {
+    background: "none", border: "none", cursor: "pointer",
+    color: "hsl(var(--muted-foreground))", display: "flex",
+    alignItems: "center", justifyContent: "center", minWidth: 44, minHeight: 44,
+  }
+
   return (
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
       <DrawerContent style={{ maxHeight: "85dvh" }}>
-        {/* Close + fav row */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0" }}>
-          <DrawerClose asChild>
-            <button style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", display: "flex", alignItems: "center", justifyContent: "center", minWidth: 44, minHeight: 44 }}>
-              <X size={20} strokeWidth={1.5} />
+        {/* Top bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0 }}>
+          {view.page === "main" ? (
+            <DrawerClose asChild>
+              <button style={iconBtn}><X size={20} strokeWidth={1.5} /></button>
+            </DrawerClose>
+          ) : (
+            <button style={iconBtn} onClick={() => setView({ page: "main" })}>
+              <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
             </button>
-          </DrawerClose>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {saveCount !== null && saveCount > 0 && (
-              <span style={{
-                fontSize: 11, letterSpacing: "0.06em",
-                color: "hsl(var(--muted-foreground))",
-                opacity: 0.7,
-              }}>
-                {saveCount} {saveCount === 1 ? "person" : "people"} saved this
-              </span>
-            )}
-            <button
-              onClick={onToggleFav}
-              style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
-            >
-              <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
-              {isFav ? "SAVED" : "SAVE"}
-            </button>
-          </div>
+          )}
+
+          {view.page === "main" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {saveCount !== null && saveCount > 0 && (
+                <button
+                  onClick={openSavers}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: 11, letterSpacing: "0.06em", fontFamily: "inherit",
+                    color: "hsl(var(--muted-foreground))", opacity: 0.7,
+                    display: "flex", alignItems: "center", gap: 4, padding: "8px 4px",
+                  }}
+                >
+                  <Heart size={10} fill="rgba(255,107,107,0.5)" stroke="none" />
+                  {saveCount} {saveCount === 1 ? "person" : "people"} saved this
+                </button>
+              )}
+              <button
+                onClick={onToggleFav}
+                style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, padding: "0 12px", color: isFav ? "#ff6b6b" : "hsl(var(--muted-foreground))", fontSize: 12, fontFamily: "inherit", letterSpacing: "0.06em" }}
+              >
+                <Heart size={16} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+                {isFav ? "SAVED" : "SAVE"}
+              </button>
+            </div>
+          )}
+
+          {view.page === "savers" && (
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>
+              WHO SAVED THIS
+            </span>
+          )}
+
+          {view.page === "user-picks" && (
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>
+              {(view as { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }).displayName.toUpperCase()}
+            </span>
+          )}
+
+          {/* spacer to balance close btn on left */}
+          {view.page !== "main" && <div style={{ width: 44 }} />}
         </div>
 
-        {artist ? (
+        {/* Main artist page */}
+        {view.page === "main" && artist && (
           <div style={{ overflowY: "auto", padding: "12px 20px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
-            {/* Name + meta */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
@@ -988,19 +1051,11 @@ function ArtistDrawer({
                 {artist.name}
               </h2>
             </div>
-
-            {/* Bio */}
             {artist.bio ? (
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>
-                {artist.bio}
-              </p>
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
             ) : (
-              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>
-                No bio available.
-              </p>
+              <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
             )}
-
-            {/* Links */}
             {(artist.links.soundcloud || artist.links.instagram || artist.links.ra) && (
               <div style={{ display: "flex", flexDirection: "column", gap: 0, borderTop: border, borderBottom: border }}>
                 {([
@@ -1008,23 +1063,8 @@ function ArtistDrawer({
                   { key: "instagram",  label: "INSTAGRAM",  href: artist.links.instagram  },
                   { key: "ra",         label: "RA",         href: artist.links.ra          },
                 ] as const).filter(l => l.href).map((l) => (
-                  <a
-                    key={l.key}
-                    href={l.href!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "13px 0",
-                      borderBottom: border,
-                      color: "hsl(var(--foreground))",
-                      textDecoration: "none",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      letterSpacing: "0.08em",
-                    }}
+                  <a key={l.key} href={l.href!} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: border, color: "hsl(var(--foreground))", textDecoration: "none", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}
                   >
                     {l.label}
                     <ExternalLink size={14} strokeWidth={1.5} style={{ color: "hsl(var(--muted-foreground))" }} />
@@ -1033,7 +1073,61 @@ function ArtistDrawer({
               </div>
             )}
           </div>
-        ) : null}
+        )}
+
+        {/* Savers list */}
+        {view.page === "savers" && (
+          <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column" }}>
+            {view.loading ? (
+              <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
+            ) : view.list.length === 0 ? (
+              <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>no one yet</div>
+            ) : view.list.map((u) => (
+              <button
+                key={u.name_key}
+                onClick={() => openUserPicks(u.name_key, u.display_name)}
+                style={{
+                  background: "none", border: "none", borderBottom: border,
+                  cursor: "pointer", display: "flex", alignItems: "center",
+                  justifyContent: "space-between", padding: "14px 0",
+                  color: "hsl(var(--foreground))", fontFamily: "inherit",
+                  fontSize: 14, fontWeight: 700, letterSpacing: "0.04em", textAlign: "left",
+                }}
+              >
+                {u.display_name}
+                <ChevronDown size={14} strokeWidth={1.5} style={{ transform: "rotate(-90deg)", color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* User picks */}
+        {view.page === "user-picks" && (() => {
+          const v = view as { page: "user-picks"; displayName: string; loading: boolean; favs: string[] }
+          const parsed = v.favs.map(parseSlotKey).filter(Boolean) as { day: string; stage: string; artist: string; time: string }[]
+          return (
+            <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column" }}>
+              {v.loading ? (
+                <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>loading…</div>
+              ) : parsed.length === 0 ? (
+                <div style={{ padding: "24px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>nothing saved yet</div>
+              ) : parsed.map((p, i) => {
+                const stageAccent = STAGE_ACCENT[p.stage as Stage] ?? "#d2d2d0"
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: border }}>
+                    <div style={{ width: 3, height: 36, borderRadius: 2, backgroundColor: stageAccent, flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "hsl(var(--foreground))", letterSpacing: "0.02em" }}>{p.artist}</div>
+                      <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, letterSpacing: "0.06em" }}>
+                        {p.stage} · {p.day.slice(0, 3).toUpperCase()} {p.time}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
       </DrawerContent>
     </Drawer>
   )
