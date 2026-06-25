@@ -1282,7 +1282,6 @@ export default function App() {
         flexDirection: "column",
         backgroundColor: "#0b0b0a",
         overflow: "hidden",
-        paddingTop: "env(safe-area-inset-top)",
       }}
     >
       {favsLoading && (
@@ -1327,7 +1326,7 @@ export default function App() {
         ))}
 
         {/* Bottom day-selector bar */}
-        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a", paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
