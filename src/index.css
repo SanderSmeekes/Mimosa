@@ -137,57 +137,60 @@
 
 /* ── Diva mode ──────────────────────────────── */
 .theme-diva {
-  /* surfaces — from the palette: deep plum base */
-  --background:         320 52% 8%;    /* #200A18 — dark plum */
-  --background-deep:    320 52% 8%;
-  --foreground:         330 60% 92%;   /* #F5D0E4 — soft warm pink-white */
+  /* All-pink world: dark rose base, blush text, hot pink accents */
+  --background:         340 55% 7%;    /* #1C0812 — deepest rose-black */
+  --background-deep:    340 55% 7%;
+  --foreground:         340 55% 88%;   /* #F5C8DC — soft blush pink */
 
-  --card:               320 44% 12%;   /* #2D1020 */
-  --card-foreground:    330 60% 92%;
+  --card:               335 48% 11%;   /* #2E1020 — dark rose card */
+  --card-foreground:    340 55% 88%;
 
-  --popover:            320 44% 12%;
-  --popover-foreground: 330 60% 92%;
+  --popover:            335 48% 11%;
+  --popover-foreground: 340 55% 88%;
 
-  /* hot pink primary from palette swatch 1 */
-  --primary:            328 76% 55%;   /* #E03C8A */
-  --primary-foreground: 0 0% 100%;
+  /* hot pink primary */
+  --primary:            330 82% 57%;   /* #F02880 */
+  --primary-foreground: 340 55% 7%;    /* dark rose — "super dark pink" on buttons */
 
-  /* rich magenta secondary from swatch 6 */
-  --secondary:          320 62% 30%;   /* #8B2070 */
-  --secondary-foreground: 330 60% 92%;
+  /* deep rose secondary */
+  --secondary:          335 60% 22%;   /* #581030 */
+  --secondary-foreground: 340 55% 88%;
 
-  /* deep rose muted from swatches 9/10 */
-  --muted:              320 44% 18%;   /* #3D1028 */
-  --muted-foreground:   330 30% 65%;   /* #BF9AAD */
+  /* muted rose */
+  --muted:              335 45% 16%;   /* #3D1028 */
+  --muted-foreground:   335 35% 60%;   /* #B06080 — medium rose */
 
-  /* orchid accent from swatch 7 */
-  --accent:             300 46% 42%;   /* #9E3A9E */
-  --accent-foreground:  0 0% 100%;
+  /* accent: bright fuchsia */
+  --accent:             320 80% 52%;   /* #E81890 */
+  --accent-foreground:  340 55% 7%;
 
-  --destructive:        350 70% 52%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive:        350 75% 52%;
+  --destructive-foreground: 340 55% 88%;
 
-  --border:             320 40% 22%;   /* #4A1535 */
-  --input:              320 44% 18%;
-  --ring:               328 76% 55%;
+  --border:             335 45% 20%;   /* #4A1030 */
+  --input:              335 45% 16%;
+  --ring:               330 82% 57%;
 
-  /* diva palette tokens — tune these to shift intensity */
-  --diva-pink:          #E03C8A;        /* swatch 1: hot pink */
-  --diva-soft-pink:     #F0A8C0;        /* swatch 2: blush */
-  --diva-magenta:       #8B2070;        /* swatch 6: rich magenta */
-  --diva-orchid:        #9E3A9E;        /* swatch 7: orchid */
-  --diva-lavender:      #C0A8D4;        /* swatch 8: lavender */
-  --diva-plum:          #4A1040;        /* swatch 9: deep plum */
-  --diva-pink-glow:     rgba(224,60,138,0.30);
-  --diva-chrome-start:  #F0A8C0;        /* chrome uses palette blush→magenta */
-  --diva-chrome-end:    #8B2070;
-  --diva-holo:          linear-gradient(135deg, #E03C8A 0%, #9E3A9E 40%, #C0A8D4 75%, #F0A8C0 100%);
-  --diva-card-glow:     0 0 0 1px rgba(224,60,138,0.18), 0 4px 24px rgba(139,32,112,0.18), inset 0 1px 0 rgba(240,168,192,0.10);
+  /* diva palette tokens */
+  --diva-pink:          #F02880;
+  --diva-soft-pink:     #F0A8C0;
+  --diva-deep-rose:     #581030;
+  --diva-rose-card:     #2E1020;
+  --diva-pink-glow:     rgba(240,40,128,0.32);
+  --diva-chrome-start:  #F5C8DC;
+  --diva-chrome-end:    #C0206A;
+  --diva-holo:          linear-gradient(135deg, #F02880 0%, #C0206A 35%, #E880B8 70%, #F5C8DC 100%);
+  --diva-card-glow:     0 0 0 1px rgba(240,40,128,0.20), 0 4px 28px rgba(192,32,106,0.20), inset 0 1px 0 rgba(245,200,220,0.10);
 }
 
-/* body bg matches diva surface */
+/* body bg */
 .theme-diva, .theme-diva body {
-  background-color: #200A18;
+  background-color: #1C0812;
+}
+
+/* drawer gets rose surface */
+.theme-diva [data-slot="drawer-content"] {
+  background-color: #2E1020 !important;
 }
 
 /* hide mascots in diva mode */

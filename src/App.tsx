@@ -78,6 +78,7 @@ function EventCard({
   dimmed,
   onToggleFav,
   onOpenArtist,
+  diva,
 }: {
   slot: SlotEntry
   stage: Stage
@@ -85,6 +86,7 @@ function EventCard({
   dimmed: boolean
   onToggleFav: () => void
   onOpenArtist: (id: string) => void
+  diva?: boolean
 }) {
   const [animKey, setAnimKey] = useState(0)
   const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
@@ -105,17 +107,17 @@ function EventCard({
         left: 4,
         right: 4,
         height: height - 4,
-        backgroundColor: bg,
+        backgroundColor: diva ? "hsl(var(--card))" : bg,
         cursor: "pointer",
-        color: text,
+        color: diva ? "hsl(var(--card-foreground))" : text,
         borderRadius: 8,
-        borderLeft: `3px solid ${accent}`,
+        borderLeft: diva ? "none" : `3px solid ${accent}`,
         padding: compact ? "5px 8px" : "8px 10px",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: compact ? "center" : "space-between",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+        boxShadow: diva ? "var(--diva-card-glow)" : "0 1px 4px rgba(0,0,0,0.25)",
         userSelect: "none",
         opacity: dimmed ? 0.4 : 1,
         transition: "opacity 0.2s ease",
@@ -202,6 +204,7 @@ function ListRow({
   onOpenArtist,
   clashWith,
   status,
+  diva,
 }: {
   item: ListItem
   day: Day
@@ -211,6 +214,7 @@ function ListRow({
   onOpenArtist: (id: string) => void
   clashWith: string | null
   status: "now" | "later" | "earlier"
+  diva?: boolean
 }) {
   const accent = STAGE_ACCENT[item.stage]
   const border = "1px solid hsl(var(--border))"
@@ -220,6 +224,7 @@ function ListRow({
   const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
 
   const isNow = status === "now"
+  const divaAccent = "hsl(var(--primary))"
 
   return (
     <div
@@ -228,7 +233,7 @@ function ListRow({
         display: "flex",
         alignItems: "stretch",
         borderBottom: border,
-        borderLeft: isNow ? `2px solid ${accent}` : "2px solid transparent",
+        borderLeft: isNow ? `2px solid ${diva ? divaAccent : accent}` : "2px solid transparent",
         minHeight: 64,
         opacity: dimmed ? 0.35 : status === "earlier" ? 0.38 : 1,
         transition: "opacity 0.2s ease",
@@ -361,12 +366,14 @@ function ListView({
   showFavs,
   onToggleFav,
   onOpenArtist,
+  diva,
 }: {
   day: Day
   favourites: Set<string>
   showFavs: boolean
   onToggleFav: (key: string) => void
   onOpenArtist: (id: string) => void
+  diva?: boolean
 }) {
   const now = useNow()
   const [earlierExpanded, setEarlierExpanded] = useState(false)
@@ -441,6 +448,7 @@ function ListView({
         onOpenArtist={onOpenArtist}
         clashWith={clashName(item)}
         status={status}
+        diva={diva}
       />
     )
   }
@@ -516,6 +524,7 @@ function TimetableGrid({
   onToggleFav,
   onOpenArtist,
   listView,
+  diva,
 }: {
   day: Day
   favourites: Set<string>
@@ -523,6 +532,7 @@ function TimetableGrid({
   onToggleFav: (key: string) => void
   onOpenArtist: (id: string) => void
   listView: boolean
+  diva?: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -564,6 +574,7 @@ function TimetableGrid({
         showFavs={showFavs}
         onToggleFav={onToggleFav}
         onOpenArtist={onOpenArtist}
+        diva={diva}
       />
     )
   }
@@ -795,6 +806,7 @@ function TimetableGrid({
                     dimmed={dimmed}
                     onToggleFav={() => onToggleFav(key)}
                     onOpenArtist={onOpenArtist}
+                    diva={diva}
                   />
                 )
               })}
@@ -1275,7 +1287,7 @@ export default function App() {
       try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
       // Update PWA theme-color meta
       const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", next ? "#200A18" : "#0b0b0a")
+      if (meta) meta.setAttribute("content", next ? "#1C0812" : "#0b0b0a")
       return next
     })
   }
@@ -1301,7 +1313,7 @@ export default function App() {
         inset: 0,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: diva ? "#200A18" : "#0b0b0a",
+        backgroundColor: diva ? "#1C0812" : "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
       }}
@@ -1371,6 +1383,7 @@ export default function App() {
               onToggleFav={toggleFav}
               onOpenArtist={setSelectedArtistId}
               listView={listView}
+              diva={diva}
             />
           </TabsContent>
         ))}
@@ -1497,7 +1510,7 @@ export default function App() {
                     DIVA MODE 💅
                   </span>
                   <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: diva ? "#FF2D95" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#200A18" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#1C0812" : "#a5a4a1", transition: "left 0.2s ease" }} />
                   </div>
                 </button>
 
@@ -1562,7 +1575,7 @@ export default function App() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: diva ? "#200A18" : "hsl(var(--muted-foreground))",
+          color: diva ? "#1C0812" : "hsl(var(--muted-foreground))",
           boxShadow: diva ? "0 4px 20px rgba(255,45,149,0.4), 0 0 0 1px rgba(255,45,149,0.25)" : "0 4px 16px rgba(0,0,0,0.4)",
           zIndex: 40,
         }}
