@@ -197,29 +197,33 @@
 
 /* ── Diva: chrome sweep on drawer open ─── */
 @keyframes diva-drawer-chrome {
-  0%   { transform: translateX(-120%) skewX(-12deg); opacity: 0; }
-  15%  { opacity: 1; }
-  100% { transform: translateX(220%)  skewX(-12deg); opacity: 0; }
+  0%   { transform: translateX(-130%) skewX(-10deg); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(230%)  skewX(-10deg); opacity: 0; }
 }
 .theme-diva [data-slot="drawer-content"] {
+  position: relative;
   overflow: hidden;
 }
 .theme-diva [data-slot="drawer-content"]::after {
   content: "";
   position: absolute;
-  inset: 0;
-  width: 55%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(245, 200, 220, 0.08) 40%,
-    rgba(255, 255, 255, 0.18) 50%,
-    rgba(245, 200, 220, 0.08) 60%,
+    rgba(245, 200, 220, 0.25) 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(245, 200, 220, 0.25) 65%,
     transparent 100%
   );
-  animation: diva-drawer-chrome 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  animation: diva-drawer-chrome 1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   pointer-events: none;
-  z-index: 50;
+  z-index: 100;
 }
 @media (prefers-reduced-motion: reduce) {
   .theme-diva [data-slot="drawer-content"]::after { display: none; }
