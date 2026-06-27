@@ -1039,6 +1039,8 @@ function ArtistDrawer({
   isFav,
   onToggleFav,
   myFavourites,
+  diva,
+  onSparkle,
 }: {
   artistId: string | null
   slotKey: string | null
@@ -1047,6 +1049,8 @@ function ArtistDrawer({
   isFav: boolean
   onToggleFav: () => void
   myFavourites: Set<string>
+  diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   const artist = artistId ? artistsData[artistId] : null
   const accent = artist ? STAGE_ACCENT[artist.stage as Stage] : "#d2d2d0"
@@ -1136,7 +1140,13 @@ function ArtistDrawer({
             {/* 50/50 action buttons */}
             <div style={{ display: "flex", gap: 10 }}>
               <button
-                onClick={onToggleFav}
+                onClick={(e) => {
+                  if (diva && !isFav && onSparkle) {
+                    const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect()
+                    onSparkle(r.left + r.width / 2, r.top + r.height / 2)
+                  }
+                  onToggleFav()
+                }}
                 style={{
                   flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
@@ -1248,12 +1258,16 @@ function ArtistDrawerPortal({
   favourites,
   onClose,
   onToggleFav,
+  diva,
+  onSparkle,
 }: {
   artistId: string | null
   activeDay: Day
   favourites: Set<string>
   onClose: () => void
   onToggleFav: (key: string) => void
+  diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   if (!artistId) return <ArtistDrawer artistId={null} slotKey={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} myFavourites={favourites} />
 
@@ -1273,6 +1287,8 @@ function ArtistDrawerPortal({
       isFav={isFav}
       onToggleFav={() => key && onToggleFav(key)}
       myFavourites={favourites}
+      diva={diva}
+      onSparkle={onSparkle}
     />
   )
 }
@@ -1662,6 +1678,8 @@ export default function App() {
         favourites={favourites}
         onClose={() => setSelectedArtistId(null)}
         onToggleFav={toggleFav}
+        diva={diva}
+        onSparkle={diva ? triggerSparkle : undefined}
       />
     </div>
   )
