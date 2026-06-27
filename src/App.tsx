@@ -1207,6 +1207,9 @@ export default function App() {
   const [minimal, setMinimal] = useState(() => {
     try { return localStorage.getItem("memosa-minimal") === "1" } catch { return false }
   })
+  const [diva, setDiva] = useState(() => {
+    try { return localStorage.getItem("memosa-diva") === "1" } catch { return false }
+  })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load favourites from Supabase when account is set
@@ -1266,6 +1269,17 @@ export default function App() {
     })
   }
 
+  function toggleDiva() {
+    setDiva((v) => {
+      const next = !v
+      try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
+      // Update PWA theme-color meta
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute("content", next ? "#0e0a14" : "#0b0b0a")
+      return next
+    })
+  }
+
   function handleSwitchAccount() {
     signOut().catch(() => {})
     setUserName(null)
@@ -1281,13 +1295,13 @@ export default function App() {
 
   return (
     <div
-      className={minimal ? "font-minimal" : undefined}
+      className={[minimal ? "font-minimal" : "", diva ? "theme-diva" : ""].filter(Boolean).join(" ") || undefined}
       style={{
         position: "fixed",
         inset: 0,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#0b0b0a",
+        backgroundColor: diva ? "#0e0a14" : "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
       }}
@@ -1470,6 +1484,23 @@ export default function App() {
                   </div>
                 </button>
 
+                {/* Diva mode toggle */}
+                <button
+                  onClick={toggleDiva}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0", cursor: "pointer", width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: diva ? "#FF2D95" : "hsl(var(--foreground))", fontFamily: "inherit", transition: "color 0.2s ease" }}>
+                    DIVA MODE 💅
+                  </span>
+                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: diva ? "#FF2D95" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
+                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#0e0a14" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                  </div>
+                </button>
+
                 {/* Account row */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1517,7 +1548,7 @@ export default function App() {
       <button
         onClick={() => setSettingsOpen(true)}
         aria-label="Settings"
-        className="fab-settings"
+        className={["fab-settings", diva ? "diva-shimmer diva-chrome-btn" : ""].filter(Boolean).join(" ")}
         style={{
           position: "fixed",
           bottom: 72,
@@ -1525,14 +1556,14 @@ export default function App() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          backgroundColor: "#1d1c14",
-          border: "1px solid hsl(var(--border))",
+          backgroundColor: diva ? undefined : "#1d1c14",
+          border: diva ? "none" : "1px solid hsl(var(--border))",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: "hsl(var(--muted-foreground))",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+          color: diva ? "#0e0a14" : "hsl(var(--muted-foreground))",
+          boxShadow: diva ? "0 4px 20px rgba(255,45,149,0.4), 0 0 0 1px rgba(255,45,149,0.25)" : "0 4px 16px rgba(0,0,0,0.4)",
           zIndex: 40,
         }}
       >

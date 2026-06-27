@@ -134,3 +134,143 @@
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Diva mode ──────────────────────────────── */
+.theme-diva {
+  /* surfaces */
+  --background:         290 20% 6%;    /* #0e0a14 — deep violet-black */
+  --background-deep:    290 20% 6%;
+  --foreground:         0 0% 97%;      /* #f8f8f8 — crisp white */
+
+  --card:               290 18% 9%;    /* #130e1a */
+  --card-foreground:    0 0% 97%;
+
+  --popover:            290 18% 9%;
+  --popover-foreground: 0 0% 97%;
+
+  /* hot pink as primary */
+  --primary:            328 100% 58%;  /* #FF2D95 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary:          270 20% 22%;   /* silver-violet */
+  --secondary-foreground: 0 0% 97%;
+
+  --muted:              270 15% 18%;
+  --muted-foreground:   270 10% 65%;
+
+  --accent:             328 100% 58%;
+  --accent-foreground:  0 0% 100%;
+
+  --destructive:        0 75% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border:             270 15% 22%;
+  --input:              270 15% 18%;
+  --ring:               328 100% 58%;
+
+  /* diva-specific tokens */
+  --diva-pink:          #FF2D95;
+  --diva-pink-glow:     rgba(255,45,149,0.28);
+  --diva-chrome-start:  #EEF1F6;
+  --diva-chrome-end:    #9EA5B0;
+  --diva-holo:          linear-gradient(135deg, #FF2D95 0%, #BF5FFF 35%, #5FF4FF 65%, #EEF1F6 100%);
+  --diva-card-glow:     0 0 0 1px rgba(255,45,149,0.15), 0 4px 24px rgba(255,45,149,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* body bg matches diva surface */
+.theme-diva, .theme-diva body {
+  background-color: #0e0a14;
+}
+
+/* ── Diva: chrome button ─── */
+.diva-chrome-btn {
+  background: linear-gradient(160deg, var(--diva-chrome-start) 0%, var(--diva-chrome-end) 100%);
+  color: #0e0a14;
+  font-weight: 700;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+.diva-chrome-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(255,255,255,0.55) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* ── Diva: glossy card ─── */
+.diva-card {
+  box-shadow: var(--diva-card-glow);
+  background: linear-gradient(160deg, hsl(290 18% 11%) 0%, hsl(290 18% 8%) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.diva-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  pointer-events: none;
+}
+
+/* ── Diva: holo text ─── */
+.diva-holo-text {
+  background: var(--diva-holo);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+/* ── Diva: shimmer sweep on primary CTAs ─── */
+@keyframes diva-shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(250%)  skewX(-15deg); }
+}
+.diva-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.diva-shimmer::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: diva-shimmer 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Diva: glitter speckle on accent surfaces ─── */
+@keyframes diva-glitter {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+.diva-glitter {
+  position: relative;
+}
+.diva-glitter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,200,240,0.7) 1px, transparent 1px),
+    radial-gradient(circle, rgba(200,180,255,0.6) 1px, transparent 1px);
+  background-size: 28px 28px, 19px 19px, 37px 37px;
+  background-position: 0 0, 9px 14px, 18px 5px;
+  animation: diva-glitter 3s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Reduced motion: kill all diva animations ─── */
+@media (prefers-reduced-motion: reduce) {
+  .diva-shimmer::before,
+  .diva-glitter::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
