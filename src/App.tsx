@@ -1416,7 +1416,7 @@ export default function App() {
           loading your picks…
         </div>
       )}
-      <MarqueeBanner />
+      {!diva && <MarqueeBanner />}
       <SparkleOverlay particles={sparkleParticles} />
 
       {/* Add to Home Screen hint */}
