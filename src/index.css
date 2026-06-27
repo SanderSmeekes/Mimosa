@@ -203,7 +203,6 @@
   100% { transform: translateX(230%)  skewX(-10deg); opacity: 0; }
 }
 .theme-diva [data-slot="drawer-content"] {
-  position: relative;
   overflow: hidden;
 }
 .theme-diva [data-slot="drawer-content"]::after {
