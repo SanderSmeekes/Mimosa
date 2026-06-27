@@ -1323,6 +1323,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const [showA2HS, setShowA2HS] = useState(false)
+  const [showMap, setShowMap] = useState(false)
   const [diva, setDiva] = useState(() => {
     try { return localStorage.getItem("memosa-diva") === "1" } catch { return false }
   })
@@ -1601,6 +1602,21 @@ export default function App() {
                   </div>
                 </button>
 
+                {/* Festival map */}
+                <button
+                  onClick={() => { setSettingsOpen(false); setShowMap(true) }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                    padding: "16px 0", cursor: "pointer", width: "100%",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                    FESTIVAL MAP
+                  </span>
+                  <ExternalLink size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
+                </button>
+
                 {/* Account row */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1679,6 +1695,46 @@ export default function App() {
         diva={diva}
         onSparkle={diva ? triggerSparkle : undefined}
       />
+
+      {/* Festival map overlay */}
+      {showMap && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 200,
+            backgroundColor: "rgba(0,0,0,0.92)",
+            display: "flex", flexDirection: "column",
+          }}
+        >
+          {/* Header */}
+          <div style={{
+            flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))",
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", color: "hsl(var(--foreground))" }}>
+              FESTIVAL MAP
+            </span>
+            <button
+              onClick={() => setShowMap(false)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 4 }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+          {/* Scrollable map */}
+          <div style={{
+            flex: 1, overflow: "auto", overscrollBehavior: "contain",
+            display: "flex", alignItems: "flex-start", justifyContent: "flex-start",
+            touchAction: "pan-x pan-y pinch-zoom",
+          }}>
+            <img
+              src="/festival-map.png"
+              alt="Memòri 2026 Festival Map"
+              style={{ width: "100%", maxWidth: "none", height: "auto", display: "block", userSelect: "none" }}
+              draggable={false}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
