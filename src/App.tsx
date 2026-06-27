@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
-import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User } from "lucide-react"
+import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User, Menu } from "lucide-react"
 import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
@@ -1684,7 +1684,7 @@ export default function App() {
           zIndex: 40,
         }}
       >
-        <Settings size={20} strokeWidth={1.5} />
+        <Menu size={20} strokeWidth={1.5} />
       </button>
 
       <ArtistDrawerPortal
