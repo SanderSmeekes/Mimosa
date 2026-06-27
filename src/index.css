@@ -188,11 +188,6 @@
   background-color: #1C0812;
 }
 
-/* drawer gets rose surface */
-.theme-diva [data-slot="drawer-content"] {
-  background-color: #2E1020 !important;
-}
-
 /* hide mascots in diva mode */
 .theme-diva .mascot-img,
 .theme-diva .marquee-mascot {

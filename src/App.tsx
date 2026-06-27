@@ -349,7 +349,7 @@ function SectionHeader({ label, dim }: { label: string; dim?: boolean }) {
       fontWeight: 700,
       letterSpacing: "0.12em",
       color: dim ? "#6B6A62" : "#A9A79D",
-      backgroundColor: "#0b0b0a",
+      backgroundColor: "hsl(var(--background))",
       borderBottom: "1px solid hsl(var(--border))",
       position: "sticky",
       top: 0,
@@ -1389,7 +1389,7 @@ export default function App() {
         ))}
 
         {/* Bottom day-selector bar */}
-        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "#0b0b0a" }}>
+        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "hsl(var(--background))" }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
