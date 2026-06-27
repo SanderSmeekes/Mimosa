@@ -1490,7 +1490,7 @@ export default function App() {
                       textTransform: "uppercase",
                     }}
                   >
-                    switch
+                    log out
                   </button>
                 </div>
 
