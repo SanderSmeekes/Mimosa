@@ -611,7 +611,7 @@ function TimetableGrid({
             <img
               src={({ Thursday: "/siley.png", Friday: "/mooney.png", Saturday: "/mooney.png", Sunday: "/siley.png" } as Record<Day, string>)[day]}
               alt=""
-              className="animate-[spin_20s_linear_infinite]"
+              className="mascot-img animate-[spin_20s_linear_infinite]"
               style={{ width: 30, height: 30, objectFit: "contain" }}
             />
           </div>
@@ -836,7 +836,7 @@ function MarqueeSegment() {
       >
         {MARQUEE_CHUNK}
       </span>
-      <img src="/siley.png" alt="" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
+      <img src="/siley.png" alt="" className="marquee-mascot" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
     </>
   )
 }
@@ -1275,7 +1275,7 @@ export default function App() {
       try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
       // Update PWA theme-color meta
       const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", next ? "#0e0a14" : "#0b0b0a")
+      if (meta) meta.setAttribute("content", next ? "#200A18" : "#0b0b0a")
       return next
     })
   }
@@ -1301,7 +1301,7 @@ export default function App() {
         inset: 0,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: diva ? "#0e0a14" : "#0b0b0a",
+        backgroundColor: diva ? "#200A18" : "#0b0b0a",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
       }}
@@ -1497,7 +1497,7 @@ export default function App() {
                     DIVA MODE 💅
                   </span>
                   <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: diva ? "#FF2D95" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#0e0a14" : "#a5a4a1", transition: "left 0.2s ease" }} />
+                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#200A18" : "#a5a4a1", transition: "left 0.2s ease" }} />
                   </div>
                 </button>
 
@@ -1562,7 +1562,7 @@ export default function App() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: diva ? "#0e0a14" : "hsl(var(--muted-foreground))",
+          color: diva ? "#200A18" : "hsl(var(--muted-foreground))",
           boxShadow: diva ? "0 4px 20px rgba(255,45,149,0.4), 0 0 0 1px rgba(255,45,149,0.25)" : "0 4px 16px rgba(0,0,0,0.4)",
           zIndex: 40,
         }}

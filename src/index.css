@@ -137,55 +137,69 @@
 
 /* ── Diva mode ──────────────────────────────── */
 .theme-diva {
-  /* surfaces */
-  --background:         290 20% 6%;    /* #0e0a14 — deep violet-black */
-  --background-deep:    290 20% 6%;
-  --foreground:         0 0% 97%;      /* #f8f8f8 — crisp white */
+  /* surfaces — from the palette: deep plum base */
+  --background:         320 52% 8%;    /* #200A18 — dark plum */
+  --background-deep:    320 52% 8%;
+  --foreground:         330 60% 92%;   /* #F5D0E4 — soft warm pink-white */
 
-  --card:               290 18% 9%;    /* #130e1a */
-  --card-foreground:    0 0% 97%;
+  --card:               320 44% 12%;   /* #2D1020 */
+  --card-foreground:    330 60% 92%;
 
-  --popover:            290 18% 9%;
-  --popover-foreground: 0 0% 97%;
+  --popover:            320 44% 12%;
+  --popover-foreground: 330 60% 92%;
 
-  /* hot pink as primary */
-  --primary:            328 100% 58%;  /* #FF2D95 */
+  /* hot pink primary from palette swatch 1 */
+  --primary:            328 76% 55%;   /* #E03C8A */
   --primary-foreground: 0 0% 100%;
 
-  --secondary:          270 20% 22%;   /* silver-violet */
-  --secondary-foreground: 0 0% 97%;
+  /* rich magenta secondary from swatch 6 */
+  --secondary:          320 62% 30%;   /* #8B2070 */
+  --secondary-foreground: 330 60% 92%;
 
-  --muted:              270 15% 18%;
-  --muted-foreground:   270 10% 65%;
+  /* deep rose muted from swatches 9/10 */
+  --muted:              320 44% 18%;   /* #3D1028 */
+  --muted-foreground:   330 30% 65%;   /* #BF9AAD */
 
-  --accent:             328 100% 58%;
+  /* orchid accent from swatch 7 */
+  --accent:             300 46% 42%;   /* #9E3A9E */
   --accent-foreground:  0 0% 100%;
 
-  --destructive:        0 75% 55%;
+  --destructive:        350 70% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:             270 15% 22%;
-  --input:              270 15% 18%;
-  --ring:               328 100% 58%;
+  --border:             320 40% 22%;   /* #4A1535 */
+  --input:              320 44% 18%;
+  --ring:               328 76% 55%;
 
-  /* diva-specific tokens */
-  --diva-pink:          #FF2D95;
-  --diva-pink-glow:     rgba(255,45,149,0.28);
-  --diva-chrome-start:  #EEF1F6;
-  --diva-chrome-end:    #9EA5B0;
-  --diva-holo:          linear-gradient(135deg, #FF2D95 0%, #BF5FFF 35%, #5FF4FF 65%, #EEF1F6 100%);
-  --diva-card-glow:     0 0 0 1px rgba(255,45,149,0.15), 0 4px 24px rgba(255,45,149,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  /* diva palette tokens — tune these to shift intensity */
+  --diva-pink:          #E03C8A;        /* swatch 1: hot pink */
+  --diva-soft-pink:     #F0A8C0;        /* swatch 2: blush */
+  --diva-magenta:       #8B2070;        /* swatch 6: rich magenta */
+  --diva-orchid:        #9E3A9E;        /* swatch 7: orchid */
+  --diva-lavender:      #C0A8D4;        /* swatch 8: lavender */
+  --diva-plum:          #4A1040;        /* swatch 9: deep plum */
+  --diva-pink-glow:     rgba(224,60,138,0.30);
+  --diva-chrome-start:  #F0A8C0;        /* chrome uses palette blush→magenta */
+  --diva-chrome-end:    #8B2070;
+  --diva-holo:          linear-gradient(135deg, #E03C8A 0%, #9E3A9E 40%, #C0A8D4 75%, #F0A8C0 100%);
+  --diva-card-glow:     0 0 0 1px rgba(224,60,138,0.18), 0 4px 24px rgba(139,32,112,0.18), inset 0 1px 0 rgba(240,168,192,0.10);
 }
 
 /* body bg matches diva surface */
 .theme-diva, .theme-diva body {
-  background-color: #0e0a14;
+  background-color: #200A18;
+}
+
+/* hide mascots in diva mode */
+.theme-diva .mascot-img,
+.theme-diva .marquee-mascot {
+  display: none;
 }
 
 /* ── Diva: chrome button ─── */
 .diva-chrome-btn {
   background: linear-gradient(160deg, var(--diva-chrome-start) 0%, var(--diva-chrome-end) 100%);
-  color: #0e0a14;
+  color: #fff;
   font-weight: 700;
   border: none;
   position: relative;
@@ -195,7 +209,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, rgba(255,255,255,0.55) 0%, transparent 55%);
+  background: linear-gradient(105deg, rgba(255,255,255,0.30) 0%, transparent 55%);
   pointer-events: none;
 }
 
