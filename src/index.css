@@ -186,9 +186,13 @@
   --diva-card-glow:     0 0 0 1px rgba(240,40,128,0.20), 0 4px 28px rgba(192,32,106,0.20), inset 0 1px 0 rgba(245,200,220,0.10);
 }
 
-/* body bg */
+/* body bg + font */
 .theme-diva, .theme-diva body {
   background-color: #1C0812;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+.theme-diva * {
+  font-family: "Space Grotesk", system-ui, sans-serif;
 }
 
 /* hide mascots in diva mode */
