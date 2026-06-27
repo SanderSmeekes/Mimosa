@@ -1224,6 +1224,14 @@ export default function App() {
   })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Apply theme-diva to <html> so portals (drawers) inherit the tokens
+  useEffect(() => {
+    document.documentElement.classList.toggle("theme-diva", diva)
+    document.documentElement.style.backgroundColor = diva ? "#1C0812" : "#0b0b0a"
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute("content", diva ? "#1C0812" : "#0b0b0a")
+  }, [diva])
+
   // Load favourites from Supabase when account is set
   useEffect(() => {
     if (!userName) return
@@ -1285,9 +1293,6 @@ export default function App() {
     setDiva((v) => {
       const next = !v
       try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
-      // Update PWA theme-color meta
-      const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", next ? "#1C0812" : "#0b0b0a")
       return next
     })
   }
@@ -1307,7 +1312,7 @@ export default function App() {
 
   return (
     <div
-      className={[minimal ? "font-minimal" : "", diva ? "theme-diva" : ""].filter(Boolean).join(" ") || undefined}
+      className={minimal ? "font-minimal" : undefined}
       style={{
         position: "fixed",
         inset: 0,
