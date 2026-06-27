@@ -1324,6 +1324,7 @@ export default function App() {
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const [showA2HS, setShowA2HS] = useState(false)
   const [showMap, setShowMap] = useState(false)
+  const [mapIndex, setMapIndex] = useState(0)
   const [diva, setDiva] = useState(() => {
     try { return localStorage.getItem("memosa-diva") === "1" } catch { return false }
   })
@@ -1720,6 +1721,27 @@ export default function App() {
               <X size={20} />
             </button>
           </div>
+          {/* Segmented control */}
+          <div style={{
+            flexShrink: 0, display: "flex", gap: 6, padding: "10px 16px",
+            borderBottom: "1px solid hsl(var(--border))",
+          }}>
+            {["MAP 1", "MAP 2", "MAP 3"].map((label, i) => (
+              <button
+                key={i}
+                onClick={() => setMapIndex(i)}
+                style={{
+                  flex: 1, padding: "6px 0", fontSize: 11, fontWeight: 700,
+                  letterSpacing: "0.08em", borderRadius: 6, border: "none", cursor: "pointer",
+                  transition: "background 150ms, color 150ms",
+                  background: mapIndex === i ? "hsl(var(--foreground))" : "hsl(var(--muted))",
+                  color: mapIndex === i ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           {/* Scrollable map */}
           <div style={{
             flex: 1, overflow: "auto", overscrollBehavior: "contain",
@@ -1727,8 +1749,8 @@ export default function App() {
             touchAction: "pan-x pan-y pinch-zoom",
           }}>
             <img
-              src="/festival-map.png"
-              alt="Memòri 2026 Festival Map"
+              src={`/festival-map-${mapIndex + 1}.png`}
+              alt={`Memòri 2026 Festival Map ${mapIndex + 1}`}
               style={{ width: "100%", maxWidth: "none", height: "auto", display: "block", userSelect: "none" }}
               draggable={false}
             />
