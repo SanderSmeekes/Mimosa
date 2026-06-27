@@ -155,13 +155,13 @@ function EventCard({
             minWidth: 44,
             minHeight: 44,
             margin: "-14px -10px -14px 0",
-            color: isFav ? "#ff6b6b" : "rgba(255,255,255,0.45)",
+            color: isFav ? "var(--fav-color)" : "rgba(255,255,255,0.45)",
             transition: "color 150ms ease-out",
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
         >
           <span key={animKey} className={animClass} style={{ display: "flex" }}>
-            <Heart size={iconSize} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+            <Heart size={iconSize} fill={isFav ? "var(--fav-color)" : "none"} strokeWidth={2} />
           </span>
         </button>
       </div>
@@ -328,13 +328,13 @@ function ListRow({
           justifyContent: "center",
           minWidth: 44,
           minHeight: 64,
-          color: isFav ? "#ff6b6b" : "#3E3D38",
+          color: isFav ? "var(--fav-color)" : "#3E3D38",
           transition: "color 150ms ease-out",
         }}
         aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
       >
         <span key={animKey} className={animClass} style={{ display: "flex" }}>
-          <Heart size={14} fill={isFav ? "#ff6b6b" : "none"} strokeWidth={2} />
+          <Heart size={14} fill={isFav ? "var(--fav-color)" : "none"} strokeWidth={2} />
         </span>
       </button>
     </div>
@@ -1047,7 +1047,7 @@ function ArtistDrawer({
                 style={{
                   flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                  backgroundColor: isFav ? "#ff6b6b" : "hsl(var(--muted))",
+                  backgroundColor: isFav ? "var(--fav-color)" : "hsl(var(--muted))",
                   color: isFav ? "#0b0b0a" : "hsl(var(--foreground))",
                   fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", fontFamily: "inherit",
                   transition: "background-color 150ms ease-out, color 150ms ease-out",

@@ -32,6 +32,7 @@
     --input:              60 2% 29%;
     --ring:               60 3% 82%;
     --radius:             0.5rem;
+    --fav-color:          #ff6b6b;
   }
 }
 
@@ -170,6 +171,8 @@
   --border:             335 45% 20%;   /* #4A1030 */
   --input:              335 45% 16%;
   --ring:               330 82% 57%;
+
+  --fav-color:          #F02880;
 
   /* diva palette tokens */
   --diva-pink:          #F02880;
