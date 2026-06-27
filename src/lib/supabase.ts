@@ -69,3 +69,27 @@ export async function getUserFavourites(nameKey: string): Promise<string[]> {
   if (error || !data) return []
   return data.favourites as string[]
 }
+
+export async function signInWithEmail(email: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin },
+  })
+  if (error) throw error
+}
+
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut()
+}
+
+export async function lookupOrCreateAuthUser(
+  userId: string,
+  displayName: string,
+): Promise<UserRecord> {
+  const existing = await lookupUser(userId)
+  if (existing) return existing
+  const record: UserRecord = { name_key: userId, display_name: displayName, favourites: [] }
+  const { error } = await supabase.from("user_favourites").insert(record)
+  if (error) throw error
+  return record
+}

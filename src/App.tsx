@@ -4,7 +4,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, Drawer
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
-import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
 /* ─────────────────────────────────────────────
@@ -1267,8 +1267,11 @@ export default function App() {
   }
 
   function handleSwitchAccount() {
+    signOut().catch(() => {})
     setUserName(null)
+    setFavourites(new Set())
     try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
+    try { localStorage.removeItem(LS_KEY) } catch { /* ok */ }
   }
 
 

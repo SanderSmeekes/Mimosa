@@ -1,81 +1,65 @@
-import React, { useState, useRef } from "react"
-import { lookupUser, createUser, toNameKey, type UserRecord } from "../lib/supabase"
+import React, { useState, useEffect } from "react"
+import { supabase, signInWithEmail, lookupOrCreateAuthUser, type UserRecord } from "../lib/supabase"
 
-type Step = "welcome" | "enter" | "loading" | "taken" | "confirm"
+type Step = "welcome" | "email" | "sent" | "display_name" | "loading" | "error"
 
 type Props = {
   onComplete: (record: UserRecord) => void
 }
 
-function offlineRecord(displayName: string): UserRecord {
-  return { name_key: toNameKey(displayName), display_name: displayName, favourites: [] }
-}
-
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("welcome")
-  const [nameInput, setNameInput] = useState("")
-  const [confirmInput, setConfirmInput] = useState("")
-  const [existingRecord, setExistingRecord] = useState<UserRecord | null>(null)
-  const [newRecord, setNewRecord] = useState<UserRecord | null>(null)
+  const [emailInput, setEmailInput] = useState("")
+  const [displayNameInput, setDisplayNameInput] = useState("")
   const [error, setError] = useState("")
-  const [errorDetail, setErrorDetail] = useState("")
-  const [copied, setCopied] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [sending, setSending] = useState(false)
 
-  async function handleContinue() {
-    const trimmed = nameInput.trim()
-    if (!trimmed) return
+  // Listen for auth state — fires when magic link is clicked
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session?.user) return
+      setStep("display_name")
+      // If user already has a record, skip display name step and complete immediately
+      const { data } = await supabase
+        .from("user_favourites")
+        .select("name_key, display_name, favourites")
+        .eq("name_key", session.user.id)
+        .single()
+      if (data) {
+        onComplete(data as UserRecord)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [onComplete])
+
+  async function handleSendLink() {
+    const email = emailInput.trim()
+    if (!email) return
     setError("")
-    setErrorDetail("")
+    setSending(true)
+    try {
+      await signInWithEmail(email)
+      setStep("sent")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send link.")
+    } finally {
+      setSending(false)
+    }
+  }
+
+  async function handleSetDisplayName() {
+    const name = displayNameInput.trim()
+    if (!name) return
     setStep("loading")
     try {
-      const existing = await lookupUser(toNameKey(trimmed))
-      if (existing) {
-        setExistingRecord(existing)
-        setStep("taken")
-      } else {
-        const record = await createUser(trimmed)
-        setNewRecord(record)
-        setStep("confirm")
-      }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) { setStep("error"); return }
+      const record = await lookupOrCreateAuthUser(session.user.id, name)
+      onComplete(record)
     } catch (err) {
-      let msg = ""
-      if (err instanceof Error) {
-        msg = err.message
-      } else if (err && typeof err === "object" && "message" in err) {
-        msg = String((err as { message: unknown }).message)
-      } else {
-        msg = String(err)
-      }
-      setError("Could not reach sync server.")
-      setErrorDetail(msg)
-      setStep("enter")
+      setError(err instanceof Error ? err.message : "Something went wrong.")
+      setStep("error")
     }
-  }
-
-  function handleSkipSync() {
-    const trimmed = nameInput.trim()
-    if (!trimmed) return
-    // Use offline — picks stay local only
-    const record = offlineRecord(trimmed)
-    setNewRecord(record)
-    setStep("confirm")
-  }
-
-  function handleCopyName() {
-    if (!newRecord) return
-    navigator.clipboard.writeText(newRecord.display_name).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  function handleConfirm() {
-    if (!newRecord) return
-    if (confirmInput.trim().toLowerCase() !== newRecord.display_name.toLowerCase()) {
-      setError("Name doesn't match. Try again.")
-      return
-    }
-    onComplete(newRecord)
   }
 
   const bg: React.CSSProperties = {
@@ -146,9 +130,9 @@ export function Onboarding({ onComplete }: Props) {
           </div>
           <div style={{ height: 8 }} />
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            pick a name to save your favourites and sync them across all your devices.
+            sign in with your email to save your favourites and see what others are picking.
           </div>
-          <button style={btn()} onClick={() => setStep("enter")}>
+          <button style={btn()} onClick={() => setStep("email")}>
             get started
           </button>
         </div>
@@ -156,46 +140,32 @@ export function Onboarding({ onComplete }: Props) {
     )
   }
 
-  if (step === "enter" || step === "loading") {
+  if (step === "email") {
     return (
       <div style={bg}>
         <div style={card}>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>choose your name</div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>sign in</div>
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            pick a nickname — something personal enough that no one else would use it, easy enough that you'll remember it. this is your only password.
+            enter your email — we'll send you a magic link to sign in. no password needed.
           </div>
           <input
-            ref={inputRef}
             style={inputStyle}
-            placeholder="your name"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleContinue()}
+            type="email"
+            placeholder="your@email.com"
+            value={emailInput}
+            onChange={(e) => setEmailInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendLink()}
             autoFocus
-            disabled={step === "loading"}
+            disabled={sending}
           />
-          {error && (
-            <div style={{ fontSize: 12, color: "#e07070", lineHeight: 1.6 }}>
-              <div>{error}</div>
-              {errorDetail && (
-                <div style={{ marginTop: 4, opacity: 0.6, fontFamily: "monospace", fontSize: 11, wordBreak: "break-all" }}>
-                  {errorDetail}
-                </div>
-              )}
-            </div>
-          )}
+          {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
           <button
-            style={{ ...btn(), opacity: step === "loading" ? 0.5 : 1 }}
-            onClick={handleContinue}
-            disabled={step === "loading" || !nameInput.trim()}
+            style={{ ...btn(), opacity: sending || !emailInput.trim() ? 0.5 : 1 }}
+            onClick={handleSendLink}
+            disabled={sending || !emailInput.trim()}
           >
-            {step === "loading" ? "checking…" : "continue"}
+            {sending ? "sending…" : "send magic link"}
           </button>
-          {error && nameInput.trim() && (
-            <button style={{ ...btn("secondary"), fontSize: 12 }} onClick={handleSkipSync}>
-              continue without sync (local only)
-            </button>
-          )}
           <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => setStep("welcome")}>
             back
           </button>
@@ -204,115 +174,76 @@ export function Onboarding({ onComplete }: Props) {
     )
   }
 
-  if (step === "taken" && existingRecord) {
-    const pickCount = existingRecord.favourites.length
+  if (step === "sent") {
     return (
       <div style={bg}>
         <div style={card}>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>welcome back</div>
-          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.04em", wordBreak: "break-word" }}>
-            {existingRecord.display_name}
+          <div style={{ fontSize: 40 }}>✉️</div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>check your email</div>
+          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
+            we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>.
+            tap the link in the email to sign in.
           </div>
-          <div style={{ fontSize: 13, opacity: 0.55 }}>
-            {pickCount === 0 ? "no picks saved yet" : `${pickCount} pick${pickCount !== 1 ? "s" : ""} saved`}
+          <div style={{ fontSize: 12, opacity: 0.4, lineHeight: 1.6 }}>
+            once you tap the link, this screen will update automatically.
           </div>
-          <div style={{ height: 4 }} />
-          <button style={btn()} onClick={() => onComplete(existingRecord)}>
-            {pickCount > 0 ? "load my picks" : "use this name"}
-          </button>
           <button
             style={{ ...btn("secondary"), fontSize: 13 }}
-            onClick={() => {
-              setExistingRecord(null)
-              setNameInput("")
-              setStep("enter")
-            }}
+            onClick={() => { setStep("email"); setError("") }}
           >
-            choose a different name
+            use a different email
           </button>
         </div>
       </div>
     )
   }
 
-  if (step === "confirm" && newRecord) {
-    const nameMatches =
-      confirmInput.trim().toLowerCase() === newRecord.display_name.toLowerCase()
+  if (step === "display_name") {
     return (
       <div style={bg}>
-        <div style={{ ...card, maxWidth: 380 }}>
-          <img
-            src="/memosa-glass.png"
-            alt=""
-            style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }}
-          />
-          <div style={{ fontSize: 20, fontWeight: 700 }}>save your name</div>
-          <div
-            style={{
-              background: "rgba(240,236,224,0.07)",
-              borderRadius: 6,
-              padding: "14px 16px",
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              wordBreak: "break-word",
-            }}
-          >
-            {newRecord.display_name}
+        <div style={card}>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>what's your name?</div>
+          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
+            choose a display name so others can recognise you in the app.
           </div>
-          <button
-            style={{ ...btn("secondary"), fontSize: 13 }}
-            onClick={handleCopyName}
-          >
-            {copied ? "copied!" : "copy name"}
-          </button>
-          <div
-            style={{
-              fontSize: 12,
-              lineHeight: 1.7,
-              color: "#d4a820",
-              background: "rgba(212,168,32,0.1)",
-              borderRadius: 4,
-              padding: "12px 14px",
-              borderLeft: "3px solid #d4a820",
-              textAlign: "left",
-              alignSelf: "stretch",
-            }}
-          >
-            <strong style={{ display: "block", marginBottom: 4, fontSize: 13 }}>⚠ don't forget this name</strong>
-            there are no passwords and no recovery. anyone who types this exact name gets your picks.
-            write it down — in your notes app, a text to yourself, anywhere.
-            if you lose it, your picks are gone forever.
-          </div>
-          <div style={{ fontSize: 13, opacity: 0.7 }}>type your name again to confirm:</div>
           <input
             style={inputStyle}
-            placeholder={newRecord.display_name}
-            value={confirmInput}
-            onChange={(e) => {
-              setConfirmInput(e.target.value)
-              setError("")
-            }}
-            onKeyDown={(e) => e.key === "Enter" && nameMatches && handleConfirm()}
+            placeholder="display name"
+            value={displayNameInput}
+            onChange={(e) => setDisplayNameInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSetDisplayName()}
+            autoFocus
           />
-          {error && <div style={{ fontSize: 13, color: "#e07070" }}>{error}</div>}
           <button
-            style={{ ...btn(), opacity: nameMatches ? 1 : 0.4 }}
-            onClick={handleConfirm}
-            disabled={!nameMatches}
+            style={{ ...btn(), opacity: !displayNameInput.trim() ? 0.5 : 1 }}
+            onClick={handleSetDisplayName}
+            disabled={!displayNameInput.trim()}
           >
-            i've saved my name
+            continue
           </button>
-          <button
-            style={{ ...btn("secondary"), fontSize: 13 }}
-            onClick={() => {
-              setNewRecord(null)
-              setConfirmInput("")
-              setNameInput("")
-              setStep("enter")
-            }}
-          >
-            choose a different name
+        </div>
+      </div>
+    )
+  }
+
+  if (step === "loading") {
+    return (
+      <div style={bg}>
+        <div style={card}>
+          <div style={{ fontSize: 13, opacity: 0.5 }}>loading…</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === "error") {
+    return (
+      <div style={bg}>
+        <div style={card}>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>something went wrong</div>
+          {error && <div style={{ fontSize: 13, color: "#e07070" }}>{error}</div>}
+          <button style={btn()} onClick={() => { setStep("welcome"); setError("") }}>
+            try again
           </button>
         </div>
       </div>
