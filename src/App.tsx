@@ -1171,10 +1171,8 @@ function ArtistDrawer({
                   textAlign: "center",
                 }}
               >
-                {saveCount !== null && saveCount > 1
-                  ? `SAVED BY ${saveCount} OTHERS`
-                  : saveCount === 1
-                  ? "SAVED BY 1 OTHER"
+                {saveCount !== null && saveCount > 0
+                  ? `SEE WHO ELSE (${saveCount})`
                   : "SEE WHO ELSE"}
               </button>
             </div>
