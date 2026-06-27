@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
-import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, User } from "lucide-react"
+import { Heart, Settings, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User } from "lucide-react"
 import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 
@@ -1702,36 +1702,55 @@ export default function App() {
         <div
           style={{
             position: "fixed", inset: 0, zIndex: 200,
-            backgroundColor: "rgba(0,0,0,0.92)",
+            backgroundColor: "hsl(var(--background))",
             display: "flex", flexDirection: "column",
           }}
         >
-          {/* Header */}
+          {/* Scrollable map — fills everything above the bottom bar */}
           <div style={{
-            flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "14px 20px", borderBottom: "1px solid hsl(var(--border))",
+            flex: 1, overflow: "auto", overscrollBehavior: "contain",
+            touchAction: "pan-x pan-y pinch-zoom",
+            paddingBottom: 72,
           }}>
-            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", color: "hsl(var(--foreground))" }}>
-              FESTIVAL MAP
-            </span>
+            {mapIndex === 0 && (
+              <img src="/full-festival-map.png" alt="Memòri 2026 Full Map"
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
+                draggable={false} />
+            )}
+            {mapIndex === 1 && (
+              <img src="/memori_2026_maps-1.webp" alt="Memòri 2026 Festival Map"
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
+                draggable={false} />
+            )}
+            {mapIndex === 2 && (
+              <img src="/camping-map.png" alt="Memòri 2026 Camping Map"
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
+                draggable={false} />
+            )}
+          </div>
+          {/* Fixed bottom bar */}
+          <div style={{
+            position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 12px",
+            background: "hsl(var(--background))",
+            borderTop: "1px solid hsl(var(--border))",
+          }}>
             <button
               onClick={() => setShowMap(false)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "hsl(var(--muted-foreground))", padding: 4 }}
+              style={{
+                flexShrink: 0, background: "none", border: "none", cursor: "pointer",
+                color: "hsl(var(--foreground))", padding: "6px 4px", display: "flex", alignItems: "center",
+              }}
             >
-              <X size={20} />
+              <ChevronLeft size={22} />
             </button>
-          </div>
-          {/* Segmented control */}
-          <div style={{
-            flexShrink: 0, display: "flex", gap: 6, padding: "10px 16px",
-            borderBottom: "1px solid hsl(var(--border))",
-          }}>
-            {["MAP 1", "MAP 2", "MAP 3"].map((label, i) => (
+            {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
               <button
                 key={i}
                 onClick={() => setMapIndex(i)}
                 style={{
-                  flex: 1, padding: "6px 0", fontSize: 11, fontWeight: 700,
+                  flex: 1, padding: "7px 0", fontSize: 11, fontWeight: 700,
                   letterSpacing: "0.08em", borderRadius: 6, border: "none", cursor: "pointer",
                   transition: "background 150ms, color 150ms",
                   background: mapIndex === i ? "hsl(var(--foreground))" : "hsl(var(--muted))",
@@ -1741,19 +1760,6 @@ export default function App() {
                 {label}
               </button>
             ))}
-          </div>
-          {/* Scrollable map */}
-          <div style={{
-            flex: 1, overflow: "auto", overscrollBehavior: "contain",
-            display: "flex", alignItems: "flex-start", justifyContent: "flex-start",
-            touchAction: "pan-x pan-y pinch-zoom",
-          }}>
-            <img
-              src={`/festival-map-${mapIndex + 1}.png`}
-              alt={`Memòri 2026 Festival Map ${mapIndex + 1}`}
-              style={{ width: "100%", maxWidth: "none", height: "auto", display: "block", userSelect: "none" }}
-              draggable={false}
-            />
           </div>
         </div>
       )}
