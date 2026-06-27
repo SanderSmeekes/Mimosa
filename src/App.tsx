@@ -1707,7 +1707,7 @@ export default function App() {
             paddingBottom: 88,
           }}>
             {mapIndex === 0 && (
-              <img src="/full-festival-map.png" alt="Memòri 2026 Full Map"
+              <img src="/full-festival-map.webp" alt="Memòri 2026 Full Map"
                 style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
             {mapIndex === 1 && (
@@ -1715,7 +1715,7 @@ export default function App() {
                 style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
             {mapIndex === 2 && (
-              <img src="/camping-map.png" alt="Memòri 2026 Camping Map"
+              <img src="/camping-map.webp" alt="Memòri 2026 Camping Map"
                 style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
           </div>
