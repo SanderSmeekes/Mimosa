@@ -1699,67 +1699,76 @@ export default function App() {
 
       {/* Festival map overlay */}
       {showMap && (
-        <div
-          style={{
-            position: "fixed", inset: 0, zIndex: 200,
-            backgroundColor: "hsl(var(--background))",
-            display: "flex", flexDirection: "column",
-          }}
-        >
-          {/* Scrollable map — fills everything above the bottom bar */}
+        <div style={{ position: "fixed", inset: 0, zIndex: 200, backgroundColor: "#000", display: "flex", flexDirection: "column" }}>
+          {/* Scrollable map */}
           <div style={{
             flex: 1, overflow: "auto", overscrollBehavior: "contain",
             touchAction: "pan-x pan-y pinch-zoom",
-            paddingBottom: 72,
+            paddingBottom: 88,
           }}>
             {mapIndex === 0 && (
               <img src="/full-festival-map.png" alt="Memòri 2026 Full Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
-                draggable={false} />
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
             {mapIndex === 1 && (
               <img src="/memori_2026_maps-1.webp" alt="Memòri 2026 Festival Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
-                draggable={false} />
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
             {mapIndex === 2 && (
               <img src="/camping-map.png" alt="Memòri 2026 Camping Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
-                draggable={false} />
+                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
             )}
           </div>
+
           {/* Fixed bottom bar */}
           <div style={{
             position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "10px 12px",
-            background: "hsl(var(--background))",
-            borderTop: "1px solid hsl(var(--border))",
+            padding: "12px 16px 28px",
+            background: "linear-gradient(to top, rgba(0,0,0,0.98) 60%, transparent)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
           }}>
-            <button
-              onClick={() => setShowMap(false)}
-              style={{
-                flexShrink: 0, background: "none", border: "none", cursor: "pointer",
-                color: "hsl(var(--foreground))", padding: "6px 4px", display: "flex", alignItems: "center",
-              }}
-            >
-              <ChevronLeft size={22} />
-            </button>
-            {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
+            {/* Segmented pill track */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              {/* Back button */}
               <button
-                key={i}
-                onClick={() => setMapIndex(i)}
+                onClick={() => setShowMap(false)}
                 style={{
-                  flex: 1, padding: "7px 0", fontSize: 11, fontWeight: 700,
-                  letterSpacing: "0.08em", borderRadius: 6, border: "none", cursor: "pointer",
-                  transition: "background 150ms, color 150ms",
-                  background: mapIndex === i ? "hsl(var(--foreground))" : "hsl(var(--muted))",
-                  color: mapIndex === i ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
+                  flexShrink: 0, width: 38, height: 38, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  cursor: "pointer", color: "hsl(var(--foreground))",
                 }}
               >
-                {label}
+                <ChevronLeft size={20} />
               </button>
-            ))}
+
+              {/* Pill track */}
+              <div style={{
+                flex: 1, display: "flex", alignItems: "center",
+                background: "rgba(255,255,255,0.07)", borderRadius: 10,
+                padding: 3, gap: 2,
+              }}>
+                {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setMapIndex(i)}
+                    style={{
+                      flex: 1, padding: "8px 0", fontSize: 11, fontWeight: 700,
+                      letterSpacing: "0.1em", borderRadius: 8, border: "none", cursor: "pointer",
+                      transition: "background 180ms, color 180ms, box-shadow 180ms",
+                      background: mapIndex === i ? "hsl(var(--foreground))" : "transparent",
+                      color: mapIndex === i ? "hsl(var(--background))" : "rgba(255,255,255,0.45)",
+                      boxShadow: mapIndex === i ? "0 1px 6px rgba(0,0,0,0.4)" : "none",
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
