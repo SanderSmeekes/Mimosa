@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
@@ -69,6 +70,71 @@ function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
 }
 
 /* ─────────────────────────────────────────────
+   Diva sparkles
+───────────────────────────────────────────── */
+const SPARKLE_COLORS = ["#F02880", "#F5C8DC", "#C0206A", "#FF80C0", "#FFD0E8", "#E81890"]
+const SPARKLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315]
+
+type SparkleParticle = { id: number; x: number; y: number; dx: number; dy: number; color: string; size: number; shape: "circle" | "star" }
+let _sparkleId = 0
+
+function SparkleOverlay({ particles }: { particles: SparkleParticle[] }) {
+  if (!particles.length) return null
+  return createPortal(
+    <>
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: "fixed",
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            pointerEvents: "none",
+            zIndex: 99999,
+            color: p.color,
+            fontSize: p.size,
+            lineHeight: 1,
+            transform: "translate(-50%, -50%)",
+            "--sdx": `${p.dx}px`,
+            "--sdy": `${p.dy}px`,
+          } as React.CSSProperties}
+          className="diva-sparkle-particle"
+        >
+          {p.shape === "star" ? "✦" : "●"}
+        </div>
+      ))}
+    </>,
+    document.body
+  )
+}
+
+function useDivaSparkles() {
+  const [particles, setParticles] = useState<SparkleParticle[]>([])
+
+  const trigger = useCallback((x: number, y: number) => {
+    const newOnes: SparkleParticle[] = SPARKLE_ANGLES.map((angle) => {
+      const rad = (angle * Math.PI) / 180
+      const dist = 28 + Math.random() * 28
+      return {
+        id: _sparkleId++,
+        x, y,
+        dx: Math.cos(rad) * dist,
+        dy: Math.sin(rad) * dist,
+        color: SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
+        size: 10 + Math.random() * 8,
+        shape: Math.random() > 0.5 ? "star" : "circle",
+      }
+    })
+    setParticles((prev) => [...prev, ...newOnes])
+    setTimeout(() => setParticles((prev) => prev.filter((p) => !newOnes.find((n) => n.id === p.id))), 650)
+  }, [])
+
+  return { particles, trigger }
+}
+
+/* ─────────────────────────────────────────────
    Event card
 ───────────────────────────────────────────── */
 function EventCard({
@@ -79,6 +145,7 @@ function EventCard({
   onToggleFav,
   onOpenArtist,
   diva,
+  onSparkle,
 }: {
   slot: SlotEntry
   stage: Stage
@@ -87,6 +154,7 @@ function EventCard({
   onToggleFav: () => void
   onOpenArtist: (id: string) => void
   diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   const [animKey, setAnimKey] = useState(0)
   const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
@@ -142,7 +210,15 @@ function EventCard({
 
         {/* Favourite toggle */}
         <button
-          onClick={(e) => { e.stopPropagation(); setAnimKey(k => k + 1); onToggleFav() }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setAnimKey(k => k + 1)
+            if (diva && !isFav && onSparkle) {
+              const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect()
+              onSparkle(r.left + r.width / 2, r.top + r.height / 2)
+            }
+            onToggleFav()
+          }}
           style={{
             background: "none",
             border: "none",
@@ -205,6 +281,7 @@ function ListRow({
   clashWith,
   status,
   diva,
+  onSparkle,
 }: {
   item: ListItem
   day: Day
@@ -215,6 +292,7 @@ function ListRow({
   clashWith: string | null
   status: "now" | "later" | "earlier"
   diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   const accent = STAGE_ACCENT[item.stage]
   const border = "1px solid hsl(var(--border))"
@@ -317,7 +395,15 @@ function ListRow({
 
       {/* Heart */}
       <button
-        onClick={(e) => { e.stopPropagation(); setAnimKey(k => k + 1); onToggleFav() }}
+        onClick={(e) => {
+          e.stopPropagation()
+          setAnimKey(k => k + 1)
+          if (diva && !isFav && onSparkle) {
+            const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect()
+            onSparkle(r.left + r.width / 2, r.top + r.height / 2)
+          }
+          onToggleFav()
+        }}
         style={{
           background: "none",
           border: "none",
@@ -367,6 +453,7 @@ function ListView({
   onToggleFav,
   onOpenArtist,
   diva,
+  onSparkle,
 }: {
   day: Day
   favourites: Set<string>
@@ -374,6 +461,7 @@ function ListView({
   onToggleFav: (key: string) => void
   onOpenArtist: (id: string) => void
   diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   const now = useNow()
   const [earlierExpanded, setEarlierExpanded] = useState(false)
@@ -449,6 +537,7 @@ function ListView({
         clashWith={clashName(item)}
         status={status}
         diva={diva}
+        onSparkle={onSparkle}
       />
     )
   }
@@ -525,6 +614,7 @@ function TimetableGrid({
   onOpenArtist,
   listView,
   diva,
+  onSparkle,
 }: {
   day: Day
   favourites: Set<string>
@@ -533,6 +623,7 @@ function TimetableGrid({
   onOpenArtist: (id: string) => void
   listView: boolean
   diva?: boolean
+  onSparkle?: (x: number, y: number) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -575,6 +666,7 @@ function TimetableGrid({
         onToggleFav={onToggleFav}
         onOpenArtist={onOpenArtist}
         diva={diva}
+        onSparkle={onSparkle}
       />
     )
   }
@@ -807,6 +899,7 @@ function TimetableGrid({
                     onToggleFav={() => onToggleFav(key)}
                     onOpenArtist={onOpenArtist}
                     diva={diva}
+                    onSparkle={onSparkle}
                   />
                 )
               })}
@@ -1216,13 +1309,11 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const [showA2HS, setShowA2HS] = useState(false)
-  const [minimal, setMinimal] = useState(() => {
-    try { return localStorage.getItem("memosa-minimal") === "1" } catch { return false }
-  })
   const [diva, setDiva] = useState(() => {
     try { return localStorage.getItem("memosa-diva") === "1" } catch { return false }
   })
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { particles: sparkleParticles, trigger: triggerSparkle } = useDivaSparkles()
 
   // Apply theme-diva to <html> so portals (drawers) inherit the tokens
   useEffect(() => {
@@ -1281,14 +1372,6 @@ export default function App() {
     try { localStorage.setItem(A2HS_KEY, "1") } catch { /* ok */ }
   }
 
-  function toggleMinimal() {
-    setMinimal((v) => {
-      const next = !v
-      try { localStorage.setItem("memosa-minimal", next ? "1" : "0") } catch { /* ok */ }
-      return next
-    })
-  }
-
   function toggleDiva() {
     setDiva((v) => {
       const next = !v
@@ -1312,7 +1395,7 @@ export default function App() {
 
   return (
     <div
-      className={minimal ? "font-minimal" : undefined}
+      className={undefined}
       style={{
         position: "fixed",
         inset: 0,
@@ -1333,7 +1416,8 @@ export default function App() {
           loading your picks…
         </div>
       )}
-      {!minimal && <MarqueeBanner />}
+      <MarqueeBanner />
+      <SparkleOverlay particles={sparkleParticles} />
 
       {/* Add to Home Screen hint */}
       {showA2HS && (
@@ -1389,6 +1473,7 @@ export default function App() {
               onOpenArtist={setSelectedArtistId}
               listView={listView}
               diva={diva}
+              onSparkle={diva ? triggerSparkle : undefined}
             />
           </TabsContent>
         ))}
@@ -1482,23 +1567,6 @@ export default function App() {
                   </span>
                   <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showFavs ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
                     <div style={{ position: "absolute", top: 3, left: showFavs ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showFavs ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
-                  </div>
-                </button>
-
-                {/* Minimal mode toggle */}
-                <button
-                  onClick={toggleMinimal}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0", cursor: "pointer", width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    MINIMAL MODE
-                  </span>
-                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: minimal ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: minimal ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: minimal ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
                   </div>
                 </button>
 
