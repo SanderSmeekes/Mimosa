@@ -9,7 +9,7 @@ type Props = {
 
 const fadeIn = `
 @keyframes ob-fade-up {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 `
@@ -17,7 +17,7 @@ const fadeIn = `
 function FadeItem({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
   return (
     <div style={{
-      animation: `ob-fade-up 420ms ease both`,
+      animation: `ob-fade-up 700ms cubic-bezier(0.22,1,0.36,1) both`,
       animationDelay: `${delay}ms`,
       width: "100%",
       display: "flex",
@@ -152,25 +152,25 @@ export function Onboarding({ onComplete }: Props) {
               style={{ width: 120, height: 120, objectFit: "contain", marginBottom: 8 }}
             />
           </FadeItem>
-          <FadeItem delay={80}>
-            <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>Mimosa</div>
+          <FadeItem delay={100}>
+            <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
           </FadeItem>
-          <FadeItem delay={160}>
+          <FadeItem delay={220}>
             <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>
-              Your personal timetable for Memòri Festival 2026
+              your personal timetable for memòri festival 2026
             </div>
           </FadeItem>
-          <FadeItem delay={240}>
+          <FadeItem delay={340}>
             <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-              Sign in with your email to save your favourites and see what others are picking.
+              sign in with your email to save your favourites and see what others are picking.
             </div>
           </FadeItem>
-          <FadeItem delay={320}>
+          <FadeItem delay={460}>
             <button style={btn()} onClick={() => setStep("email")}>
-              Get started <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
+              get started <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
             </button>
           </FadeItem>
-          <FadeItem delay={400}>
+          <FadeItem delay={560}>
             <button
               onClick={() => setStep("email")}
               style={{
@@ -180,7 +180,7 @@ export function Onboarding({ onComplete }: Props) {
                 textDecoration: "underline", padding: "4px 0",
               }}
             >
-              I already have an account
+              i already have an account
             </button>
           </FadeItem>
         </div>
