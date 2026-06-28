@@ -122,18 +122,18 @@ export function Onboarding({ onComplete }: Props) {
           <img
             src="/memosa-glass.png"
             alt=""
-            style={{ width: 96, height: 96, objectFit: "contain", marginBottom: 8 }}
+            style={{ width: 120, height: 120, objectFit: "contain", marginBottom: 8 }}
           />
-          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>memosa</div>
+          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>Mimosa</div>
           <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>
-            your personal timetable for memòri festival 2026
+            Your personal timetable for Memòri Festival 2026
           </div>
           <div style={{ height: 8 }} />
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            sign in with your email to save your favourites and see what others are picking.
+            Sign in with your email to save your favourites and see what others are picking.
           </div>
           <button style={btn()} onClick={() => setStep("email")}>
-            get started
+            Get started
           </button>
         </div>
       </div>
