@@ -7,6 +7,29 @@ type Props = {
   onComplete: (record: UserRecord) => void
 }
 
+const fadeIn = `
+@keyframes ob-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+`
+
+function FadeItem({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      animation: `ob-fade-up 420ms ease both`,
+      animationDelay: `${delay}ms`,
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      ...style,
+    }}>
+      {children}
+    </div>
+  )
+}
+
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("welcome")
   const [emailInput, setEmailInput] = useState("")
@@ -14,12 +37,10 @@ export function Onboarding({ onComplete }: Props) {
   const [error, setError] = useState("")
   const [sending, setSending] = useState(false)
 
-  // Listen for auth state — fires when magic link is clicked
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session?.user) return
       setStep("display_name")
-      // If user already has a record, skip display name step and complete immediately
       const { data } = await supabase
         .from("user_favourites")
         .select("name_key, display_name, favourites")
@@ -113,28 +134,55 @@ export function Onboarding({ onComplete }: Props) {
     letterSpacing: "0.08em",
     cursor: "pointer",
     textTransform: "uppercase" as const,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   })
 
   if (step === "welcome") {
     return (
       <div style={bg}>
+        <style>{fadeIn}</style>
         <div style={card}>
-          <img
-            src="/memosa-glass.png"
-            alt=""
-            style={{ width: 120, height: 120, objectFit: "contain", marginBottom: 8 }}
-          />
-          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>Mimosa</div>
-          <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>
-            Your personal timetable for Memòri Festival 2026
-          </div>
-          <div style={{ height: 8 }} />
-          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            Sign in with your email to save your favourites and see what others are picking.
-          </div>
-          <button style={btn()} onClick={() => setStep("email")}>
-            Get started
-          </button>
+          <FadeItem delay={0}>
+            <img
+              src="/memosa-glass.png"
+              alt=""
+              style={{ width: 120, height: 120, objectFit: "contain", marginBottom: 8 }}
+            />
+          </FadeItem>
+          <FadeItem delay={80}>
+            <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>Mimosa</div>
+          </FadeItem>
+          <FadeItem delay={160}>
+            <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>
+              Your personal timetable for Memòri Festival 2026
+            </div>
+          </FadeItem>
+          <FadeItem delay={240}>
+            <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
+              Sign in with your email to save your favourites and see what others are picking.
+            </div>
+          </FadeItem>
+          <FadeItem delay={320}>
+            <button style={btn()} onClick={() => setStep("email")}>
+              Get started <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
+            </button>
+          </FadeItem>
+          <FadeItem delay={400}>
+            <button
+              onClick={() => setStep("email")}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: "#f0ece0", opacity: 0.45, fontSize: 13,
+                fontFamily: "'Courier Prime', monospace",
+                textDecoration: "underline", padding: "4px 0",
+              }}
+            >
+              I already have an account
+            </button>
+          </FadeItem>
         </div>
       </div>
     )
