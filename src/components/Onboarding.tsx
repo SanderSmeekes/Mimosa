@@ -170,19 +170,6 @@ export function Onboarding({ onComplete }: Props) {
               get started <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
             </button>
           </FadeItem>
-          <FadeItem delay={560}>
-            <button
-              onClick={() => setStep("email")}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                color: "#f0ece0", opacity: 0.45, fontSize: 13,
-                fontFamily: "'Courier Prime', monospace",
-                textDecoration: "underline", padding: "4px 0",
-              }}
-            >
-              i already have an account
-            </button>
-          </FadeItem>
         </div>
       </div>
     )
