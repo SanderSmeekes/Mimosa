@@ -907,7 +907,7 @@ function TimetableGrid({
 /* ─────────────────────────────────────────────
    Marquee banner
 ───────────────────────────────────────────── */
-const MARQUEE_TEXT = "Smile, dance and make Memoiries. Raargh!"
+const MARQUEE_TEXT = "Smile, dance and make Memoiries ➰ Raargh!"
 const MARQUEE_SEPARATOR = "   "
 const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR)
 
@@ -1589,34 +1589,47 @@ export default function App() {
                       <SectionLabel label="Display" />
 
                       {/* Theme segmented control */}
-                      <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", color: "hsl(var(--foreground))", marginBottom: 10 }}>Theme</div>
-                        <div style={{ display: "flex", background: "hsl(var(--muted))", borderRadius: 999, padding: 3, gap: 2 }}>
-                          {(["dark", "light", "diva"] as Theme[]).map((t) => {
-                            const active = theme === t
-                            const labels: Record<Theme, string> = { dark: "DARK", light: "LIGHT", diva: "DIVA 💅" }
-                            const activeBg = t === "diva" ? "#FF2D95" : "hsl(var(--foreground))"
-                            const activeColor = t === "diva" ? "#1C0812" : "hsl(var(--background))"
-                            return (
-                              <button
-                                key={t}
-                                onClick={() => setTheme(t)}
-                                style={{
-                                  flex: 1, padding: "8px 4px", fontSize: 11, fontWeight: 700,
-                                  letterSpacing: "0.08em", borderRadius: 999, border: "none", cursor: "pointer",
-                                  fontFamily: "inherit",
-                                  background: active ? activeBg : "transparent",
-                                  color: active ? activeColor : "hsl(var(--muted-foreground))",
-                                  transition: "background 180ms, color 180ms",
-                                  boxShadow: active ? "0 1px 4px rgba(0,0,0,0.25)" : "none",
-                                }}
-                              >
-                                {labels[t]}
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </div>
+                      {(() => {
+                        const themes: Theme[] = ["dark", "light", "diva"]
+                        const labels: Record<Theme, string> = { dark: "DARK", light: "LIGHT", diva: "DIVA 💅" }
+                        const idx = themes.indexOf(theme)
+                        const pillBg = theme === "diva" ? "#FF2D95" : "hsl(var(--foreground))"
+                        const activeTextColor = theme === "diva" ? "#1C0812" : "hsl(var(--background))"
+                        return (
+                          <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", color: "hsl(var(--foreground))", marginBottom: 10 }}>Theme</div>
+                            <div style={{ position: "relative", display: "flex", background: "hsl(var(--muted))", borderRadius: 999, padding: 3 }}>
+                              {/* Sliding pill */}
+                              <div style={{
+                                position: "absolute",
+                                top: 3, bottom: 3,
+                                left: `calc(${idx} * (100% - 6px) / 3 + 3px)`,
+                                width: "calc((100% - 6px) / 3)",
+                                borderRadius: 999,
+                                background: pillBg,
+                                boxShadow: "0 1px 6px rgba(0,0,0,0.3)",
+                                transition: "left 400ms cubic-bezier(0.34, 1.56, 0.64, 1), background 250ms ease",
+                                pointerEvents: "none",
+                              }} />
+                              {themes.map((t) => (
+                                <button
+                                  key={t}
+                                  onClick={() => setTheme(t)}
+                                  style={{
+                                    flex: 1, padding: "8px 4px", fontSize: 11, fontWeight: 700,
+                                    letterSpacing: "0.08em", borderRadius: 999, border: "none", cursor: "pointer",
+                                    fontFamily: "inherit", background: "transparent", position: "relative", zIndex: 1,
+                                    color: theme === t ? activeTextColor : "hsl(var(--muted-foreground))",
+                                    transition: "color 250ms ease",
+                                  }}
+                                >
+                                  {labels[t]}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })()}
 
                       <ToggleRow label="List view"            on={listView}  onToggle={() => setListView(v => !v)} />
                       <ToggleRow label="Highlight favourites" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
