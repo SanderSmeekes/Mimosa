@@ -1354,7 +1354,19 @@ export default function App() {
   })
   const diva = theme === "diva"
 
+  function applyThemeToDom(t: Theme) {
+    const html = document.documentElement
+    html.classList.toggle("theme-diva",  t === "diva")
+    html.classList.toggle("theme-light", t === "light")
+    const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
+    html.style.backgroundColor = bg
+    document.body.style.backgroundColor = bg
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg)
+  }
+
   function setTheme(t: Theme) {
+    // Apply DOM changes synchronously so Safari repicks theme-color before transition
+    applyThemeToDom(t)
     const apply = () => {
       setThemeState(t)
       try {
@@ -1369,14 +1381,8 @@ export default function App() {
     }
   }
 
-  useEffect(() => {
-    const html = document.documentElement
-    html.classList.toggle("theme-diva",  theme === "diva")
-    html.classList.toggle("theme-light", theme === "light")
-    const bg = theme === "diva" ? "#1C0812" : theme === "light" ? "#ffffff" : "#0b0b0a"
-    html.style.backgroundColor = bg
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg)
-  }, [theme])
+  // Keep DOM in sync on initial mount / hot reload
+  useEffect(() => { applyThemeToDom(theme) }, [theme])
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { particles: sparkleParticles, trigger: triggerSparkle } = useDivaSparkles()
