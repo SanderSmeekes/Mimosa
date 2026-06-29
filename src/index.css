@@ -49,7 +49,7 @@
   body {
     color: hsl(var(--foreground));
     margin: 0;
-    font-family: "Courier Prime", "Courier New", monospace;
+    font-family: "Space Mono", "Courier New", monospace;
     -webkit-font-smoothing: antialiased;
   }
   #root {
@@ -62,6 +62,25 @@
   }
   *::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* ── Heading font token ─────────────────────── */
+:root {
+  --font-heading: "Anton", sans-serif;
+  --font-body:    "Space Mono", "Courier New", monospace;
+}
+
+/* ── View transitions: smooth theme crossfade ── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms !important;
   }
 }
 

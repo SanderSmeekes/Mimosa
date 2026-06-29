@@ -1106,7 +1106,7 @@ function ArtistDrawer({
                   {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
                 </span>
               </div>
-              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "0.04em", color: "hsl(var(--foreground))", lineHeight: 1.2 }}>{artist.name}</h2>
+              <h2 style={{ margin: 0, fontSize: 26, fontWeight: 400, letterSpacing: "0.02em", color: "hsl(var(--foreground))", lineHeight: 1.05, fontFamily: "var(--font-heading)" }}>{artist.name}</h2>
               {slotKey && (() => {
                 const parsed = parseSlotKey(slotKey)
                 if (!parsed) return null
@@ -1326,18 +1326,20 @@ export default function App() {
     return "dark"
   })
   const diva = theme === "diva"
-  const [themeFading, setThemeFading] = useState(false)
 
   function setTheme(t: Theme) {
-    setThemeFading(true)
-    setTimeout(() => {
+    const apply = () => {
       setThemeState(t)
       try {
         localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
         localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
       } catch { /* ok */ }
-      setTimeout(() => setThemeFading(false), 300)
-    }, 180)
+    }
+    if ('startViewTransition' in document) {
+      (document as { startViewTransition: (cb: () => void) => void }).startViewTransition(apply)
+    } else {
+      apply()
+    }
   }
 
   useEffect(() => {
@@ -1425,8 +1427,6 @@ export default function App() {
         backgroundColor: diva ? "#1C0812" : "hsl(var(--background))",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
-        opacity: themeFading ? 0 : 1,
-        transition: "opacity 220ms ease",
       }}
     >
       {favsLoading && (
@@ -1434,7 +1434,7 @@ export default function App() {
           position: "fixed", inset: 0, zIndex: 9998,
           background: "rgba(11,11,10,0.85)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "'Courier Prime', monospace", color: "#f0ece0", fontSize: 14, letterSpacing: "0.06em",
+          fontFamily: "var(--font-body)", color: "#f0ece0", fontSize: 14, letterSpacing: "0.06em",
         }}>
           loading your picks…
         </div>
@@ -1543,8 +1543,8 @@ export default function App() {
                   )
 
                   const Toggle = ({ on, divaColor }: { on: boolean; divaColor?: string }) => {
-                    const trackOn = divaColor ?? "#d2d2d0"
-                    const knobOn  = divaColor ? "#1C0812" : "#0b0b0a"
+                    const trackOn = divaColor ?? "hsl(var(--foreground))"
+                    const knobOn  = divaColor ? "#1C0812" : "hsl(var(--background))"
                     return (
                       <div style={{
                         width: 44, height: 26, borderRadius: 13, flexShrink: 0,
@@ -1557,7 +1557,7 @@ export default function App() {
                           position: "absolute", top: 3,
                           left: on ? 21 : 3,
                           width: 20, height: 20, borderRadius: 10,
-                          backgroundColor: on ? knobOn : "#6b6a62",
+                          backgroundColor: on ? knobOn : "hsl(var(--muted-foreground))",
                           transition: "left 0.2s ease",
                           boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
                         }} />

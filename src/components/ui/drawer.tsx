@@ -61,7 +61,8 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("text-base font-semibold tracking-widest text-[hsl(var(--foreground))]", className)}
+      className={cn("text-xl tracking-wide text-[hsl(var(--foreground))]", className)}
+      style={{ fontFamily: "var(--font-heading)", fontWeight: 400, lineHeight: 1.05 }}
       {...props}
     />
   )
