@@ -917,10 +917,10 @@ function MarqueeSegment() {
     <>
       <span
         style={{
-          fontFamily: "'Courier Prime', 'Courier New', monospace",
-          fontSize: "0.875rem",
-          letterSpacing: "0.05em",
-          color: "#a5a4a1",
+          fontFamily: "var(--font-body)",
+          fontSize: "0.8rem",
+          letterSpacing: "0.04em",
+          color: "hsl(var(--muted-foreground))",
           verticalAlign: "middle",
         }}
       >
@@ -1162,7 +1162,15 @@ function ArtistDrawer({
             </div>
 
             {artist.bio ? (
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "hsl(var(--muted-foreground))" }}>{artist.bio}</p>
+              <p style={{
+                margin: 0,
+                fontSize: 13,
+                lineHeight: 1.8,
+                color: "hsl(var(--muted-foreground))",
+                fontFeatureSettings: '"kern" 1, "liga" 1',
+                wordSpacing: "0.04em",
+                textWrap: "pretty" as React.CSSProperties["textWrap"],
+              }}>{artist.bio}</p>
             ) : (
               <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--muted-foreground))", fontStyle: "italic", opacity: 0.5 }}>No bio available.</p>
             )}
@@ -1689,7 +1697,7 @@ export default function App() {
                         </button>
                       </div>
 
-                      <div style={{ marginTop: 32, fontSize: 11, lineHeight: 1.8, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
+                      <div style={{ marginTop: 32, fontSize: 11, lineHeight: 1.9, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center", wordSpacing: "0.03em", textWrap: "pretty" as React.CSSProperties["textWrap"] }}>
                         <p style={{ margin: 0 }}>
                           This app is not official from Memòri Festival.{" "}
                           For the latest info, visit{" "}
