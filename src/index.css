@@ -53,7 +53,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1;
+    font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
+    font-variant-numeric: tabular-nums;
   }
   #root {
     width: 100%;

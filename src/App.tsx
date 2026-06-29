@@ -211,10 +211,10 @@ function EventCard({
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 4 }}>
         <span
           style={{
-            fontSize: compact ? 11 : 12,
+            fontSize: compact ? 11 : 13,
             fontWeight: 700,
-            lineHeight: 1.25,
-            letterSpacing: "0.03em",
+            lineHeight: 1.2,
+            letterSpacing: "0.01em",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: compact ? "nowrap" : "normal",
@@ -259,7 +259,7 @@ function EventCard({
       </div>
 
       {!compact && (
-        <span style={{ fontSize: 10, opacity: 0.65, flexShrink: 0 }}>
+        <span style={{ fontSize: 10, opacity: 0.55, flexShrink: 0, letterSpacing: 0 }}>
           {slot.start_time}–{slot.end_time}
         </span>
       )}
@@ -388,21 +388,21 @@ function ListRow({
         {/* Secondary line */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <div style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accent, flexShrink: 0 }} />
-          <span style={{ fontSize: 10, color: "#6B6A62", letterSpacing: "0.06em" }}>
+          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", letterSpacing: "0.03em" }}>
             {item.stage}
           </span>
-          <span style={{ fontSize: 10, color: "#4F4E48" }}>·</span>
+          <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.5 }}>·</span>
           {isNow && (
             <span style={{ fontSize: 10, color: accent }}>until {item.end_time}</span>
           )}
           {status === "later" && (
-            <span style={{ fontSize: 10, color: "#4F4E48" }}>until {item.end_time}</span>
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.7 }}>until {item.end_time}</span>
           )}
           {status === "earlier" && (
-            <span style={{ fontSize: 10, color: "#4F4E48" }}>ended {item.end_time}</span>
+            <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", opacity: 0.7 }}>ended {item.end_time}</span>
           )}
           {isFav && clashWith && (
-            <span style={{ fontSize: 10, color: "#e8a838", letterSpacing: "0.03em" }}>
+            <span style={{ fontSize: 10, color: "#e8a838" }}>
               ↔ {clashWith}
             </span>
           )}
@@ -581,7 +581,7 @@ function ListView({
 
       {/* End cap */}
       {!nowInDay && later.length > 0 && (
-        <div style={{ padding: "20px 0 32px", textAlign: "center", fontSize: 10, letterSpacing: "0.12em", color: "#3A3935" }}>
+        <div style={{ padding: "20px 0 32px", textAlign: "center", fontSize: 10, letterSpacing: "0.07em", color: "hsl(var(--muted-foreground))", opacity: 0.45 }}>
           — END OF {day.toUpperCase()} —
         </div>
       )}
@@ -602,10 +602,10 @@ function ListView({
               borderTop: border,
               borderBottom: earlierExpanded ? border : "none",
               cursor: "pointer",
-              color: "#6B6A62",
+              color: "hsl(var(--muted-foreground))",
               fontSize: 11,
               fontWeight: 700,
-              letterSpacing: "0.1em",
+              letterSpacing: "0.06em",
               fontFamily: "inherit",
             }}
           >
@@ -740,9 +740,9 @@ function TimetableGrid({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: "0.12em",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.07em",
                 color: "hsl(var(--muted-foreground))",
                 borderRight: border,
               }}
@@ -807,7 +807,7 @@ function TimetableGrid({
                 <span style={{
                   fontSize: 11,
                   fontWeight: 700,
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.06em",
                   color: "rgba(212,162,75,0.75)",
                   textTransform: "uppercase",
                 }}>
@@ -849,6 +849,7 @@ function TimetableGrid({
                     fontSize: 10,
                     color: mutedColor,
                     lineHeight: 1,
+                    fontVariantNumeric: "tabular-nums",
                   }}
                 >
                   {String(h % 24).padStart(2, "0")}:00
@@ -1009,7 +1010,7 @@ function UserPicksList({ favs, loading, border, myFavourites }: { favs: string[]
     <>
       {byDay.map((group) => (
         <React.Fragment key={group.day}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", color: "hsl(var(--muted-foreground))", opacity: 0.5, padding: "12px 0 4px", textTransform: "uppercase" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", color: "hsl(var(--muted-foreground))", opacity: 0.5, padding: "12px 0 4px", textTransform: "uppercase" }}>
             {group.day}
           </div>
           {group.items.map((p, i) => {
@@ -1104,7 +1105,7 @@ function ArtistDrawer({
           )}
 
           {view.page === "savers" && (
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))" }}>WHO SAVED THIS</span>
           )}
           {view.page === "user-picks" && (
             <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--muted-foreground))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
@@ -1121,7 +1122,7 @@ function ArtistDrawer({
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))" }}>
                   {artist.stage}{artist.country ? ` · ${artist.country}` : ""}
                 </span>
               </div>
@@ -1580,7 +1581,7 @@ export default function App() {
                 {/* ── Section label helper ── */}
                 {(() => {
                   const SectionLabel = ({ label }: { label: string }) => (
-                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.03em", color: "hsl(var(--muted-foreground))", opacity: 0.7, paddingTop: 32, paddingBottom: 8 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "hsl(var(--muted-foreground))", opacity: 0.55, paddingTop: 32, paddingBottom: 8 }}>
                       {label}
                     </div>
                   )
@@ -1853,7 +1854,7 @@ export default function App() {
                     onClick={() => setMapIndex(i)}
                     style={{
                       flex: 1, padding: "8px 0", fontSize: 11, fontWeight: 700,
-                      letterSpacing: "0.1em", borderRadius: 8, border: "none", cursor: "pointer",
+                      letterSpacing: "0.06em", borderRadius: 8, border: "none", cursor: "pointer",
                       transition: "background 180ms, color 180ms, box-shadow 180ms",
                       background: mapIndex === i ? "hsl(var(--foreground))" : "transparent",
                       color: mapIndex === i ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
