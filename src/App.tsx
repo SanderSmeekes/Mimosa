@@ -1370,9 +1370,8 @@ export default function App() {
   }
 
   function setTheme(t: Theme) {
-    // Apply DOM changes synchronously so Safari repicks theme-color before transition
-    applyThemeToDom(t)
     const apply = () => {
+      applyThemeToDom(t)
       setThemeState(t)
       try {
         localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
@@ -1386,7 +1385,7 @@ export default function App() {
     }
   }
 
-  // Keep DOM in sync on initial mount / hot reload
+  // Keep DOM in sync on initial mount
   useEffect(() => { applyThemeToDom(theme) }, [theme])
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
