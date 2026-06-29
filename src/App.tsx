@@ -1305,6 +1305,13 @@ export default function App() {
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null)
   const [showA2HS, setShowA2HS] = useState(false)
   const [showMap, setShowMap] = useState(false)
@@ -1501,11 +1508,11 @@ export default function App() {
           </TabsList>
 
           {/* Settings drawer */}
-          <Drawer open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <Drawer open={settingsOpen} onOpenChange={setSettingsOpen} direction={isDesktop ? "right" : "bottom"}>
             <DrawerTrigger asChild>
               <button style={{ display: "none" }} aria-hidden />
             </DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent hideHandle={isDesktop} className={isDesktop ? "!inset-y-0 !right-0 !left-auto !rounded-none !w-80 !h-full !flex-col overflow-y-auto" : ""}>
               <DrawerHeader>
                 <DrawerTitle>PREFERENCES</DrawerTitle>
               </DrawerHeader>
@@ -1552,7 +1559,7 @@ export default function App() {
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                        padding: "13px 0", cursor: "pointer", width: "100%", maxWidth: 480,
+                        padding: "13px 0", cursor: "pointer", width: "100%",
                         outline: "none",
                       }}
                       onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
@@ -1581,7 +1588,7 @@ export default function App() {
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           background: "none", border: "none",
-                          padding: "13px 0", cursor: "pointer", width: "100%", maxWidth: 480,
+                          padding: "13px 0", cursor: "pointer", width: "100%",
                           marginTop: 8,
                           outline: "none",
                         }}
@@ -1594,13 +1601,13 @@ export default function App() {
                         <ChevronLeft size={16} style={{ color: "hsl(var(--muted-foreground))", transform: "rotate(180deg)" }} />
                       </button>
 
-                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))", maxWidth: 480 }} />
+                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))" }} />
 
                       <SectionLabel label="ACCOUNT" />
                       <div style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         borderBottom: "1px solid hsl(var(--border))",
-                        padding: "13px 0", maxWidth: 480,
+                        padding: "13px 0",
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <User size={14} style={{ opacity: 0.5 }} />
