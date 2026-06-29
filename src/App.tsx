@@ -1305,7 +1305,6 @@ export default function App() {
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [lightMode, setLightMode] = useState(() => localStorage.getItem("mimosa-light") === "1")
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768)
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)")
@@ -1317,37 +1316,36 @@ export default function App() {
   const [showA2HS, setShowA2HS] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [mapIndex, setMapIndex] = useState(0)
-  const [diva, setDiva] = useState(() => {
-    try { return localStorage.getItem("memosa-diva") === "1" } catch { return false }
+
+  type Theme = "dark" | "light" | "diva"
+  const [theme, setThemeState] = useState<Theme>(() => {
+    try {
+      if (localStorage.getItem("memosa-diva") === "1") return "diva"
+      if (localStorage.getItem("mimosa-light") === "1") return "light"
+    } catch { /* ok */ }
+    return "dark"
   })
+  const diva = theme === "diva"
+
+  function setTheme(t: Theme) {
+    setThemeState(t)
+    try {
+      localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
+      localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
+    } catch { /* ok */ }
+  }
+
+  useEffect(() => {
+    const html = document.documentElement
+    html.classList.toggle("theme-diva",  theme === "diva")
+    html.classList.toggle("theme-light", theme === "light")
+    const bg = theme === "diva" ? "#1C0812" : theme === "light" ? "#f5f4ef" : "#0b0b0a"
+    html.style.backgroundColor = bg
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg)
+  }, [theme])
+
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { particles: sparkleParticles, trigger: triggerSparkle } = useDivaSparkles()
-
-  // Apply theme-diva to <html> so portals (drawers) inherit the tokens
-  useEffect(() => {
-    document.documentElement.classList.toggle("theme-diva", diva)
-    if (!diva) {
-      const bg = lightMode ? "#f5f4ef" : "#0b0b0a"
-      document.documentElement.style.backgroundColor = bg
-      const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", bg)
-    } else {
-      document.documentElement.style.backgroundColor = "#1C0812"
-      const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", "#1C0812")
-    }
-  }, [diva, lightMode])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("theme-light", lightMode && !diva)
-    localStorage.setItem("mimosa-light", lightMode ? "1" : "0")
-    if (!diva) {
-      const bg = lightMode ? "#f5f4ef" : "#0b0b0a"
-      document.documentElement.style.backgroundColor = bg
-      const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute("content", bg)
-    }
-  }, [lightMode, diva])
 
   // Load favourites from Supabase when account is set
   useEffect(() => {
@@ -1396,15 +1394,6 @@ export default function App() {
   function dismissA2HS() {
     setShowA2HS(false)
     try { localStorage.setItem(A2HS_KEY, "1") } catch { /* ok */ }
-  }
-
-  function toggleDiva() {
-    setDiva((v) => {
-      const next = !v
-      if (next) setLightMode(false) // diva and light mode are mutually exclusive
-      try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
-      return next
-    })
   }
 
   function handleSwitchAccount() {
@@ -1598,10 +1587,39 @@ export default function App() {
                   return (
                     <>
                       <SectionLabel label="DISPLAY" />
-                      <ToggleRow label="LIGHT MODE ☀️"        sub="Switch to a light colour scheme" on={lightMode} onToggle={() => setLightMode(v => !v)} />
+
+                      {/* Theme segmented control */}
+                      <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", marginBottom: 10 }}>THEME</div>
+                        <div style={{ display: "flex", background: "hsl(var(--muted))", borderRadius: 8, padding: 3, gap: 2 }}>
+                          {(["dark", "light", "diva"] as Theme[]).map((t) => {
+                            const active = theme === t
+                            const labels: Record<Theme, string> = { dark: "DARK", light: "LIGHT", diva: "DIVA 💅" }
+                            const activeBg = t === "diva" ? "#FF2D95" : "hsl(var(--foreground))"
+                            const activeColor = t === "diva" ? "#1C0812" : "hsl(var(--background))"
+                            return (
+                              <button
+                                key={t}
+                                onClick={() => setTheme(t)}
+                                style={{
+                                  flex: 1, padding: "8px 4px", fontSize: 11, fontWeight: 700,
+                                  letterSpacing: "0.08em", borderRadius: 6, border: "none", cursor: "pointer",
+                                  fontFamily: "inherit",
+                                  background: active ? activeBg : "transparent",
+                                  color: active ? activeColor : "hsl(var(--muted-foreground))",
+                                  transition: "background 180ms, color 180ms",
+                                  boxShadow: active ? "0 1px 4px rgba(0,0,0,0.25)" : "none",
+                                }}
+                              >
+                                {labels[t]}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
                       <ToggleRow label="LIST VIEW"            on={listView}  onToggle={() => setListView(v => !v)} />
                       <ToggleRow label="HIGHLIGHT FAVOURITES" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
-                      <ToggleRow label="DIVA MODE 💅"         sub="Bigger, glossier, more sparkle" on={diva}      onToggle={toggleDiva} divaColor="#FF2D95" />
 
                       {/* Festival map nav row */}
                       <button
