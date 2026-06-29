@@ -20,11 +20,24 @@ const DAY_LABELS: Record<Day, string> = {
   Sunday: "SUN",
 }
 
+const STAGE_TINT: Record<Stage, string> = {
+  LUX:    "#C0392B",
+  UNDA:   "#D9A227",
+  AURA:   "#7A8B3C",
+  MENTIS: "#4A9BC4",
+}
+
+function stageBg(stage: Stage, theme: "dark" | "light" | "diva"): string {
+  const color = STAGE_TINT[stage]
+  const pct = theme === "light" ? "10%" : theme === "diva" ? "18%" : "20%"
+  return `color-mix(in srgb, ${color} ${pct}, hsl(var(--background)))`
+}
+
 const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "color-mix(in srgb, #C0392B 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  UNDA:   { bg: "color-mix(in srgb, #D9A227 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  AURA:   { bg: "color-mix(in srgb, #7A8B3C 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  MENTIS: { bg: "color-mix(in srgb, #4A9BC4 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  LUX:    { bg: "color-mix(in srgb, #C0392B 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  UNDA:   { bg: "color-mix(in srgb, #D9A227 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  AURA:   { bg: "color-mix(in srgb, #7A8B3C 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  MENTIS: { bg: "color-mix(in srgb, #4A9BC4 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
 }
 
 const STAGE_ACCENT: Record<Stage, string> = {
@@ -145,6 +158,7 @@ function EventCard({
   onToggleFav,
   onOpenArtist,
   diva,
+  theme,
   onSparkle,
 }: {
   slot: SlotEntry
@@ -154,13 +168,15 @@ function EventCard({
   onToggleFav: () => void
   onOpenArtist: (id: string) => void
   diva?: boolean
+  theme?: "dark" | "light" | "diva"
   onSparkle?: (x: number, y: number) => void
 }) {
   const [animKey, setAnimKey] = useState(0)
   const animClass = animKey === 0 ? "" : isFav ? "heart-anim-off" : "heart-anim-on"
   const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
-  const { bg, text } = STAGE_COLORS[stage]
+  const bg = stageBg(stage, theme ?? "dark")
+  const { text } = STAGE_COLORS[stage]
   const accent = STAGE_ACCENT[stage]
   const compact = height < 56
 
@@ -614,6 +630,7 @@ function TimetableGrid({
   onOpenArtist,
   listView,
   diva,
+  theme,
   onSparkle,
 }: {
   day: Day
@@ -623,6 +640,7 @@ function TimetableGrid({
   onOpenArtist: (id: string) => void
   listView: boolean
   diva?: boolean
+  theme?: "dark" | "light" | "diva"
   onSparkle?: (x: number, y: number) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -892,6 +910,7 @@ function TimetableGrid({
                     onToggleFav={() => onToggleFav(key)}
                     onOpenArtist={onOpenArtist}
                     diva={diva}
+                    theme={theme}
                     onSparkle={onSparkle}
                   />
                 )
@@ -1504,6 +1523,7 @@ export default function App() {
               onOpenArtist={setSelectedArtistId}
               listView={listView}
               diva={diva}
+              theme={theme}
               onSparkle={diva ? triggerSparkle : undefined}
             />
           </TabsContent>
@@ -1520,7 +1540,7 @@ export default function App() {
               <TabsTrigger
                 key={day}
                 value={day}
-                className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] flex-col gap-1 after:hidden"
+                className="flex-1 h-full rounded-none text-[12px] font-bold tracking-[0.04em] flex-col gap-1 after:hidden"
                 style={activeDay === day ? { color: "hsl(var(--foreground))" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
@@ -1611,8 +1631,7 @@ export default function App() {
                         const pillBg = theme === "diva" ? "#FF2D95" : "hsl(var(--foreground))"
                         const activeTextColor = theme === "diva" ? "#1C0812" : "hsl(var(--background))"
                         return (
-                          <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", color: "hsl(var(--foreground))", marginBottom: 10 }}>Theme</div>
+                          <div style={{ padding: "10px 0", borderBottom: "1px solid hsl(var(--border))" }}>
                             <div style={{ position: "relative", display: "flex", background: "hsl(var(--muted))", borderRadius: 999, padding: 3 }}>
                               {/* Sliding pill */}
                               <div style={{
