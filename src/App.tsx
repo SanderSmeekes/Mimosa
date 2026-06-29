@@ -1361,7 +1361,12 @@ export default function App() {
     const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
     html.style.backgroundColor = bg
     document.body.style.backgroundColor = bg
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg)
+    const existing = document.querySelector('meta[name="theme-color"]')
+    if (existing) existing.remove()
+    const tc = document.createElement('meta')
+    tc.name = 'theme-color'
+    tc.content = bg
+    document.head.appendChild(tc)
   }
 
   function setTheme(t: Theme) {
