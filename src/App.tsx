@@ -1509,134 +1509,135 @@ export default function App() {
               <DrawerHeader>
                 <DrawerTitle>PREFERENCES</DrawerTitle>
               </DrawerHeader>
-              <div style={{ padding: "8px 24px 40px", display: "flex", flexDirection: "column", gap: 0 }}>
-                {/* List view toggle */}
+              <div style={{ padding: "4px 24px 40px", display: "flex", flexDirection: "column" }}>
 
-                <button
-                  onClick={() => setListView((v) => !v)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    background: "none",
-                    border: "none",
-                    borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0",
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    LIST VIEW
-                  </span>
-                  {/* pill toggle */}
-                  <div style={{
-                    width: 44,
-                    height: 24,
-                    borderRadius: 12,
-                    backgroundColor: listView ? "#d2d2d0" : "hsl(var(--muted))",
-                    position: "relative",
-                    transition: "background-color 0.2s ease",
-                    flexShrink: 0,
-                  }}>
-                    <div style={{
-                      position: "absolute",
-                      top: 3,
-                      left: listView ? 23 : 3,
-                      width: 18,
-                      height: 18,
-                      borderRadius: 9,
-                      backgroundColor: listView ? "#0b0b0a" : "#a5a4a1",
-                      transition: "left 0.2s ease",
-                    }} />
-                  </div>
-                </button>
+                {/* ── Section label helper ── */}
+                {(() => {
+                  const SectionLabel = ({ label }: { label: string }) => (
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", color: "hsl(var(--muted-foreground))", opacity: 0.6, paddingTop: 20, paddingBottom: 6 }}>
+                      {label}
+                    </div>
+                  )
 
-                {/* Show favourites toggle */}
-                <button
-                  onClick={() => setShowFavs((v) => !v)}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0", cursor: "pointer", width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    HIGHLIGHT FAVOURITES
-                  </span>
-                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: showFavs ? "#d2d2d0" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: showFavs ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: showFavs ? "#0b0b0a" : "#a5a4a1", transition: "left 0.2s ease" }} />
-                  </div>
-                </button>
+                  const Toggle = ({ on, divaColor }: { on: boolean; divaColor?: string }) => {
+                    const trackOn = divaColor ?? "#d2d2d0"
+                    const knobOn  = divaColor ? "#1C0812" : "#0b0b0a"
+                    return (
+                      <div style={{
+                        width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                        backgroundColor: on ? trackOn : "hsl(var(--muted))",
+                        position: "relative",
+                        transition: "background-color 0.2s ease",
+                        outline: "none",
+                      }}>
+                        <div style={{
+                          position: "absolute", top: 3,
+                          left: on ? 21 : 3,
+                          width: 20, height: 20, borderRadius: 10,
+                          backgroundColor: on ? knobOn : "#6b6a62",
+                          transition: "left 0.2s ease",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+                        }} />
+                      </div>
+                    )
+                  }
 
-                {/* Diva mode toggle */}
-                <button
-                  onClick={toggleDiva}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0", cursor: "pointer", width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: diva ? "#FF2D95" : "hsl(var(--foreground))", fontFamily: "inherit", transition: "color 0.2s ease" }}>
-                    DIVA MODE 💅
-                  </span>
-                  <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: diva ? "#FF2D95" : "hsl(var(--muted))", position: "relative", transition: "background-color 0.2s ease", flexShrink: 0 }}>
-                    <div style={{ position: "absolute", top: 3, left: diva ? 23 : 3, width: 18, height: 18, borderRadius: 9, backgroundColor: diva ? "#1C0812" : "#a5a4a1", transition: "left 0.2s ease" }} />
-                  </div>
-                </button>
+                  const ToggleRow = ({
+                    label, sub, on, onToggle, divaColor,
+                  }: { label: string; sub?: string; on: boolean; onToggle: () => void; divaColor?: string }) => (
+                    <button
+                      role="switch"
+                      aria-checked={on}
+                      onClick={onToggle}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
+                        padding: "13px 0", cursor: "pointer", width: "100%", maxWidth: 480,
+                        outline: "none",
+                      }}
+                      onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
+                      onBlur={e  => (e.currentTarget.style.outline = "none")}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2, textAlign: "left" }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: divaColor && on ? divaColor : "hsl(var(--foreground))", fontFamily: "inherit", transition: "color 0.2s ease" }}>
+                          {label}
+                        </span>
+                        {sub && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", letterSpacing: "0.03em", opacity: 0.7 }}>{sub}</span>}
+                      </div>
+                      <Toggle on={on} divaColor={divaColor} />
+                    </button>
+                  )
 
-                {/* Festival map */}
-                <button
-                  onClick={() => { setSettingsOpen(false); setShowMap(true) }}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                    padding: "16px 0", cursor: "pointer", width: "100%",
-                  }}
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                    FESTIVAL MAP
-                  </span>
-                </button>
+                  return (
+                    <>
+                      <SectionLabel label="DISPLAY" />
+                      <ToggleRow label="LIST VIEW"            on={listView}  onToggle={() => setListView(v => !v)} />
+                      <ToggleRow label="HIGHLIGHT FAVOURITES" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
+                      <ToggleRow label="DIVA MODE 💅"         sub="Bigger, glossier, more sparkle" on={diva}      onToggle={toggleDiva} divaColor="#FF2D95" />
 
-                {/* Account row */}
-                <div style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  borderBottom: "1px solid hsl(var(--border))",
-                  padding: "16px 0",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <User size={14} style={{ opacity: 0.5 }} />
-                    <span style={{ fontSize: 13, color: "hsl(var(--foreground))", fontWeight: 700, letterSpacing: "0.08em" }}>
-                      {userName?.display_name ?? ""}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleSwitchAccount}
-                    style={{
-                      fontSize: 11, letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))",
-                      background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    log out
-                  </button>
-                </div>
+                      {/* Festival map nav row */}
+                      <button
+                        onClick={() => { setSettingsOpen(false); setShowMap(true) }}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          background: "none", border: "none",
+                          padding: "13px 0", cursor: "pointer", width: "100%", maxWidth: 480,
+                          marginTop: 8,
+                          outline: "none",
+                        }}
+                        onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
+                        onBlur={e  => (e.currentTarget.style.outline = "none")}
+                      >
+                        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                          FESTIVAL MAP
+                        </span>
+                        <ChevronLeft size={16} style={{ color: "hsl(var(--muted-foreground))", transform: "rotate(180deg)" }} />
+                      </button>
 
-                {/* Disclaimer */}
-                <p style={{ marginTop: 32, fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
-                  This app is not official from Memòri Festival.{"\n"}
-                  For the latest info, visit{" "}
-                  <a
-                    href="https://memori-festival.fr/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
-                  >
-                    memori-festival.fr
-                  </a>
-                </p>
+                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))", maxWidth: 480 }} />
+
+                      <SectionLabel label="ACCOUNT" />
+                      <div style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        borderBottom: "1px solid hsl(var(--border))",
+                        padding: "13px 0", maxWidth: 480,
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <User size={14} style={{ opacity: 0.5 }} />
+                          <span style={{ fontSize: 13, color: "hsl(var(--foreground))", fontWeight: 700, letterSpacing: "0.08em" }}>
+                            {userName?.display_name ?? ""}
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleSwitchAccount}
+                          style={{
+                            fontSize: 11, letterSpacing: "0.06em", color: "hsl(var(--muted-foreground))",
+                            background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+                            textTransform: "uppercase", padding: "4px 0",
+                            outline: "none",
+                          }}
+                          onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
+                          onBlur={e  => (e.currentTarget.style.outline = "none")}
+                        >
+                          log out
+                        </button>
+                      </div>
+
+                      <p style={{ marginTop: 32, fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
+                        This app is not official from Memòri Festival.{"\n"}
+                        For the latest info, visit{" "}
+                        <a
+                          href="https://memori-festival.fr/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
+                        >
+                          memori-festival.fr
+                        </a>
+                      </p>
+                    </>
+                  )
+                })()}
               </div>
             </DrawerContent>
           </Drawer>
