@@ -1135,12 +1135,12 @@ function ArtistDrawer({
                   flex: 1, height: 48, borderRadius: 8, border: "none", cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                   backgroundColor: isFav ? "var(--fav-color)" : "hsl(var(--muted))",
-                  color: isFav ? "#0b0b0a" : "hsl(var(--foreground))",
+                  color: isFav ? "#ffffff" : "hsl(var(--foreground))",
                   fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", fontFamily: "inherit",
                   transition: "background-color 150ms ease-out, color 150ms ease-out",
                 }}
               >
-                <Heart size={14} fill={isFav ? "#0b0b0a" : "none"} strokeWidth={2} />
+                <Heart size={14} fill={isFav ? "#ffffff" : "none"} strokeWidth={2} />
                 {isFav ? "FAVOURITED" : "FAVOURITE"}
               </button>
               <button
