@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User, Menu } from "lucide-react"
@@ -711,12 +711,6 @@ function TimetableGrid({
               justifyContent: "center",
             }}
           >
-            <img
-              src={({ Thursday: "/siley.png", Friday: "/mooney.png", Saturday: "/mooney.png", Sunday: "/siley.png" } as Record<Day, string>)[day]}
-              alt=""
-              className="mascot-img animate-[spin_20s_linear_infinite]"
-              style={{ width: 30, height: 30, objectFit: "contain" }}
-            />
           </div>
           {ALL_STAGES.map((stage) => (
             <div
@@ -917,14 +911,6 @@ const MARQUEE_TEXT = "Smile, dance and make Memoiries. Raargh!"
 const MARQUEE_SEPARATOR = "   "
 const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR)
 
-const marqueeImgStyle: React.CSSProperties = {
-  width: 24,
-  height: 24,
-  objectFit: "contain",
-  verticalAlign: "middle",
-  display: "inline-block",
-  marginBottom: 1,
-}
 
 function MarqueeSegment() {
   return (
@@ -940,7 +926,6 @@ function MarqueeSegment() {
       >
         {MARQUEE_CHUNK}
       </span>
-      <img src="/siley.png" alt="" className="marquee-mascot" style={{ ...marqueeImgStyle, margin: "0 10px" }} />
     </>
   )
 }
@@ -1522,8 +1507,7 @@ export default function App() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle>SETTINGS</DrawerTitle>
-                <DrawerDescription>memosa 2026</DrawerDescription>
+                <DrawerTitle>PREFERENCES</DrawerTitle>
               </DrawerHeader>
               <div style={{ padding: "8px 24px 40px", display: "flex", flexDirection: "column", gap: 0 }}>
                 {/* List view toggle */}
@@ -1614,7 +1598,6 @@ export default function App() {
                   <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
                     FESTIVAL MAP
                   </span>
-                  <ExternalLink size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
                 </button>
 
                 {/* Account row */}

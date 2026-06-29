@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['**/*'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff,woff2,webp}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
