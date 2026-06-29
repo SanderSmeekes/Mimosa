@@ -75,10 +75,8 @@
   --font-body:    "Space Mono", "Courier New", monospace;
 }
 
-/* ── Theme transition: html background slides for browser chrome ── */
-html {
-  transition: background-color 350ms ease;
-}
+/* ── Theme transition ───────────────────────── */
+/* html background must NOT transition — browser chrome reads it directly */
 
 /* ── Light mode ─────────────────────────────── */
 .theme-light {

@@ -1360,8 +1360,12 @@ export default function App() {
     html.classList.toggle("theme-diva",  t === "diva")
     html.classList.toggle("theme-light", t === "light")
     const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
+    // Set directly on both elements so browser chrome picks it up this paint
     html.style.backgroundColor = bg
     document.body.style.backgroundColor = bg
+    // Force a style flush so the value is committed before the next paint
+    void html.offsetHeight
+    // Re-insert meta so browsers that only watch for insertion pick up the new value
     const existing = document.querySelector('meta[name="theme-color"]')
     if (existing) existing.remove()
     const tc = document.createElement('meta')
