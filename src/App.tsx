@@ -1669,18 +1669,23 @@ export default function App() {
                         </button>
                       </div>
 
-                      <p style={{ marginTop: 32, fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
-                        This app is not official from Memòri Festival.{"\n"}
-                        For the latest info, visit{" "}
-                        <a
-                          href="https://memori-festival.fr/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
-                        >
-                          memori-festival.fr
-                        </a>
-                      </p>
+                      <div style={{ marginTop: 32, fontSize: 11, lineHeight: 1.8, color: "hsl(var(--muted-foreground))", opacity: 0.6, textAlign: "center" }}>
+                        <p style={{ margin: 0 }}>
+                          This app is not official from Memòri Festival.{" "}
+                          For the latest info, visit{" "}
+                          <a
+                            href="https://memori-festival.fr/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
+                          >
+                            memori-festival.fr
+                          </a>
+                        </p>
+                        <p style={{ margin: "6px 0 0" }}>
+                          Last updated: 29 June 2026
+                        </p>
+                      </div>
                     </>
                   )
                 })()}
