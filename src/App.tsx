@@ -767,7 +767,23 @@ function TimetableGrid({
                 zIndex: 15,
                 pointerEvents: "none",
               }}
-            />
+            >
+              <div style={{
+                position: "absolute",
+                top: -9,
+                left: 6,
+                background: "#d2d2d0",
+                color: "#0b0b0a",
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                padding: "2px 5px",
+                borderRadius: 3,
+                lineHeight: 1.4,
+              }}>
+                now
+              </div>
+            </div>
           )}
 
           {/* Full-width banner blocks (e.g. "Arriving at the camping") */}
