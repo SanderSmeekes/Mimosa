@@ -1555,7 +1555,9 @@ export default function App() {
               >
                 {DAY_LABELS[day]}
                 {activeDay === day && (
-                  <span style={{ fontSize: 10, lineHeight: 1, animation: "indicator-in 0.25s ease forwards" }}>✦</span>
+                  diva
+                    ? <span style={{ fontSize: 10, lineHeight: 1, animation: "indicator-in 0.25s ease forwards" }}>✦</span>
+                    : <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: "hsl(var(--foreground))", animation: "indicator-in 0.25s ease forwards" }} />
                 )}
               </TabsTrigger>
             ))}
