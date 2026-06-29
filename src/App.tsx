@@ -21,10 +21,10 @@ const DAY_LABELS: Record<Day, string> = {
 }
 
 const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "rgba(192,57,43,0.18)",  text: "#d2d2d0" },
-  UNDA:   { bg: "rgba(217,162,39,0.18)", text: "#d2d2d0" },
-  AURA:   { bg: "rgba(122,139,60,0.18)", text: "#d2d2d0" },
-  MENTIS: { bg: "rgba(74,155,196,0.18)", text: "#d2d2d0" },
+  LUX:    { bg: "#271d1b", text: "#d2d2d0" },
+  UNDA:   { bg: "#26221a", text: "#d2d2d0" },
+  AURA:   { bg: "#1e2118", text: "#d2d2d0" },
+  MENTIS: { bg: "#1a2026", text: "#d2d2d0" },
 }
 
 const STAGE_ACCENT: Record<Stage, string> = {
