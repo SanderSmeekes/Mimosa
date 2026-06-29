@@ -99,6 +99,15 @@
 }
 .now-pulse { animation: now-pulse 2.5s ease-in-out infinite; }
 
+@keyframes now-line-in {
+  0%   { opacity: 0; }
+  100% { opacity: 0.6; }
+}
+/* After fade-in, pulse continues via now-pulse — applied together with a delay */
+.now-line {
+  animation: now-line-in 900ms ease forwards, now-pulse 2.5s ease-in-out 900ms infinite;
+}
+
 /* ── FAB press ──────────────────────────────── */
 @keyframes fab-press {
   0%   { transform: scale(1); }
