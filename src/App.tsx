@@ -1547,11 +1547,11 @@ export default function App() {
                 key={day}
                 value={day}
                 className="flex-1 h-full rounded-none text-[12px] font-bold tracking-[0.04em] flex-col gap-1 after:hidden"
-                style={activeDay === day ? { color: "hsl(var(--foreground))" } : { color: "#4a4943" }}
+                style={activeDay === day ? { color: "hsl(var(--foreground))" } : { color: "hsl(var(--foreground))", opacity: 0.35 }}
               >
                 {DAY_LABELS[day]}
                 {activeDay === day && (
-                  <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: "hsl(var(--foreground))", animation: "indicator-in 0.25s ease forwards" }} />
+                  <span style={{ fontSize: 10, lineHeight: 1, animation: "indicator-in 0.25s ease forwards" }}>✦</span>
                 )}
               </TabsTrigger>
             ))}
