@@ -561,7 +561,7 @@ function ListView({
   const border = "1px solid hsl(var(--border))"
 
   return (
-    <div className="view-fade" style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never }}>
+    <div className="view-fade" style={{ flex: 1, overflow: "auto", overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as never, paddingBottom: "calc(64px + env(safe-area-inset-bottom))" }}>
 
       {/* ON NOW */}
       {nowInDay && onNow.length > 0 && (
@@ -698,7 +698,7 @@ function TimetableGrid({
         flex: 1,
         overflow: "auto",
         overscrollBehavior: "contain",
-        paddingBottom: "16px",
+        paddingBottom: "calc(64px + env(safe-area-inset-bottom))",
       }}
     >
       <div style={{ minWidth: TIME_GUTTER_W + ALL_STAGES.length * STAGE_COL_W, width: "100%", position: "relative" }}>
@@ -1490,7 +1490,7 @@ export default function App() {
       {/* Add to Home Screen hint */}
       {showA2HS && (
         <div style={{
-          position: "fixed", bottom: 128, left: 16, right: 16,
+          position: "fixed", bottom: "calc(128px + env(safe-area-inset-bottom))", left: 16, right: 16,
           backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
           borderRadius: 12, padding: "14px 16px",
           boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -1547,8 +1547,20 @@ export default function App() {
           </TabsContent>
         ))}
 
-        {/* Bottom day-selector bar */}
-        <div style={{ flexShrink: 0, borderTop: "1px solid hsl(var(--border))", display: "flex", alignItems: "stretch", backgroundColor: "hsl(var(--background))" }}>
+        {/* Bottom day-selector bar — floating glass */}
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40,
+          display: "flex", alignItems: "stretch",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          background: diva
+            ? "rgba(28,8,18,0.72)"
+            : theme === "light"
+              ? "rgba(255,255,255,0.72)"
+              : "rgba(11,11,10,0.72)",
+          backdropFilter: "blur(20px) saturate(1.8)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.8)",
+          borderTop: "1px solid hsl(var(--border) / 0.5)",
+        }}>
           {/* Tabs fill available space */}
           <TabsList
             variant="line"
@@ -1766,7 +1778,7 @@ export default function App() {
         className={["fab-settings", diva ? "diva-shimmer diva-chrome-btn" : ""].filter(Boolean).join(" ")}
         style={{
           position: "fixed",
-          bottom: 72,
+          bottom: "calc(56px + env(safe-area-inset-bottom))",
           right: 16,
           width: 56,
           height: 56,
