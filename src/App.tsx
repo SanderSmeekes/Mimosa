@@ -1761,7 +1761,7 @@ export default function App() {
 
       {/* Festival map overlay */}
       {showMap && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 200, backgroundColor: "#000", display: "flex", flexDirection: "column" }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 200, backgroundColor: "hsl(var(--background))", display: "flex", flexDirection: "column" }}>
           {/* Scrollable map */}
           <div style={{
             flex: 1, overflow: "auto", overscrollBehavior: "contain",
@@ -1786,7 +1786,7 @@ export default function App() {
           <div style={{
             position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
             padding: "12px 16px 28px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.98) 60%, transparent)",
+            background: `linear-gradient(to top, hsl(var(--background)) 60%, transparent)`,
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
           }}>
@@ -1800,7 +1800,7 @@ export default function App() {
                 style={{
                   flexShrink: 0, width: 38, height: 38, borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
+                  background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))",
                   cursor: "pointer", color: "hsl(var(--foreground))",
                 }}
               >
@@ -1810,7 +1810,7 @@ export default function App() {
               {/* Pill track */}
               <div style={{
                 flex: 1, display: "flex", alignItems: "center",
-                background: "rgba(255,255,255,0.07)", borderRadius: 10,
+                background: "hsl(var(--muted))", borderRadius: 10,
                 padding: 3, gap: 2,
               }}>
                 {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
@@ -1822,7 +1822,7 @@ export default function App() {
                       letterSpacing: "0.1em", borderRadius: 8, border: "none", cursor: "pointer",
                       transition: "background 180ms, color 180ms, box-shadow 180ms",
                       background: mapIndex === i ? "hsl(var(--foreground))" : "transparent",
-                      color: mapIndex === i ? "hsl(var(--background))" : "rgba(255,255,255,0.45)",
+                      color: mapIndex === i ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
                       boxShadow: mapIndex === i ? "0 1px 6px rgba(0,0,0,0.4)" : "none",
                     }}
                   >
