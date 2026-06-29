@@ -21,10 +21,10 @@ const DAY_LABELS: Record<Day, string> = {
 }
 
 const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "#271d1b", text: "#d2d2d0" },
-  UNDA:   { bg: "#26221a", text: "#d2d2d0" },
-  AURA:   { bg: "#1e2118", text: "#d2d2d0" },
-  MENTIS: { bg: "#1a2026", text: "#d2d2d0" },
+  LUX:    { bg: "color-mix(in srgb, #C0392B 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  UNDA:   { bg: "color-mix(in srgb, #D9A227 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  AURA:   { bg: "color-mix(in srgb, #7A8B3C 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+  MENTIS: { bg: "color-mix(in srgb, #4A9BC4 22%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
 }
 
 const STAGE_ACCENT: Record<Stage, string> = {
@@ -942,7 +942,7 @@ function MarqueeBanner() {
         paddingBottom: "10px",
         overflow: "hidden",
         whiteSpace: "nowrap",
-        backgroundColor: "rgba(10,10,10,0.95)",
+        backgroundColor: "hsl(var(--background))",
       }}
     >
       <div
@@ -1428,7 +1428,7 @@ export default function App() {
         inset: 0,
         display: "flex",
         flexDirection: "column",
-        backgroundColor: diva ? "#1C0812" : "#0b0b0a",
+        backgroundColor: diva ? "#1C0812" : "hsl(var(--background))",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
       }}
@@ -1450,7 +1450,7 @@ export default function App() {
       {showA2HS && (
         <div style={{
           position: "fixed", bottom: 128, left: 16, right: 16,
-          backgroundColor: "#1d1c14", border: "1px solid hsl(var(--border))",
+          backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))",
           borderRadius: 12, padding: "14px 16px",
           boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           zIndex: 50, display: "flex", alignItems: "flex-start", gap: 12,
