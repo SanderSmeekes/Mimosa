@@ -50,7 +50,7 @@ function DrawerContent({ className, children, hideHandle, ...props }: React.Comp
 }
 
 function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="drawer-header" className={cn("flex flex-col gap-1.5 p-6 pb-2", className)} {...props} />
+  return <div data-slot="drawer-header" className={cn("flex flex-col gap-1.5 px-7 pt-7 pb-2", className)} {...props} />
 }
 
 function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {

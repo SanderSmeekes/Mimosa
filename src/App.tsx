@@ -1540,12 +1540,12 @@ export default function App() {
               <DrawerHeader>
                 <DrawerTitle>Preferences</DrawerTitle>
               </DrawerHeader>
-              <div style={{ padding: "4px 24px 40px", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "8px 28px 56px", display: "flex", flexDirection: "column" }}>
 
                 {/* ── Section label helper ── */}
                 {(() => {
                   const SectionLabel = ({ label }: { label: string }) => (
-                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.03em", color: "hsl(var(--muted-foreground))", opacity: 0.7, paddingTop: 20, paddingBottom: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.03em", color: "hsl(var(--muted-foreground))", opacity: 0.7, paddingTop: 32, paddingBottom: 8 }}>
                       {label}
                     </div>
                   )
@@ -1583,7 +1583,7 @@ export default function App() {
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
-                        padding: "13px 0", cursor: "pointer", width: "100%",
+                        padding: "17px 0", cursor: "pointer", width: "100%",
                         outline: "none",
                       }}
                       onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
@@ -1674,7 +1674,7 @@ export default function App() {
                       <div style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         borderBottom: "1px solid hsl(var(--border))",
-                        padding: "13px 0",
+                        padding: "17px 0",
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <User size={14} style={{ opacity: 0.5 }} />
