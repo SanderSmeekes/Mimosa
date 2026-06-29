@@ -74,17 +74,9 @@
   --font-body:    "Space Mono", "Courier New", monospace;
 }
 
-/* ── View transitions: smooth theme crossfade ── */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 450ms;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 1ms !important;
-  }
+/* ── Theme transition: html background slides for browser chrome ── */
+html {
+  transition: background-color 350ms ease;
 }
 
 /* ── Light mode ─────────────────────────────── */

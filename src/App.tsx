@@ -1369,20 +1369,21 @@ export default function App() {
     document.head.appendChild(tc)
   }
 
+  const [themeFading, setThemeFading] = useState(false)
+
   function setTheme(t: Theme) {
-    const apply = () => {
-      applyThemeToDom(t)
+    // Update browser chrome immediately — no transition API blocking it
+    applyThemeToDom(t)
+    // Fade content out, swap theme, fade back in
+    setThemeFading(true)
+    setTimeout(() => {
       setThemeState(t)
       try {
         localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
         localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
       } catch { /* ok */ }
-    }
-    if ('startViewTransition' in document) {
-      (document as { startViewTransition: (cb: () => void) => void }).startViewTransition(apply)
-    } else {
-      apply()
-    }
+      requestAnimationFrame(() => setThemeFading(false))
+    }, 180)
   }
 
   // Keep DOM in sync on initial mount
@@ -1464,6 +1465,8 @@ export default function App() {
         backgroundColor: diva ? "#1C0812" : "hsl(var(--background))",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
+        opacity: themeFading ? 0 : 1,
+        transition: "opacity 200ms ease",
       }}
     >
       {favsLoading && (
