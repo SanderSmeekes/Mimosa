@@ -1374,21 +1374,21 @@ export default function App() {
     document.head.appendChild(tc)
   }
 
-  const [themeFading, setThemeFading] = useState(false)
+  const [themeFlash, setThemeFlash] = useState<string | null>(null)
 
   function setTheme(t: Theme) {
-    // Update browser chrome immediately — no transition API blocking it
+    const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
+    // Show solid overlay in new bg color so content snap is invisible
+    setThemeFlash(bg)
+    // Update chrome + React together — no async gap so bg colors always match
     applyThemeToDom(t)
-    // Fade content out, swap theme, fade back in
-    setThemeFading(true)
-    setTimeout(() => {
-      setThemeState(t)
-      try {
-        localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
-        localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
-      } catch { /* ok */ }
-      requestAnimationFrame(() => setThemeFading(false))
-    }, 180)
+    setThemeState(t)
+    try {
+      localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
+      localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
+    } catch { /* ok */ }
+    // Fade overlay out to reveal new theme
+    setTimeout(() => setThemeFlash(null), 260)
   }
 
   // Keep DOM in sync on initial mount
@@ -1470,10 +1470,20 @@ export default function App() {
         backgroundColor: diva ? "#1C0812" : "hsl(var(--background))",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
-        opacity: themeFading ? 0 : 1,
-        transition: "opacity 200ms ease",
       }}
     >
+      {/* Theme flash overlay — fades out over new background to mask the instant React re-render */}
+      {themeFlash && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 9997,
+            backgroundColor: themeFlash,
+            animation: "theme-flash-out 260ms ease forwards",
+            pointerEvents: "none",
+          }}
+          onAnimationEnd={() => setThemeFlash(null)}
+        />
+      )}
       {favsLoading && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9998,

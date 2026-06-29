@@ -196,6 +196,11 @@
   letter-spacing: var(--app-tracking) !important;
 }
 
+@keyframes theme-flash-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
