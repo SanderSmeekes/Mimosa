@@ -1591,7 +1591,7 @@ export default function App() {
                       {/* Theme segmented control */}
                       <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
                         <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", color: "hsl(var(--foreground))", marginBottom: 10 }}>Theme</div>
-                        <div style={{ display: "flex", background: "hsl(var(--muted))", borderRadius: 8, padding: 3, gap: 2 }}>
+                        <div style={{ display: "flex", background: "hsl(var(--muted))", borderRadius: 999, padding: 3, gap: 2 }}>
                           {(["dark", "light", "diva"] as Theme[]).map((t) => {
                             const active = theme === t
                             const labels: Record<Theme, string> = { dark: "DARK", light: "LIGHT", diva: "DIVA 💅" }
@@ -1603,7 +1603,7 @@ export default function App() {
                                 onClick={() => setTheme(t)}
                                 style={{
                                   flex: 1, padding: "8px 4px", fontSize: 11, fontWeight: 700,
-                                  letterSpacing: "0.08em", borderRadius: 6, border: "none", cursor: "pointer",
+                                  letterSpacing: "0.08em", borderRadius: 999, border: "none", cursor: "pointer",
                                   fontFamily: "inherit",
                                   background: active ? activeBg : "transparent",
                                   color: active ? activeColor : "hsl(var(--muted-foreground))",
