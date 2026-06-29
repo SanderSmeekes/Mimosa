@@ -331,7 +331,7 @@ function ListRow({
         paddingLeft: 6,
         gap: 2,
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: isNow ? accent : "#86847B", lineHeight: 1 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: isNow ? accent : "hsl(var(--muted-foreground))", lineHeight: 1 }}>
           {item.start_time}
         </span>
         {isNow && (
@@ -347,7 +347,7 @@ function ListRow({
             fontSize: 13,
             fontWeight: 700,
             letterSpacing: "0.03em",
-            color: "#ECEAE2",
+            color: "hsl(var(--foreground))",
             lineHeight: 1.2,
             overflow: "hidden",
             textOverflow: "ellipsis",
