@@ -1305,6 +1305,7 @@ export default function App() {
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [lightMode, setLightMode] = useState(() => localStorage.getItem("mimosa-light") === "1")
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768)
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)")
@@ -1325,10 +1326,28 @@ export default function App() {
   // Apply theme-diva to <html> so portals (drawers) inherit the tokens
   useEffect(() => {
     document.documentElement.classList.toggle("theme-diva", diva)
-    document.documentElement.style.backgroundColor = diva ? "#1C0812" : "#0b0b0a"
-    const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute("content", diva ? "#1C0812" : "#0b0b0a")
-  }, [diva])
+    if (!diva) {
+      const bg = lightMode ? "#f5f4ef" : "#0b0b0a"
+      document.documentElement.style.backgroundColor = bg
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute("content", bg)
+    } else {
+      document.documentElement.style.backgroundColor = "#1C0812"
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute("content", "#1C0812")
+    }
+  }, [diva, lightMode])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("theme-light", lightMode && !diva)
+    localStorage.setItem("mimosa-light", lightMode ? "1" : "0")
+    if (!diva) {
+      const bg = lightMode ? "#f5f4ef" : "#0b0b0a"
+      document.documentElement.style.backgroundColor = bg
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute("content", bg)
+    }
+  }, [lightMode, diva])
 
   // Load favourites from Supabase when account is set
   useEffect(() => {
@@ -1382,6 +1401,7 @@ export default function App() {
   function toggleDiva() {
     setDiva((v) => {
       const next = !v
+      if (next) setLightMode(false) // diva and light mode are mutually exclusive
       try { localStorage.setItem("memosa-diva", next ? "1" : "0") } catch { /* ok */ }
       return next
     })
@@ -1578,6 +1598,7 @@ export default function App() {
                   return (
                     <>
                       <SectionLabel label="DISPLAY" />
+                      <ToggleRow label="LIGHT MODE ☀️"        sub="Switch to a light colour scheme" on={lightMode} onToggle={() => setLightMode(v => !v)} />
                       <ToggleRow label="LIST VIEW"            on={listView}  onToggle={() => setListView(v => !v)} />
                       <ToggleRow label="HIGHLIGHT FAVOURITES" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
                       <ToggleRow label="DIVA MODE 💅"         sub="Bigger, glossier, more sparkle" on={diva}      onToggle={toggleDiva} divaColor="#FF2D95" />

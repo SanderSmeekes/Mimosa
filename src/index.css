@@ -65,6 +65,45 @@
   }
 }
 
+/* ── Light mode ─────────────────────────────── */
+.theme-light {
+  --background:         60 20% 96%;    /* #f5f4ef — warm off-white */
+  --background-deep:    60 20% 96%;
+  --foreground:         30 8% 14%;     /* #251f18 — near-black warm */
+
+  --card:               60 15% 91%;   /* #eae8e0 */
+  --card-foreground:    30 8% 14%;
+
+  --popover:            60 15% 91%;
+  --popover-foreground: 30 8% 14%;
+
+  --primary:            30 8% 14%;
+  --primary-foreground: 60 20% 96%;
+
+  --secondary:          60 6% 78%;    /* #c8c6be */
+  --secondary-foreground: 30 8% 14%;
+
+  --muted:              60 6% 84%;    /* #d8d6ce */
+  --muted-foreground:   30 5% 42%;    /* #6e6a61 */
+
+  --accent:             60 6% 78%;
+  --accent-foreground:  30 8% 14%;
+
+  --destructive:        0 62% 44%;
+  --destructive-foreground: 60 20% 96%;
+
+  --border:             60 5% 74%;    /* #bebcb4 */
+  --input:              60 6% 84%;
+  --ring:               30 8% 14%;
+
+  --fav-color:          #c0392b;
+}
+
+.theme-light, .theme-light body {
+  background-color: #f5f4ef;
+  color: #251f18;
+}
+
 /* ── Drawer handle hint ─────────────────────── */
 @keyframes drawer-hint {
   0%, 100% { opacity: 0.3; }
