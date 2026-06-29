@@ -756,7 +756,7 @@ function TimetableGrid({
                 left: TIME_GUTTER_W,
                 right: 0,
                 height: 0,
-                borderTop: "1px dashed #d2d2d0",
+                borderTop: "1px dashed hsl(var(--foreground))",
                 zIndex: 15,
                 pointerEvents: "none",
               }}
@@ -936,7 +936,7 @@ function MarqueeBanner() {
       className="group"
       style={{
         flexShrink: 0,
-        borderTop: "1px solid #1a1714",
+        borderTop: "1px solid hsl(var(--border))",
         borderBottom: "1px solid hsl(var(--border))",
         paddingTop: "10px",
         paddingBottom: "10px",
