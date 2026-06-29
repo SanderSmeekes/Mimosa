@@ -1685,8 +1685,8 @@ export default function App() {
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           background: "none", border: "none",
-                          padding: "13px 0", cursor: "pointer", width: "100%",
-                          marginTop: 8,
+                          padding: "17px 0", cursor: "pointer", width: "100%",
+                          marginTop: 0,
                           outline: "none",
                         }}
                         onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
