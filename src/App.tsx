@@ -1095,7 +1095,7 @@ function ArtistDrawer({
     <Drawer open={open} onOpenChange={(o) => { if (!o) onClose() }}>
       <DrawerContent style={{ height: "85dvh", display: "flex", flexDirection: "column" }}>
         {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 12px 0", flexShrink: 0, minHeight: 44 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 12px 0", flexShrink: 0, minHeight: 36 }}>
           {view.page !== "main" ? (
             <button style={iconBtn} onClick={() => view.page === "user-picks" ? openSavers() : setView({ page: "main" })}>
               <ChevronDown size={20} strokeWidth={1.5} style={{ transform: "rotate(90deg)" }} />
@@ -1118,7 +1118,7 @@ function ArtistDrawer({
 
         {/* Main artist page */}
         {view.page === "main" && artist && (
-          <div style={{ overflowY: "auto", padding: "16px 20px 40px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
+          <div style={{ overflowY: "auto", padding: "8px 20px 40px", display: "flex", flexDirection: "column", gap: 20, flex: 1 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 9999, backgroundColor: accent }} />
@@ -1689,9 +1689,8 @@ export default function App() {
                         onClick={() => { setSettingsOpen(false); setShowMap(true) }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
-                          background: "none", border: "none",
+                          background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
                           padding: "17px 0", cursor: "pointer", width: "100%",
-                          marginTop: 0,
                           outline: "none",
                         }}
                         onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
@@ -1702,8 +1701,6 @@ export default function App() {
                         </span>
                         <ChevronLeft size={16} style={{ color: "hsl(var(--muted-foreground))", transform: "rotate(180deg)" }} />
                       </button>
-
-                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))", marginTop: 16 }} />
 
                       <SectionLabel label="Account" />
                       <div style={{
