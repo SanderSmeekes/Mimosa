@@ -231,7 +231,7 @@ function EventCard({
             minWidth: 44,
             minHeight: 44,
             margin: "-14px -10px -14px 0",
-            color: isFav ? "var(--fav-color)" : "rgba(255,255,255,0.45)",
+            color: isFav ? "var(--fav-color)" : "hsl(var(--muted-foreground))",
             transition: "color 150ms ease-out",
           }}
           aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
@@ -414,7 +414,7 @@ function ListRow({
           justifyContent: "center",
           minWidth: 44,
           minHeight: 64,
-          color: isFav ? "var(--fav-color)" : "#3E3D38",
+          color: isFav ? "var(--fav-color)" : "hsl(var(--muted-foreground))",
           transition: "color 150ms ease-out",
         }}
         aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
