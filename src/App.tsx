@@ -1540,7 +1540,7 @@ export default function App() {
               <DrawerHeader>
                 <DrawerTitle>Preferences</DrawerTitle>
               </DrawerHeader>
-              <div style={{ padding: "8px 28px 56px", display: "flex", flexDirection: "column" }}>
+              <div key={settingsOpen ? "open" : "closed"} className={settingsOpen ? "settings-fade" : ""} style={{ padding: "8px 28px 56px", display: "flex", flexDirection: "column" }}>
 
                 {/* ── Section label helper ── */}
                 {(() => {
@@ -1668,7 +1668,7 @@ export default function App() {
                         <ChevronLeft size={16} style={{ color: "hsl(var(--muted-foreground))", transform: "rotate(180deg)" }} />
                       </button>
 
-                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))" }} />
+                      <div style={{ height: 1, backgroundColor: "hsl(var(--border))", marginTop: 16 }} />
 
                       <SectionLabel label="Account" />
                       <div style={{
