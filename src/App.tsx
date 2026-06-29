@@ -1707,7 +1707,7 @@ export default function App() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          backgroundColor: diva ? undefined : "#1d1c14",
+          backgroundColor: diva ? undefined : "hsl(var(--card))",
           border: diva ? "none" : "1px solid hsl(var(--border))",
           display: "flex",
           alignItems: "center",
