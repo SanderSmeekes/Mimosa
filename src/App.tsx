@@ -1326,13 +1326,18 @@ export default function App() {
     return "dark"
   })
   const diva = theme === "diva"
+  const [themeFading, setThemeFading] = useState(false)
 
   function setTheme(t: Theme) {
-    setThemeState(t)
-    try {
-      localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
-      localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
-    } catch { /* ok */ }
+    setThemeFading(true)
+    setTimeout(() => {
+      setThemeState(t)
+      try {
+        localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
+        localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
+      } catch { /* ok */ }
+      setTimeout(() => setThemeFading(false), 300)
+    }, 180)
   }
 
   useEffect(() => {
@@ -1420,6 +1425,8 @@ export default function App() {
         backgroundColor: diva ? "#1C0812" : "hsl(var(--background))",
         overflow: "hidden",
         paddingTop: "env(safe-area-inset-top)",
+        opacity: themeFading ? 0 : 1,
+        transition: "opacity 220ms ease",
       }}
     >
       {favsLoading && (
