@@ -1346,7 +1346,7 @@ export default function App() {
     const html = document.documentElement
     html.classList.toggle("theme-diva",  theme === "diva")
     html.classList.toggle("theme-light", theme === "light")
-    const bg = theme === "diva" ? "#1C0812" : theme === "light" ? "#f5f4ef" : "#0b0b0a"
+    const bg = theme === "diva" ? "#1C0812" : theme === "light" ? "#ffffff" : "#0b0b0a"
     html.style.backgroundColor = bg
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg)
   }, [theme])
