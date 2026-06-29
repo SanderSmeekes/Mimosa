@@ -21,10 +21,10 @@ const DAY_LABELS: Record<Day, string> = {
 }
 
 const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "#1d1c14", text: "#d2d2d0" },
-  UNDA:   { bg: "#1d1c14", text: "#d2d2d0" },
-  AURA:   { bg: "#1d1c14", text: "#d2d2d0" },
-  MENTIS: { bg: "#1d1c14", text: "#d2d2d0" },
+  LUX:    { bg: "rgba(192,57,43,0.18)",  text: "#d2d2d0" },
+  UNDA:   { bg: "rgba(217,162,39,0.18)", text: "#d2d2d0" },
+  AURA:   { bg: "rgba(122,139,60,0.18)", text: "#d2d2d0" },
+  MENTIS: { bg: "rgba(74,155,196,0.18)", text: "#d2d2d0" },
 }
 
 const STAGE_ACCENT: Record<Stage, string> = {
@@ -171,23 +171,23 @@ function EventCard({
       onClick={() => onOpenArtist(slot.artist_id)}
       style={{
         position: "absolute",
-        top: top + 2,
-        left: 4,
-        right: 4,
-        height: height - 4,
+        top: top + 1,
+        left: 1,
+        right: 1,
+        height: height - 2,
         backgroundColor: diva ? "hsl(var(--card))" : bg,
         cursor: "pointer",
         color: diva ? "hsl(var(--card-foreground))" : text,
-        borderRadius: 8,
-        borderLeft: diva ? "none" : `3px solid ${accent}`,
-        padding: compact ? "5px 8px" : "8px 10px",
+        borderRadius: 3,
+        borderLeft: diva ? `3px solid hsl(var(--primary))` : `3px solid ${accent}`,
+        padding: compact ? "3px 6px 3px 7px" : "5px 6px 5px 7px",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: compact ? "center" : "space-between",
-        boxShadow: diva ? "var(--diva-card-glow)" : "0 1px 4px rgba(0,0,0,0.25)",
+        boxShadow: diva ? "var(--diva-card-glow)" : "none",
         userSelect: "none",
-        opacity: dimmed ? 0.4 : 1,
+        opacity: dimmed ? 0.35 : 1,
         transition: "opacity 0.2s ease",
       }}
     >
