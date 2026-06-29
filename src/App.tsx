@@ -1506,11 +1506,11 @@ export default function App() {
                 key={day}
                 value={day}
                 className="flex-1 h-full rounded-none text-[13px] font-bold tracking-[0.08em] flex-col gap-1 after:hidden"
-                style={activeDay === day ? { color: "#ffffff" } : { color: "#4a4943" }}
+                style={activeDay === day ? { color: "hsl(var(--foreground))" } : { color: "#4a4943" }}
               >
                 {DAY_LABELS[day]}
                 {activeDay === day && (
-                  <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: "#ffffff", animation: "indicator-in 0.25s ease forwards" }} />
+                  <div style={{ width: 16, height: 2, borderRadius: 1, backgroundColor: "hsl(var(--foreground))", animation: "indicator-in 0.25s ease forwards" }} />
                 )}
               </TabsTrigger>
             ))}
@@ -1523,14 +1523,14 @@ export default function App() {
             </DrawerTrigger>
             <DrawerContent hideHandle={isDesktop} className={isDesktop ? "!inset-y-0 !right-0 !left-auto !rounded-none !w-80 !h-full !flex-col overflow-y-auto" : ""}>
               <DrawerHeader>
-                <DrawerTitle>PREFERENCES</DrawerTitle>
+                <DrawerTitle>Preferences</DrawerTitle>
               </DrawerHeader>
               <div style={{ padding: "4px 24px 40px", display: "flex", flexDirection: "column" }}>
 
                 {/* ── Section label helper ── */}
                 {(() => {
                   const SectionLabel = ({ label }: { label: string }) => (
-                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", color: "hsl(var(--muted-foreground))", opacity: 0.6, paddingTop: 20, paddingBottom: 6 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.03em", color: "hsl(var(--muted-foreground))", opacity: 0.7, paddingTop: 20, paddingBottom: 6 }}>
                       {label}
                     </div>
                   )
@@ -1575,7 +1575,7 @@ export default function App() {
                       onBlur={e  => (e.currentTarget.style.outline = "none")}
                     >
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2, textAlign: "left" }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: divaColor && on ? divaColor : "hsl(var(--foreground))", fontFamily: "inherit", transition: "color 0.2s ease" }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.01em", color: divaColor && on ? divaColor : "hsl(var(--foreground))", fontFamily: "inherit", transition: "color 0.2s ease" }}>
                           {label}
                         </span>
                         {sub && <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", letterSpacing: "0.03em", opacity: 0.7 }}>{sub}</span>}
@@ -1586,11 +1586,11 @@ export default function App() {
 
                   return (
                     <>
-                      <SectionLabel label="DISPLAY" />
+                      <SectionLabel label="Display" />
 
                       {/* Theme segmented control */}
                       <div style={{ padding: "12px 0", borderBottom: "1px solid hsl(var(--border))" }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", marginBottom: 10 }}>THEME</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.02em", color: "hsl(var(--foreground))", marginBottom: 10 }}>Theme</div>
                         <div style={{ display: "flex", background: "hsl(var(--muted))", borderRadius: 8, padding: 3, gap: 2 }}>
                           {(["dark", "light", "diva"] as Theme[]).map((t) => {
                             const active = theme === t
@@ -1618,8 +1618,8 @@ export default function App() {
                         </div>
                       </div>
 
-                      <ToggleRow label="LIST VIEW"            on={listView}  onToggle={() => setListView(v => !v)} />
-                      <ToggleRow label="HIGHLIGHT FAVOURITES" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
+                      <ToggleRow label="List view"            on={listView}  onToggle={() => setListView(v => !v)} />
+                      <ToggleRow label="Highlight favourites" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
 
                       {/* Festival map nav row */}
                       <button
@@ -1634,15 +1634,15 @@ export default function App() {
                         onFocus={e => (e.currentTarget.style.outline = "2px solid hsl(var(--ring))")}
                         onBlur={e  => (e.currentTarget.style.outline = "none")}
                       >
-                        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
-                          FESTIVAL MAP
+                        <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.01em", color: "hsl(var(--foreground))", fontFamily: "inherit" }}>
+                          Festival map
                         </span>
                         <ChevronLeft size={16} style={{ color: "hsl(var(--muted-foreground))", transform: "rotate(180deg)" }} />
                       </button>
 
                       <div style={{ height: 1, backgroundColor: "hsl(var(--border))" }} />
 
-                      <SectionLabel label="ACCOUNT" />
+                      <SectionLabel label="Account" />
                       <div style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         borderBottom: "1px solid hsl(var(--border))",
