@@ -73,8 +73,13 @@ export async function getUserFavourites(nameKey: string): Promise<string[]> {
 export async function signInWithEmail(email: string): Promise<void> {
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.origin },
+    options: { shouldCreateUser: true },
   })
+  if (error) throw error
+}
+
+export async function verifyOtp(email: string, token: string): Promise<void> {
+  const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" })
   if (error) throw error
 }
 

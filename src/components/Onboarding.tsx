@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react"
-import { supabase, signInWithEmail, lookupOrCreateAuthUser, type UserRecord } from "../lib/supabase"
+import React, { useState, useEffect, useRef } from "react"
+import { supabase, signInWithEmail, verifyOtp, lookupOrCreateAuthUser, type UserRecord } from "../lib/supabase"
 
-type Step = "welcome" | "email" | "sent" | "display_name" | "loading" | "error"
+type Step = "welcome" | "email" | "code" | "display_name" | "loading" | "error"
 
 type Props = {
   onComplete: (record: UserRecord) => void
@@ -33,14 +33,16 @@ function FadeItem({ children, delay = 0, style }: { children: React.ReactNode; d
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("welcome")
   const [emailInput, setEmailInput] = useState("")
+  const [codeInput, setCodeInput] = useState(["", "", "", "", "", ""])
   const [displayNameInput, setDisplayNameInput] = useState("")
   const [error, setError] = useState("")
   const [sending, setSending] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session?.user) return
-      setStep("display_name")
       const { data } = await supabase
         .from("user_favourites")
         .select("name_key, display_name, favourites")
@@ -48,23 +50,70 @@ export function Onboarding({ onComplete }: Props) {
         .single()
       if (data) {
         onComplete(data as UserRecord)
+      } else {
+        setStep("display_name")
       }
     })
     return () => subscription.unsubscribe()
   }, [onComplete])
 
-  async function handleSendLink() {
+  async function handleSendCode() {
     const email = emailInput.trim()
     if (!email) return
     setError("")
     setSending(true)
     try {
       await signInWithEmail(email)
-      setStep("sent")
+      setCodeInput(["", "", "", "", "", ""])
+      setStep("code")
+      setTimeout(() => codeRefs.current[0]?.focus(), 100)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send link.")
+      setError(err instanceof Error ? err.message : "Failed to send code.")
     } finally {
       setSending(false)
+    }
+  }
+
+  function handleCodeKey(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace" && !codeInput[i] && i > 0) {
+      codeRefs.current[i - 1]?.focus()
+    }
+  }
+
+  function handleCodeChange(i: number, val: string) {
+    // Allow paste of full 6-digit code
+    if (val.length > 1) {
+      const digits = val.replace(/\D/g, "").slice(0, 6)
+      if (digits.length === 6) {
+        const next = digits.split("")
+        setCodeInput(next)
+        codeRefs.current[5]?.focus()
+        handleVerify(digits)
+        return
+      }
+    }
+    const digit = val.replace(/\D/g, "").slice(-1)
+    const next = [...codeInput]
+    next[i] = digit
+    setCodeInput(next)
+    if (digit && i < 5) codeRefs.current[i + 1]?.focus()
+    if (next.every(d => d) ) handleVerify(next.join(""))
+  }
+
+  async function handleVerify(token?: string) {
+    const code = token ?? codeInput.join("")
+    if (code.length !== 6) return
+    setError("")
+    setVerifying(true)
+    try {
+      await verifyOtp(emailInput.trim(), code)
+      // onAuthStateChange handles the rest
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid code. Please try again.")
+      setCodeInput(["", "", "", "", "", ""])
+      setTimeout(() => codeRefs.current[0]?.focus(), 50)
+    } finally {
+      setVerifying(false)
     }
   }
 
@@ -181,7 +230,7 @@ export function Onboarding({ onComplete }: Props) {
         <div style={card}>
           <div style={{ fontSize: 20, fontWeight: 700 }}>sign in</div>
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            enter your email — we'll send you a magic link to sign in. no password needed.
+            enter your email — we'll send a 6-digit code. no password needed.
           </div>
           <input
             style={inputStyle}
@@ -189,17 +238,17 @@ export function Onboarding({ onComplete }: Props) {
             placeholder="your@email.com"
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendLink()}
+            onKeyDown={(e) => e.key === "Enter" && handleSendCode()}
             autoFocus
             disabled={sending}
           />
           {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
           <button
             style={{ ...btn(), opacity: sending || !emailInput.trim() ? 0.5 : 1 }}
-            onClick={handleSendLink}
+            onClick={handleSendCode}
             disabled={sending || !emailInput.trim()}
           >
-            {sending ? "sending…" : "send magic link"}
+            {sending ? "sending…" : "send code"}
           </button>
           <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => setStep("welcome")}>
             back
@@ -209,22 +258,61 @@ export function Onboarding({ onComplete }: Props) {
     )
   }
 
-  if (step === "sent") {
+  if (step === "code") {
+    const complete = codeInput.every(d => d)
     return (
       <div style={bg}>
         <div style={card}>
-          <div style={{ fontSize: 40 }}>✉️</div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>check your email</div>
+          <div style={{ fontSize: 32 }}>✉️</div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>enter your code</div>
           <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-            we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>.
-            tap the link in the email to sign in.
+            we sent a 6-digit code to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>. enter it below — no need to open any link.
           </div>
-          <div style={{ fontSize: 12, opacity: 0.4, lineHeight: 1.6 }}>
-            once you tap the link, this screen will update automatically.
+
+          {/* 6-box OTP input */}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            {codeInput.map((digit, i) => (
+              <input
+                key={i}
+                ref={el => { codeRefs.current[i] = el }}
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={digit}
+                onChange={e => handleCodeChange(i, e.target.value)}
+                onKeyDown={e => handleCodeKey(i, e)}
+                style={{
+                  width: 44,
+                  height: 52,
+                  background: "transparent",
+                  border: digit ? "1px solid rgba(240,236,224,0.7)" : "1px solid rgba(240,236,224,0.25)",
+                  borderRadius: 6,
+                  color: "#f0ece0",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 22,
+                  fontWeight: 700,
+                  textAlign: "center",
+                  outline: "none",
+                  caretColor: "transparent",
+                  transition: "border-color 120ms ease",
+                }}
+                disabled={verifying}
+              />
+            ))}
           </div>
+
+          {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
+
+          <button
+            style={{ ...btn(), opacity: (!complete || verifying) ? 0.5 : 1 }}
+            onClick={() => handleVerify()}
+            disabled={!complete || verifying}
+          >
+            {verifying ? "verifying…" : "continue"}
+          </button>
           <button
             style={{ ...btn("secondary"), fontSize: 13 }}
-            onClick={() => { setStep("email"); setError("") }}
+            onClick={() => { setStep("email"); setError(""); setCodeInput(["", "", "", "", "", ""]) }}
           >
             use a different email
           </button>
