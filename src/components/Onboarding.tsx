@@ -192,7 +192,10 @@ export function Onboarding({ onComplete }: Props) {
         <div style={{ fontSize: 32 }}>✉️</div>
         <div style={{ fontSize: 20, fontWeight: 700 }}>check your email</div>
         <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-          we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>. tap it to sign in — you can close this screen.
+          we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>. tap it to sign in.
+        </div>
+        <div style={{ fontSize: 11, opacity: 0.35, lineHeight: 1.6 }}>
+          don't see it? check your spam folder.
         </div>
         <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setError("") }}>
           use a different email

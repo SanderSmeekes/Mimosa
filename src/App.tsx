@@ -1548,7 +1548,7 @@ export default function App() {
               ADD TO HOME SCREEN
             </div>
             <div style={{ fontSize: 11, lineHeight: 1.6, color: "hsl(var(--muted-foreground))" }}>
-              Tap the share icon and choose "Add to Home Screen" for the best experience — works offline too.
+              Tap the share icon → "Add to Home Screen". When you open it, sign in once more to sync your favourites.
             </div>
           </div>
           <button
