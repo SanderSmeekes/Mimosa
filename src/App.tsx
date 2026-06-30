@@ -1351,7 +1351,7 @@ export default function App() {
       sessionStorage.setItem("memosa-reopen-settings", "1")
     } catch { /* ok */ }
     setThemeFlash(bg)
-    requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
+    setTimeout(() => location.reload(), 420)
   }
 
   // On first load, if no cached account, check if Supabase has an active session
@@ -1466,6 +1466,7 @@ export default function App() {
           style={{
             position: "fixed", inset: 0, zIndex: 2147483647,
             backgroundColor: themeFlash,
+            animation: "theme-flash-in 400ms cubic-bezier(0.22,1,0.36,1) forwards",
             pointerEvents: "none",
           }}
         />,
