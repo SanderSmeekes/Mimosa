@@ -1381,17 +1381,16 @@ export default function App() {
 
   function setTheme(t: Theme) {
     const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
-    // Show solid overlay in new bg color so content snap is invisible
-    setThemeFlash(bg)
-    // Update chrome + React together — no async gap so bg colors always match
-    applyThemeToDom(t)
-    setThemeState(t)
+    // Persist first so the inline <head> script picks it up on reload
     try {
       localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
       localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
     } catch { /* ok */ }
-    // Fade overlay out to reveal new theme
-    setTimeout(() => setThemeFlash(null), 260)
+    // Cover the screen in the new bg colour, then reload.
+    // iOS Safari only reads theme-color on initial paint — a service-worker-
+    // cached reload is near-instant and guarantees the chrome colour is correct.
+    setThemeFlash(bg)
+    requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
   }
 
   // Keep DOM in sync on initial mount
@@ -1772,7 +1771,7 @@ export default function App() {
                           </a>
                         </p>
                         <p style={{ margin: "6px 0 0" }}>
-                          Last updated: 29 June 2026
+                          Last updated: 30 June 2026
                         </p>
                       </div>
                     </>
