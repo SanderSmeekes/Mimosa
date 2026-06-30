@@ -1393,16 +1393,17 @@ export default function App() {
 
   function setTheme(t: Theme) {
     const bg = themeBg(t)
-    // Persist first so the inline <head> script picks it up on reload
     try {
       localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
       localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
     } catch { /* ok */ }
-    // Cover the screen in the new bg colour, then reload.
-    // iOS Safari only reads theme-color on initial paint — a service-worker-
-    // cached reload is near-instant and guarantees the chrome colour is correct.
+    // Flash covers the screen first, then close drawer + reload so the
+    // drawer close animation is never visible.
     setThemeFlash(bg)
-    requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
+    setTimeout(() => {
+      setSettingsOpen(false)
+      requestAnimationFrame(() => location.reload())
+    }, 80)
   }
 
   // On first load, if no cached account, check if Supabase has an active session
