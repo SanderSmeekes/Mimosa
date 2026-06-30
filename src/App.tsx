@@ -1420,10 +1420,10 @@ export default function App() {
     try { localStorage.setItem(A2HS_KEY, "1") } catch { /* ok */ }
   }
 
-  async function handleSwitchAccount() {
+  function handleSwitchAccount() {
     try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
     try { localStorage.removeItem(LS_KEY) } catch { /* ok */ }
-    await signOut().catch(() => {})
+    signOut().catch(() => {})
     setFavourites(new Set())
     setUserName(null)
   }
