@@ -332,7 +332,7 @@ function ListRow({
         opacity: dimmed ? 0.35 : status === "earlier" ? 0.38 : 1,
         transition: "opacity 0.2s ease",
         cursor: "pointer",
-        backgroundColor: isNow ? "rgba(255,255,255,0.025)" : "transparent",
+        backgroundColor: isNow ? "hsl(var(--muted) / 0.35)" : "transparent",
       }}
     >
       {/* Time column */}
@@ -376,8 +376,8 @@ function ListRow({
               fontSize: 8,
               fontWeight: 600,
               letterSpacing: "0.08em",
-              color: "#6B6A62",
-              border: "1px solid #3E3D38",
+              color: "hsl(var(--muted-foreground))",
+              border: "1px solid hsl(var(--border))",
               borderRadius: 3,
               padding: "1px 4px",
               flexShrink: 0,
@@ -450,7 +450,8 @@ function SectionHeader({ label, dim }: { label: string; dim?: boolean }) {
       fontSize: 10,
       fontWeight: 700,
       letterSpacing: "0.12em",
-      color: dim ? "#6B6A62" : "#A9A79D",
+      color: "hsl(var(--muted-foreground))",
+      opacity: dim ? 0.5 : 1,
       backgroundColor: "hsl(var(--background))",
       borderBottom: "1px solid hsl(var(--border))",
       position: "sticky",
@@ -1489,9 +1490,9 @@ export default function App() {
       {favsLoading && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9998,
-          background: "rgba(11,11,10,0.85)",
+          background: diva ? "rgba(28,8,18,0.88)" : theme === "light" ? "rgba(255,255,255,0.88)" : "rgba(11,11,10,0.88)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: "var(--font-body)", color: "#f0ece0", fontSize: 14, letterSpacing: "0.06em",
+          fontFamily: "var(--font-body)", color: "hsl(var(--foreground))", fontSize: 14, letterSpacing: "0.06em",
         }}>
           loading your picks…
         </div>
