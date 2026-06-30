@@ -12,6 +12,13 @@ const fadeIn = `
   from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes ob-logo-flip {
+  0%   { transform: perspective(600px) rotateY(-90deg); opacity: 0; }
+  40%  { opacity: 1; }
+  70%  { transform: perspective(600px) rotateY(12deg); }
+  85%  { transform: perspective(600px) rotateY(-6deg); }
+  100% { transform: perspective(600px) rotateY(0deg); opacity: 1; }
+}
 `
 
 function FadeItem({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
@@ -119,16 +126,16 @@ export function Onboarding({ onComplete }: Props) {
     <div style={bg}>
       <style>{fadeIn}</style>
       <div style={card}>
-        <FadeItem delay={0}>
-          <img src="/memosa-glass.webp" alt="" style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }} />
-        </FadeItem>
-        <FadeItem delay={80}>
+        <div style={{ animation: "ob-logo-flip 800ms cubic-bezier(0.22,1,0.36,1) both", animationDelay: "0ms", marginBottom: 4 }}>
+          <img src="/memosa-glass.webp" alt="" style={{ width: 80, height: 80, objectFit: "contain", display: "block" }} />
+        </div>
+        <FadeItem delay={200}>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
         </FadeItem>
-        <FadeItem delay={160}>
-          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>enter your email — we'll send you a magic link.</div>
+        <FadeItem delay={340}>
+          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.7 }}>save your festival favourites and see what others are going to.</div>
         </FadeItem>
-        <FadeItem delay={240}>
+        <FadeItem delay={440}>
           <input
             style={inputStyle} type="email" autoComplete="email" placeholder="your@email.com"
             value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
@@ -137,7 +144,7 @@ export function Onboarding({ onComplete }: Props) {
           />
         </FadeItem>
         {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
-        <FadeItem delay={320}>
+        <FadeItem delay={520}>
           <button style={{ ...btn(), opacity: sending || !emailInput.trim() ? 0.5 : 1 }} onClick={handleSendLink} disabled={sending || !emailInput.trim()}>
             {sending ? "sending…" : "send magic link"}
           </button>
