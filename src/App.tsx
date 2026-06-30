@@ -7,6 +7,7 @@ import { artistsData } from "@/data/artists"
 import { Heart, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User, Menu } from "lucide-react"
 import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
+import { track } from "@vercel/analytics"
 
 /* ─────────────────────────────────────────────
    Layout constants
@@ -1427,7 +1428,9 @@ export default function App() {
   function toggleFav(key: string) {
     setFavourites((prev) => {
       const next = new Set(prev)
-      next.has(key) ? next.delete(key) : next.add(key)
+      const adding = !next.has(key)
+      adding ? next.add(key) : next.delete(key)
+      track("favourite_toggle", { artist: key, action: adding ? "add" : "remove" })
       try { localStorage.setItem(LS_KEY, JSON.stringify([...next])) } catch { /* quota */ }
       if (userName) scheduleSave(userName.name_key, next)
       return next
@@ -1533,7 +1536,7 @@ export default function App() {
 
       <Tabs
         value={activeDay}
-        onValueChange={(v) => setActiveDay(v as Day)}
+        onValueChange={(v) => { setActiveDay(v as Day); track("day_switch", { day: v }) }}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
       >
         {/* Grid per day */}
@@ -1554,7 +1557,7 @@ export default function App() {
               favourites={favourites}
               showFavs={showFavs}
               onToggleFav={toggleFav}
-              onOpenArtist={setSelectedArtistId}
+              onOpenArtist={(id) => { setSelectedArtistId(id); if (id) track("artist_open", { artist: id, day: activeDay }) }}
               listView={listView}
               diva={diva}
               theme={theme}
@@ -1714,7 +1717,7 @@ export default function App() {
 
                       {/* Festival map nav row */}
                       <button
-                        onClick={() => { setSettingsOpen(false); setShowMap(true) }}
+                        onClick={() => { setSettingsOpen(false); setShowMap(true); track("map_open") }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           background: "none", border: "none", borderBottom: "1px solid hsl(var(--border))",
@@ -1785,7 +1788,7 @@ export default function App() {
 
       {/* Floating settings button */}
       <button
-        onClick={() => setSettingsOpen(true)}
+        onClick={() => { setSettingsOpen(true); track("settings_open") }}
         aria-label="Settings"
         className={["fab-settings", diva ? "diva-shimmer diva-chrome-btn" : ""].filter(Boolean).join(" ")}
         style={{
