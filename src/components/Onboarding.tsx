@@ -93,9 +93,27 @@ export function Onboarding({ onComplete }: Props) {
     return () => subscription.unsubscribe()
   }, [onComplete])
 
+  function validateEmail(email: string): string | null {
+    if (!email.includes("@")) return "missing @ — check your email address."
+    const [local, domain] = email.split("@")
+    if (!local) return "something's missing before the @."
+    if (!domain || !domain.includes(".")) return "missing domain — e.g. gmail.com."
+    if (domain.endsWith(".")) return "email can't end with a dot."
+    const typos: Record<string, string> = {
+      "gmail.con": "gmail.com", "gmail.cmo": "gmail.com", "gmial.com": "gmail.com",
+      "gmai.com": "gmail.com", "hotmail.con": "hotmail.com", "hotmial.com": "hotmail.com",
+      "icloud.con": "icloud.com", "yahooo.com": "yahoo.com", "yaho.com": "yahoo.com",
+      "outloook.com": "outlook.com", "outlok.com": "outlook.com",
+    }
+    if (typos[domain]) return `did you mean ${local}@${typos[domain]}?`
+    return null
+  }
+
   async function handleSendLink() {
-    const email = emailInput.trim()
+    const email = emailInput.trim().toLowerCase()
     if (!email) return
+    const validationError = validateEmail(email)
+    if (validationError) { setError(validationError); return }
     setError("")
     setSending(true)
     try {
