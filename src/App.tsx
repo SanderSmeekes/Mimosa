@@ -930,60 +930,6 @@ function TimetableGrid({
   )
 }
 
-/* ─────────────────────────────────────────────
-   Marquee banner
-───────────────────────────────────────────── */
-const MARQUEE_TEXT = "Smile, dance and make Memoiries ➰ Raargh!"
-const MARQUEE_SEPARATOR = "   "
-const MARQUEE_CHUNK = Array(3).fill(MARQUEE_TEXT).join(MARQUEE_SEPARATOR)
-
-
-function MarqueeSegment() {
-  return (
-    <>
-      <span
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.8rem",
-          letterSpacing: "0.04em",
-          color: "hsl(var(--muted-foreground))",
-          verticalAlign: "middle",
-        }}
-      >
-        {MARQUEE_CHUNK}
-      </span>
-    </>
-  )
-}
-
-function MarqueeBanner() {
-  return (
-    <div
-      className="group"
-      style={{
-        flexShrink: 0,
-        borderTop: "1px solid hsl(var(--border))",
-        borderBottom: "1px solid hsl(var(--border))",
-        paddingTop: "10px",
-        paddingBottom: "10px",
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        backgroundColor: "hsl(var(--background))",
-      }}
-    >
-      <div
-        style={{
-          display: "inline-block",
-          animation: "marquee 22s linear infinite",
-        }}
-        className="group-hover:[animation-play-state:paused]"
-      >
-        <MarqueeSegment />
-        <MarqueeSegment />
-      </div>
-    </div>
-  )
-}
 
 /* ─────────────────────────────────────────────
    Root app
@@ -1504,17 +1450,16 @@ export default function App() {
         paddingTop: "env(safe-area-inset-top)",
       }}
     >
-      {/* Theme flash overlay — fades out over new background to mask the instant React re-render */}
-      {themeFlash && (
+      {/* Theme flash overlay — rendered via portal so it sits above the vaul drawer */}
+      {themeFlash && createPortal(
         <div
           style={{
-            position: "fixed", inset: 0, zIndex: 9997,
+            position: "fixed", inset: 0, zIndex: 2147483647,
             backgroundColor: themeFlash,
-            animation: "theme-flash-out 260ms ease forwards",
             pointerEvents: "none",
           }}
-          onAnimationEnd={() => setThemeFlash(null)}
-        />
+        />,
+        document.body
       )}
       {favsLoading && (
         <div style={{
@@ -1526,7 +1471,6 @@ export default function App() {
           loading your picks…
         </div>
       )}
-      {!diva && <MarqueeBanner />}
       <SparkleOverlay particles={sparkleParticles} />
 
       {/* Add to Home Screen hint */}
