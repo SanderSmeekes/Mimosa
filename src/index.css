@@ -40,6 +40,9 @@
   * {
     border-color: hsl(var(--border));
   }
+  html {
+    color-scheme: dark;
+  }
   html, body {
     height: 100%;
     overflow: hidden;
@@ -80,6 +83,7 @@
 
 /* ── Light mode ─────────────────────────────── */
 .theme-light {
+  color-scheme: light;
   --background:         0 0% 100%;     /* #ffffff — pure white */
   --background-deep:    0 0% 100%;
   --foreground:         30 8% 14%;     /* #251f18 — near-black warm */
@@ -213,6 +217,7 @@
 
 /* ── Diva mode ──────────────────────────────── */
 .theme-diva {
+  color-scheme: dark;
   /* All-pink world: dark rose base, blush text, hot pink accents */
   --background:         340 55% 7%;    /* #1C0812 — deepest rose-black */
   --background-deep:    340 55% 7%;
