@@ -1361,19 +1361,20 @@ export default function App() {
     html.classList.toggle("theme-light", t === "light")
     const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
     const scheme = t === "light" ? "light" : "dark"
-    // Set directly so browser chrome picks them up this paint
     html.style.backgroundColor = bg
     html.style.colorScheme = scheme
     document.body.style.backgroundColor = bg
-    // Force a style flush so values are committed before the next paint
-    void html.offsetHeight
-    // Re-insert meta so browsers that only watch for insertion pick up the new value
-    const existing = document.querySelector('meta[name="theme-color"]')
-    if (existing) existing.remove()
-    const tc = document.createElement('meta')
-    tc.name = 'theme-color'
-    tc.content = bg
-    document.head.appendChild(tc)
+    // setAttribute on the existing meta triggers Safari's MutationObserver for
+    // theme-color — remove+reinsert does NOT reliably trigger dynamic updates
+    const tc = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null
+    if (tc) {
+      tc.setAttribute('content', bg)
+    } else {
+      const newTc = document.createElement('meta')
+      newTc.setAttribute('name', 'theme-color')
+      newTc.setAttribute('content', bg)
+      document.head.appendChild(newTc)
+    }
   }
 
   const [themeFlash, setThemeFlash] = useState<string | null>(null)
