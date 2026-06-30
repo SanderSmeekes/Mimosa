@@ -20,6 +20,13 @@ const fadeIn = `
   83%  { transform: perspective(800px) rotateY(-4deg); }
   100% { transform: perspective(800px) rotateY(0deg); opacity: 1; }
 }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #0b0b0a inset !important;
+  -webkit-text-fill-color: #f0ece0 !important;
+  caret-color: #f0ece0;
+}
 `
 
 function FadeItem({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
@@ -126,7 +133,7 @@ export function Onboarding({ onComplete }: Props) {
         lower.includes("rate") || lower.includes("limit") ? "too many attempts — wait a minute and try again." :
         lower.includes("signup") || lower.includes("disabled") ? "sign-ups are temporarily disabled. try again later." :
         lower.includes("invalid") ? "that doesn't look like a valid email address." :
-        "couldn't send the link. check your email and try again."
+        msg || "couldn't send the link. try again."
       )
     } finally {
       setSending(false)
