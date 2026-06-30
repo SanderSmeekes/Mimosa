@@ -1280,13 +1280,7 @@ export default function App() {
   const [userName, setUserName] = useState<UserRecord | null>(cachedAccount)
   const [sessionChecked, setSessionChecked] = useState(!!cachedAccount)
   const [favsLoading, setFavsLoading] = useState(false)
-  const [activeDay, setActiveDay] = useState<Day>(() => {
-    try {
-      const saved = sessionStorage.getItem("memosa-active-day") as Day | null
-      if (saved && timetableData.days.includes(saved)) return saved
-    } catch { /* ok */ }
-    return "Thursday"
-  })
+  const [activeDay, setActiveDay] = useState<Day>("Thursday")
   const [favourites, setFavourites] = useState<Set<string>>(() => {
     try {
       const raw = localStorage.getItem(LS_KEY)
@@ -1519,7 +1513,7 @@ export default function App() {
 
       <Tabs
         value={activeDay}
-        onValueChange={(v) => { setActiveDay(v as Day); track("day_switch", { day: v }); try { sessionStorage.setItem("memosa-active-day", v) } catch { /* ok */ } }}
+        onValueChange={(v) => { setActiveDay(v as Day); track("day_switch", { day: v }) }}
         style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}
       >
         {/* Grid per day */}
