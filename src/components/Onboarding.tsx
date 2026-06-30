@@ -194,8 +194,14 @@ export function Onboarding({ onComplete }: Props) {
         <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
           we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>. tap it to sign in.
         </div>
-        <div style={{ fontSize: 11, opacity: 0.35, lineHeight: 1.6 }}>
-          don't see it? check your spam folder.
+        <div style={{
+          width: "100%", background: "rgba(240,200,80,0.1)", border: "1px solid rgba(240,200,80,0.3)",
+          borderRadius: 6, padding: "10px 14px", display: "flex", alignItems: "flex-start", gap: 8,
+        }}>
+          <span style={{ fontSize: 14, flexShrink: 0 }}>📂</span>
+          <div style={{ fontSize: 12, color: "rgba(240,200,80,0.9)", lineHeight: 1.6 }}>
+            not seeing it? it may have landed in your <strong>spam folder</strong> — move it to inbox and you're good.
+          </div>
         </div>
         <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setError("") }}>
           use a different email
