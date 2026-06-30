@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { supabase, signInWithEmail, lookupOrCreateAuthUser, type UserRecord } from "../lib/supabase"
 
-type Step = "welcome" | "email" | "sent" | "display_name" | "loading" | "error"
+type Step = "email" | "sent" | "display_name" | "loading" | "error"
 
 type Props = {
   onComplete: (record: UserRecord) => void
@@ -14,7 +14,7 @@ const fadeIn = `
 }
 `
 
-function FadeItem({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
+function FadeItem({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
     <div style={{
       animation: `ob-fade-up 700ms cubic-bezier(0.22,1,0.36,1) both`,
@@ -23,7 +23,6 @@ function FadeItem({ children, delay = 0, style }: { children: React.ReactNode; d
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      ...style,
     }}>
       {children}
     </div>
@@ -63,7 +62,7 @@ function btn(variant: "primary" | "secondary" = "primary"): React.CSSProperties 
 }
 
 export function Onboarding({ onComplete }: Props) {
-  const [step, setStep] = useState<Step>("welcome")
+  const [step, setStep] = useState<Step>("email")
   const [emailInput, setEmailInput] = useState("")
   const [displayNameInput, setDisplayNameInput] = useState("")
   const [error, setError] = useState("")
@@ -116,47 +115,33 @@ export function Onboarding({ onComplete }: Props) {
     }
   }
 
-  if (step === "welcome") return (
+  if (step === "email") return (
     <div style={bg}>
       <style>{fadeIn}</style>
       <div style={card}>
         <FadeItem delay={0}>
-          <img src="/memosa-glass.png" alt="" style={{ width: 120, height: 120, objectFit: "contain", marginBottom: 8 }} />
+          <img src="/memosa-glass.png" alt="" style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }} />
         </FadeItem>
-        <FadeItem delay={100}>
-          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
+        <FadeItem delay={80}>
+          <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
         </FadeItem>
-        <FadeItem delay={220}>
-          <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.5 }}>your personal timetable for memòri festival 2026</div>
+        <FadeItem delay={160}>
+          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>enter your email — we'll send you a magic link.</div>
         </FadeItem>
-        <FadeItem delay={340}>
-          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>sign in with your email to save your favourites and see what others are picking.</div>
+        <FadeItem delay={240}>
+          <input
+            style={inputStyle} type="email" placeholder="your@email.com"
+            value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSendLink()}
+            autoFocus disabled={sending}
+          />
         </FadeItem>
-        <FadeItem delay={460}>
-          <button style={btn()} onClick={() => setStep("email")}>
-            get started <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
+        {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
+        <FadeItem delay={320}>
+          <button style={{ ...btn(), opacity: sending || !emailInput.trim() ? 0.5 : 1 }} onClick={handleSendLink} disabled={sending || !emailInput.trim()}>
+            {sending ? "sending…" : "send magic link"}
           </button>
         </FadeItem>
-      </div>
-    </div>
-  )
-
-  if (step === "email") return (
-    <div style={bg}>
-      <div style={card}>
-        <div style={{ fontSize: 20, fontWeight: 700 }}>sign in</div>
-        <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>enter your email — we'll send you a magic link. no password needed.</div>
-        <input
-          style={inputStyle} type="email" placeholder="your@email.com"
-          value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSendLink()}
-          autoFocus disabled={sending}
-        />
-        {error && <div style={{ fontSize: 12, color: "#e07070" }}>{error}</div>}
-        <button style={{ ...btn(), opacity: sending || !emailInput.trim() ? 0.5 : 1 }} onClick={handleSendLink} disabled={sending || !emailInput.trim()}>
-          {sending ? "sending…" : "send magic link"}
-        </button>
-        <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => setStep("welcome")}>back</button>
       </div>
     </div>
   )
@@ -203,7 +188,7 @@ export function Onboarding({ onComplete }: Props) {
       <div style={card}>
         <div style={{ fontSize: 20, fontWeight: 700 }}>something went wrong</div>
         {error && <div style={{ fontSize: 13, color: "#e07070" }}>{error}</div>}
-        <button style={btn()} onClick={() => { setStep("welcome"); setError("") }}>try again</button>
+        <button style={btn()} onClick={() => { setStep("email"); setError("") }}>try again</button>
       </div>
     </div>
   )
