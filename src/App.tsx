@@ -1423,7 +1423,10 @@ export default function App() {
   function handleSwitchAccount() {
     try { localStorage.removeItem(ACCOUNT_KEY) } catch { /* ok */ }
     try { localStorage.removeItem(LS_KEY) } catch { /* ok */ }
+    try { localStorage.removeItem("memosa-diva") } catch { /* ok */ }
+    try { localStorage.removeItem("mimosa-light") } catch { /* ok */ }
     signOut().catch(() => {})
+    applyThemeToDom("dark")
     setFavourites(new Set())
     setUserName(null)
   }
