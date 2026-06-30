@@ -13,11 +13,12 @@ const fadeIn = `
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes ob-logo-flip {
-  0%   { transform: perspective(600px) rotateY(-90deg); opacity: 0; }
-  40%  { opacity: 1; }
-  70%  { transform: perspective(600px) rotateY(12deg); }
-  85%  { transform: perspective(600px) rotateY(-6deg); }
-  100% { transform: perspective(600px) rotateY(0deg); opacity: 1; }
+  0%   { transform: perspective(800px) rotateY(-90deg); opacity: 0; filter: blur(8px); }
+  30%  { opacity: 1; filter: blur(6px); }
+  55%  { transform: perspective(800px) rotateY(0deg); filter: blur(0px); }
+  70%  { transform: perspective(800px) rotateY(8deg); filter: blur(0px); }
+  83%  { transform: perspective(800px) rotateY(-4deg); }
+  100% { transform: perspective(800px) rotateY(0deg); opacity: 1; filter: blur(0px); }
 }
 `
 
@@ -126,7 +127,7 @@ export function Onboarding({ onComplete }: Props) {
     <div style={bg}>
       <style>{fadeIn}</style>
       <div style={card}>
-        <div style={{ animation: "ob-logo-flip 800ms cubic-bezier(0.22,1,0.36,1) both", animationDelay: "0ms", marginBottom: 4 }}>
+        <div style={{ animation: "ob-logo-flip 1400ms cubic-bezier(0.25,0.8,0.25,1) both", animationDelay: "0ms", marginBottom: 4 }}>
           <img src="/memosa-glass.webp" alt="" style={{ width: 80, height: 80, objectFit: "contain", display: "block" }} />
         </div>
         <FadeItem delay={200}>
