@@ -26,6 +26,7 @@ const STAGE_TINT: Record<Stage, string> = {
   AURA:   "#7A8B3C",
   MENTIS: "#4A9BC4",
 }
+const STAGE_ACCENT = STAGE_TINT
 
 function stageBg(stage: Stage, theme: "dark" | "light" | "diva"): string {
   const color = STAGE_TINT[stage]
@@ -33,19 +34,22 @@ function stageBg(stage: Stage, theme: "dark" | "light" | "diva"): string {
   return `color-mix(in srgb, ${color} ${pct}, hsl(var(--background)))`
 }
 
-const STAGE_COLORS: Record<Stage, { bg: string; text: string }> = {
-  LUX:    { bg: "color-mix(in srgb, #C0392B 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  UNDA:   { bg: "color-mix(in srgb, #D9A227 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  AURA:   { bg: "color-mix(in srgb, #7A8B3C 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
-  MENTIS: { bg: "color-mix(in srgb, #4A9BC4 20%, hsl(var(--background)))", text: "hsl(var(--foreground))" },
+type Theme = "dark" | "light" | "diva"
+
+function themeBg(t: Theme): string {
+  return t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
 }
 
-const STAGE_ACCENT: Record<Stage, string> = {
-  LUX:    "#C0392B",
-  UNDA:   "#D9A227",
-  AURA:   "#7A8B3C",
-  MENTIS: "#4A9BC4",
+function glassBackground(t: Theme, alpha: number): string {
+  const base = t === "diva" ? "28,8,18" : t === "light" ? "255,255,255" : "11,11,10"
+  return `rgba(${base},${alpha})`
 }
+
+const MAP_IMAGES = [
+  { src: "/full-festival-map.webp",   alt: "Memòri 2026 Full Map",     label: "ALL"      },
+  { src: "/memori_2026_maps-1.webp",  alt: "Memòri 2026 Festival Map", label: "FESTIVAL" },
+  { src: "/camping-map.webp",         alt: "Memòri 2026 Camping Map",  label: "CAMPING"  },
+] as const
 
 const PX_PER_HOUR    = 88
 const STAGE_COL_W    = 148  // minimum column width; columns expand to fill screen
@@ -77,6 +81,8 @@ function heightPx(start: string, end: string): number {
 function dayBounds(_day: Day): { startHour: number; endHour: number } {
   return { startHour: DAY_START, endHour: DAY_END }
 }
+
+const GRID_HOURS = Array.from({ length: DAY_END - DAY_START + 1 }, (_, i) => DAY_START + i)
 
 function slotKey(day: Day, stage: Stage, slot: SlotEntry): string {
   return `${day}__${stage}__${slot.artist}__${slot.start_time}`
@@ -176,7 +182,6 @@ function EventCard({
   const top    = topPx(slot.start_time)
   const height = heightPx(slot.start_time, slot.end_time)
   const bg = stageBg(stage, theme ?? "dark")
-  const { text } = STAGE_COLORS[stage]
   const accent = STAGE_ACCENT[stage]
   const compact = height < 56
 
@@ -193,7 +198,7 @@ function EventCard({
         height: height - 2,
         backgroundColor: diva ? "hsl(var(--card))" : bg,
         cursor: "pointer",
-        color: diva ? "hsl(var(--card-foreground))" : text,
+        color: "hsl(var(--foreground))",
         borderRadius: 3,
         borderLeft: diva ? `3px solid hsl(var(--primary))` : `3px solid ${accent}`,
         padding: compact ? "3px 6px 3px 7px" : "5px 6px 5px 7px",
@@ -648,10 +653,9 @@ function TimetableGrid({
 
   const schedule = timetableData.schedule[day]
   const { startHour, endHour } = dayBounds(day)
-  const totalHours = endHour - startHour          // 24
+  const totalHours = endHour - startHour
   const totalH     = totalHours * PX_PER_HOUR
-  // hours 10..33 → display as 10..23, 00..09
-  const hours      = Array.from({ length: totalHours + 1 }, (_, i) => startHour + i)
+  const hours      = GRID_HOURS
 
   const border     = "1px solid hsl(var(--border))"
   const bg         = "hsl(var(--background))"
@@ -1346,8 +1350,7 @@ export default function App() {
   const [showMap, setShowMap] = useState(false)
   const [mapIndex, setMapIndex] = useState(0)
 
-  type Theme = "dark" | "light" | "diva"
-  const [theme, _setThemeState] = useState<Theme>(() => {
+  const [theme] = useState<Theme>(() => {
     try {
       if (localStorage.getItem("memosa-diva") === "1") return "diva"
       if (localStorage.getItem("mimosa-light") === "1") return "light"
@@ -1360,7 +1363,7 @@ export default function App() {
     const html = document.documentElement
     html.classList.toggle("theme-diva",  t === "diva")
     html.classList.toggle("theme-light", t === "light")
-    const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
+    const bg = themeBg(t)
     const scheme = t === "light" ? "light" : "dark"
     html.style.backgroundColor = bg
     html.style.colorScheme = scheme
@@ -1381,7 +1384,7 @@ export default function App() {
   const [themeFlash, setThemeFlash] = useState<string | null>(null)
 
   function setTheme(t: Theme) {
-    const bg = t === "diva" ? "#1C0812" : t === "light" ? "#ffffff" : "#0b0b0a"
+    const bg = themeBg(t)
     // Persist first so the inline <head> script picks it up on reload
     try {
       localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
@@ -1490,7 +1493,7 @@ export default function App() {
       {favsLoading && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9998,
-          background: diva ? "rgba(28,8,18,0.88)" : theme === "light" ? "rgba(255,255,255,0.88)" : "rgba(11,11,10,0.88)",
+          background: glassBackground(theme, 0.88),
           display: "flex", alignItems: "center", justifyContent: "center",
           fontFamily: "var(--font-body)", color: "hsl(var(--foreground))", fontSize: 14, letterSpacing: "0.06em",
         }}>
@@ -1565,11 +1568,7 @@ export default function App() {
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 40,
           display: "flex", alignItems: "stretch",
           paddingBottom: "env(safe-area-inset-bottom)",
-          background: diva
-            ? "rgba(28,8,18,0.72)"
-            : theme === "light"
-              ? "rgba(255,255,255,0.72)"
-              : "rgba(11,11,10,0.72)",
+          background: glassBackground(theme, 0.72),
           backdropFilter: "blur(20px) saturate(1.8)",
           WebkitBackdropFilter: "blur(20px) saturate(1.8)",
           borderTop: "1px solid hsl(var(--border) / 0.5)",
@@ -1828,11 +1827,7 @@ export default function App() {
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, zIndex: 201,
             paddingTop: "env(safe-area-inset-top)",
-            background: diva
-              ? "rgba(28,8,18,0.82)"
-              : theme === "light"
-                ? "rgba(255,255,255,0.82)"
-                : "rgba(11,11,10,0.82)",
+            background: glassBackground(theme, 0.82),
             backdropFilter: "blur(20px) saturate(1.8)",
             WebkitBackdropFilter: "blur(20px) saturate(1.8)",
             borderBottom: "1px solid hsl(var(--border) / 0.5)",
@@ -1867,29 +1862,14 @@ export default function App() {
             paddingTop: "calc(48px + env(safe-area-inset-top))",
             paddingBottom: "calc(80px + env(safe-area-inset-bottom))",
           }}>
-            {mapIndex === 0 && (
-              <img src="/full-festival-map.webp" alt="Memòri 2026 Full Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
-            )}
-            {mapIndex === 1 && (
-              <img src="/memori_2026_maps-1.webp" alt="Memòri 2026 Festival Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
-            )}
-            {mapIndex === 2 && (
-              <img src="/camping-map.webp" alt="Memòri 2026 Camping Map"
-                style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
-            )}
+            <img {...MAP_IMAGES[mapIndex]} style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }} draggable={false} />
           </div>
 
           {/* Bottom bar — pill segmented control only */}
           <div style={{
             position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
             padding: `12px 16px calc(12px + env(safe-area-inset-bottom))`,
-            background: diva
-              ? "rgba(28,8,18,0.82)"
-              : theme === "light"
-                ? "rgba(255,255,255,0.82)"
-                : "rgba(11,11,10,0.82)",
+            background: glassBackground(theme, 0.82),
             backdropFilter: "blur(20px) saturate(1.8)",
             WebkitBackdropFilter: "blur(20px) saturate(1.8)",
             borderTop: "1px solid hsl(var(--border) / 0.5)",
@@ -1900,7 +1880,7 @@ export default function App() {
               background: "hsl(var(--muted))", borderRadius: 999,
               padding: 3, gap: 2,
             }}>
-              {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
+              {MAP_IMAGES.map(({ label }, i) => (
                 <button
                   key={i}
                   onClick={() => setMapIndex(i)}
