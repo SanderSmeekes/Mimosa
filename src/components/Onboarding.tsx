@@ -102,7 +102,11 @@ export function Onboarding({ onComplete }: Props) {
       await signInWithEmail(email)
       setStep("sent")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send link.")
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? ""
+      setError(msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("limit")
+        ? "too many attempts — wait a minute and try again."
+        : msg || "failed to send link. try again."
+      )
     } finally {
       setSending(false)
     }
