@@ -120,10 +120,13 @@ export function Onboarding({ onComplete }: Props) {
       await signInWithEmail(email)
       setStep("sent")
     } catch (err) {
-      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? ""
-      setError(msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("limit")
-        ? "too many attempts — wait a minute and try again."
-        : msg || "failed to send link. try again."
+      const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? ""
+      const lower = msg.toLowerCase()
+      setError(
+        lower.includes("rate") || lower.includes("limit") ? "too many attempts — wait a minute and try again." :
+        lower.includes("signup") || lower.includes("disabled") ? "sign-ups are temporarily disabled. try again later." :
+        lower.includes("invalid") ? "that doesn't look like a valid email address." :
+        "couldn't send the link. check your email and try again."
       )
     } finally {
       setSending(false)

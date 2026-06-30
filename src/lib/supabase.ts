@@ -75,7 +75,7 @@ export async function signInWithEmail(email: string): Promise<void> {
     email,
     options: { shouldCreateUser: true },
   })
-  if (error) throw error
+  if (error) throw new Error(error.message)
 }
 
 export async function verifyOtp(email: string, token: string): Promise<void> {
