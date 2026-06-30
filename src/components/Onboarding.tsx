@@ -134,7 +134,7 @@ export function Onboarding({ onComplete }: Props) {
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
         </FadeItem>
         <FadeItem delay={340}>
-          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.7 }}>save your festival favourites and see what others are going to.</div>
+          <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.7 }}>save your mimosa favourites ❤️</div>
         </FadeItem>
         <FadeItem delay={440}>
           <input
