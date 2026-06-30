@@ -13,12 +13,12 @@ const fadeIn = `
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes ob-logo-flip {
-  0%   { transform: perspective(800px) rotateY(-90deg); opacity: 0; filter: blur(8px); }
-  30%  { opacity: 1; filter: blur(6px); }
-  55%  { transform: perspective(800px) rotateY(0deg); filter: blur(0px); }
-  70%  { transform: perspective(800px) rotateY(8deg); filter: blur(0px); }
+  0%   { transform: perspective(800px) rotateY(-90deg); opacity: 0; }
+  30%  { opacity: 1; }
+  55%  { transform: perspective(800px) rotateY(0deg); }
+  70%  { transform: perspective(800px) rotateY(8deg); }
   83%  { transform: perspective(800px) rotateY(-4deg); }
-  100% { transform: perspective(800px) rotateY(0deg); opacity: 1; filter: blur(0px); }
+  100% { transform: perspective(800px) rotateY(0deg); opacity: 1; }
 }
 `
 
