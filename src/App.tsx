@@ -1291,7 +1291,13 @@ export default function App() {
   })
   const [showFavs, setShowFavs]         = useState(false)
   const [listView, setListView]         = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(() => {
+    try {
+      const flag = sessionStorage.getItem("memosa-reopen-settings")
+      if (flag) { sessionStorage.removeItem("memosa-reopen-settings"); return true }
+    } catch { /* ok */ }
+    return false
+  })
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768)
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)")
@@ -1342,6 +1348,7 @@ export default function App() {
     try {
       localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
       localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
+      sessionStorage.setItem("memosa-reopen-settings", "1")
     } catch { /* ok */ }
     setThemeFlash(bg)
     requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
