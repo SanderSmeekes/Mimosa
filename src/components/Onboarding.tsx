@@ -58,9 +58,9 @@ const card: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: "100%", background: "transparent",
   border: "1px solid rgba(240,236,224,0.3)", borderRadius: 4,
-  color: "#f0ece0", fontFamily: "'Space Mono', monospace",
-  fontSize: 18, padding: "12px 14px", outline: "none",
-  boxSizing: "border-box", textAlign: "left",
+  color: "#f0ece0", fontFamily: "'Space Grotesk', sans-serif",
+  fontSize: 17, padding: "12px 14px", outline: "none",
+  boxSizing: "border-box", textAlign: "left", letterSpacing: "0.01em",
 }
 
 function btn(variant: "primary" | "secondary" = "primary"): React.CSSProperties {
