@@ -5,7 +5,7 @@ import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle } from 
 import { timetableData, type Day, type Stage, type SlotEntry, type BannerEntry } from "@/data/timetable"
 import { artistsData } from "@/data/artists"
 import { Heart, ExternalLink, X, ChevronDown, ChevronUp, ChevronLeft, User, Menu } from "lucide-react"
-import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord } from "./lib/supabase"
+import { lookupUser, saveFavourites, countSaves, getSavers, getUserFavourites, signOut, type UserRecord, supabase } from "./lib/supabase"
 import { Onboarding } from "./components/Onboarding"
 import { track } from "@vercel/analytics"
 
@@ -1041,6 +1041,9 @@ function UserPicksList({ favs, loading, border, myFavourites }: { favs: string[]
   )
 }
 
+const saveCountCache = new Map<string, number>()
+const saversCache = new Map<string, Awaited<ReturnType<typeof getSavers>>>()
+
 function ArtistDrawer({
   artistId,
   slotKey,
@@ -1071,7 +1074,9 @@ function ArtistDrawer({
   useEffect(() => {
     if (!open || !slotKey) { setSaveCount(null); return }
     setSaveCount(null)
-    countSaves(slotKey).then(setSaveCount)
+    const cached = saveCountCache.get(slotKey)
+    if (cached !== undefined) { setSaveCount(cached); return }
+    countSaves(slotKey).then((n) => { saveCountCache.set(slotKey, n); setSaveCount(n) })
   }, [open, slotKey])
 
   useEffect(() => {
@@ -1080,8 +1085,10 @@ function ArtistDrawer({
 
   function openSavers() {
     if (!slotKey) return
+    const cached = saversCache.get(slotKey)
+    if (cached) { setView({ page: "savers", loading: false, list: cached }); return }
     setView({ page: "savers", loading: true, list: [] })
-    getSavers(slotKey).then((list) => setView({ page: "savers", loading: false, list }))
+    getSavers(slotKey).then((list) => { saversCache.set(slotKey, list); setView({ page: "savers", loading: false, list }) })
   }
 
   function openUserPicks(nameKey: string, displayName: string) {
@@ -1285,7 +1292,7 @@ function ArtistDrawerPortal({
   diva?: boolean
   onSparkle?: (x: number, y: number) => void
 }) {
-  if (!artistId) return <ArtistDrawer artistId={null} slotKey={null} open={false} onClose={onClose} isFav={false} onToggleFav={() => {}} myFavourites={favourites} />
+  if (!artistId) return null
 
   const a = artistsData[artistId]
   const stage = a?.stage as Stage | undefined
@@ -1318,14 +1325,14 @@ const isStandalone = () =>
   (window.navigator as { standalone?: boolean }).standalone === true
 
 export default function App() {
-  const [userName, setUserName] = useState<UserRecord | null>(() => {
+  const cachedAccount = (() => {
     try {
       const raw = localStorage.getItem(ACCOUNT_KEY)
       return raw ? (JSON.parse(raw) as UserRecord) : null
-    } catch {
-      return null
-    }
-  })
+    } catch { return null }
+  })()
+  const [userName, setUserName] = useState<UserRecord | null>(cachedAccount)
+  const [sessionChecked, setSessionChecked] = useState(!!cachedAccount)
   const [favsLoading, setFavsLoading] = useState(false)
   const [activeDay, setActiveDay]   = useState<Day>("Thursday")
   const [favourites, setFavourites] = useState<Set<string>>(() => {
@@ -1398,6 +1405,22 @@ export default function App() {
     requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
   }
 
+  // On first load, if no cached account, check if Supabase has an active session
+  // (handles magic link redirect where localStorage isn't populated yet)
+  useEffect(() => {
+    if (cachedAccount) return
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) { setSessionChecked(true); return }
+      lookupUser(session.user.id).then((record) => {
+        if (record) {
+          setUserName(record)
+          try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(record)) } catch { /* quota */ }
+        }
+        setSessionChecked(true)
+      }).catch(() => setSessionChecked(true))
+    }).catch(() => setSessionChecked(true))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Keep DOM in sync on initial mount
   useEffect(() => { applyThemeToDom(theme) }, [theme])
 
@@ -1463,6 +1486,10 @@ export default function App() {
     try { localStorage.removeItem(LS_KEY) } catch { /* ok */ }
   }
 
+
+  if (!sessionChecked) {
+    return <div style={{ position: "fixed", inset: 0, background: themeBg(theme) }} />
+  }
 
   if (!userName) {
     return <Onboarding onComplete={handleOnboardingComplete} />

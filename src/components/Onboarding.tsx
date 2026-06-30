@@ -120,7 +120,7 @@ export function Onboarding({ onComplete }: Props) {
       <style>{fadeIn}</style>
       <div style={card}>
         <FadeItem delay={0}>
-          <img src="/memosa-glass.png" alt="" style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }} />
+          <img src="/memosa-glass.webp" alt="" style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 4 }} />
         </FadeItem>
         <FadeItem delay={80}>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.06em" }}>mimosa</div>
@@ -130,7 +130,7 @@ export function Onboarding({ onComplete }: Props) {
         </FadeItem>
         <FadeItem delay={240}>
           <input
-            style={inputStyle} type="email" placeholder="your@email.com"
+            style={inputStyle} type="email" autoComplete="email" placeholder="your@email.com"
             value={emailInput} onChange={(e) => setEmailInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendLink()}
             autoFocus disabled={sending}
