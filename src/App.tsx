@@ -1845,32 +1845,29 @@ export default function App() {
           {/* Fixed bottom bar */}
           <div style={{
             position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 201,
-            padding: "12px 16px 28px",
+            padding: `12px 16px calc(16px + env(safe-area-inset-bottom))`,
             background: `linear-gradient(to top, hsl(var(--background)) 60%, transparent)`,
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
           }}>
-            {/* Segmented pill track */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8,
-            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {/* Back button */}
               <button
                 onClick={() => setShowMap(false)}
                 style={{
-                  flexShrink: 0, width: 38, height: 38, borderRadius: "50%",
+                  flexShrink: 0, width: 44, height: 44, borderRadius: 999,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))",
+                  background: "hsl(var(--muted))", border: "none",
                   cursor: "pointer", color: "hsl(var(--foreground))",
                 }}
               >
                 <ChevronLeft size={20} />
               </button>
 
-              {/* Pill track */}
+              {/* Pill track — matches settings theme picker */}
               <div style={{
                 flex: 1, display: "flex", alignItems: "center",
-                background: "hsl(var(--muted))", borderRadius: 10,
+                background: "hsl(var(--muted))", borderRadius: 999,
                 padding: 3, gap: 2,
               }}>
                 {(["ALL", "FESTIVAL", "CAMPING"] as const).map((label, i) => (
@@ -1879,7 +1876,8 @@ export default function App() {
                     onClick={() => setMapIndex(i)}
                     style={{
                       flex: 1, padding: "8px 0", fontSize: 11, fontWeight: 700,
-                      letterSpacing: "0.06em", borderRadius: 8, border: "none", cursor: "pointer",
+                      letterSpacing: "0.06em", borderRadius: 999, border: "none", cursor: "pointer",
+                      fontFamily: "inherit",
                       transition: "background 180ms, color 180ms, box-shadow 180ms",
                       background: mapIndex === i ? "hsl(var(--foreground))" : "transparent",
                       color: mapIndex === i ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
