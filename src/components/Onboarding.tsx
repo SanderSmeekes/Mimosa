@@ -200,7 +200,7 @@ export function Onboarding({ onComplete }: Props) {
         }}>
           <span style={{ fontSize: 14, flexShrink: 0 }}>📂</span>
           <div style={{ fontSize: 12, color: "rgba(240,200,80,0.9)", lineHeight: 1.6 }}>
-            not seeing it? it may have landed in your <strong>spam folder</strong> — move it to inbox and you're good.
+            not seeing it? check your <strong>spam folder</strong>.
           </div>
         </div>
         <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setError("") }}>
