@@ -1295,8 +1295,8 @@ export default function App() {
       return new Set()
     }
   })
-  const [showFavs, setShowFavs]         = useState(false)
-  const [listView, setListView]         = useState(false)
+  const [showFavs, setShowFavs] = useState(() => { try { return sessionStorage.getItem("memosa-show-favs") === "1" } catch { return false } })
+  const [listView, setListView] = useState(() => { try { return sessionStorage.getItem("memosa-list-view") === "1" } catch { return false } })
   const [settingsOpen, setSettingsOpen] = useState(() => {
     try {
       const flag = sessionStorage.getItem("memosa-reopen-settings")
@@ -1696,8 +1696,8 @@ export default function App() {
                         )
                       })()}
 
-                      <ToggleRow label="List view"            on={listView}  onToggle={() => setListView(v => !v)} />
-                      <ToggleRow label="Highlight favourites" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => !v)} />
+                      <ToggleRow label="List view"            on={listView}  onToggle={() => setListView(v => { try { sessionStorage.setItem("memosa-list-view", !v ? "1" : "0") } catch { /* ok */ } return !v })} />
+                      <ToggleRow label="Highlight favourites" sub="Make starred acts stand out" on={showFavs}  onToggle={() => setShowFavs(v => { try { sessionStorage.setItem("memosa-show-favs", !v ? "1" : "0") } catch { /* ok */ } return !v })} />
 
                       {/* Festival map nav row */}
                       <button
