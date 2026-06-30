@@ -1347,7 +1347,7 @@ export default function App() {
   const [mapIndex, setMapIndex] = useState(0)
 
   type Theme = "dark" | "light" | "diva"
-  const [theme, setThemeState] = useState<Theme>(() => {
+  const [theme, _setThemeState] = useState<Theme>(() => {
     try {
       if (localStorage.getItem("memosa-diva") === "1") return "diva"
       if (localStorage.getItem("mimosa-light") === "1") return "light"
@@ -1917,7 +1917,6 @@ export default function App() {
                   {label}
                 </button>
               ))}
-            </div>
             </div>
           </div>
         </div>
