@@ -1397,13 +1397,8 @@ export default function App() {
       localStorage.setItem("memosa-diva",  t === "diva"  ? "1" : "0")
       localStorage.setItem("mimosa-light", t === "light" ? "1" : "0")
     } catch { /* ok */ }
-    // Flash covers the screen first, then close drawer + reload so the
-    // drawer close animation is never visible.
     setThemeFlash(bg)
-    setTimeout(() => {
-      setSettingsOpen(false)
-      requestAnimationFrame(() => location.reload())
-    }, 80)
+    requestAnimationFrame(() => requestAnimationFrame(() => location.reload()))
   }
 
   // On first load, if no cached account, check if Supabase has an active session
@@ -1723,6 +1718,7 @@ export default function App() {
                               {themes.map((t) => (
                                 <button
                                   key={t}
+                                  type="button"
                                   onClick={() => setTheme(t)}
                                   style={{
                                     flex: 1, padding: "8px 4px", fontSize: 11, fontWeight: 700,
