@@ -156,12 +156,7 @@ export function Onboarding({ onComplete }: Props) {
       if (error) throw new Error(error.message)
     } catch (err) {
       const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? ""
-      const lower = msg.toLowerCase()
-      setError(
-        lower.includes("expired") ? "code expired — request a new one." :
-        lower.includes("invalid") ? "wrong code — double-check and try again." :
-        msg || "couldn't verify the code. try again."
-      )
+      setError(msg || "couldn't verify the code. try again.")
     } finally {
       setVerifying(false)
     }
