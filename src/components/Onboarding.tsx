@@ -256,7 +256,13 @@ export function Onboarding({ onComplete }: Props) {
           </div>
         </div>
 
-        <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setCodeInput(""); setError("") }}>
+        <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={async () => {
+          setError(""); setCodeInput(""); setSending(true)
+          try { await signInWithEmail(emailInput.trim().toLowerCase()) } catch { /* ok */ } finally { setSending(false) }
+        }} disabled={sending}>
+          {sending ? "sending…" : "resend code"}
+        </button>
+        <button style={{ ...btn("secondary"), fontSize: 13, opacity: 0.5 }} onClick={() => { setStep("email"); setCodeInput(""); setError("") }}>
           use a different email
         </button>
       </div>
