@@ -149,11 +149,8 @@ export function Onboarding({ onComplete }: Props) {
     setVerifying(true)
     try {
       const email = emailInput.trim().toLowerCase()
-      let result = await supabase.auth.verifyOtp({ email, token, type: "magiclink" })
-      if (result.error) {
-        result = await supabase.auth.verifyOtp({ email, token, type: "email" })
-      }
-      if (result.error) throw new Error(result.error.message)
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" })
+      if (error) throw new Error(error.message)
     } catch (err) {
       const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? ""
       setError(msg || "couldn't verify the code. try again.")
