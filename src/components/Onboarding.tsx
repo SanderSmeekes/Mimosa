@@ -79,9 +79,11 @@ function btn(variant: "primary" | "secondary" = "primary"): React.CSSProperties 
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("email")
   const [emailInput, setEmailInput] = useState("")
+  const [codeInput, setCodeInput] = useState("")
   const [displayNameInput, setDisplayNameInput] = useState("")
   const [error, setError] = useState("")
   const [sending, setSending] = useState(false)
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -140,6 +142,31 @@ export function Onboarding({ onComplete }: Props) {
     }
   }
 
+  async function handleVerifyCode() {
+    const token = codeInput.trim()
+    if (token.length !== 6) return
+    setError("")
+    setVerifying(true)
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: emailInput.trim().toLowerCase(),
+        token,
+        type: "email",
+      })
+      if (error) throw new Error(error.message)
+    } catch (err) {
+      const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? ""
+      const lower = msg.toLowerCase()
+      setError(
+        lower.includes("expired") ? "code expired — request a new one." :
+        lower.includes("invalid") ? "wrong code — double-check and try again." :
+        msg || "couldn't verify the code. try again."
+      )
+    } finally {
+      setVerifying(false)
+    }
+  }
+
   async function handleSetDisplayName() {
     const name = displayNameInput.trim()
     if (!name) return
@@ -188,12 +215,37 @@ export function Onboarding({ onComplete }: Props) {
 
   if (step === "sent") return (
     <div style={bg}>
+      <style>{fadeIn}</style>
       <div style={card}>
         <div style={{ fontSize: 32 }}>✉️</div>
         <div style={{ fontSize: 20, fontWeight: 700 }}>check your email</div>
         <div style={{ fontSize: 13, opacity: 0.55, lineHeight: 1.6 }}>
-          we sent a magic link to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>. tap it to sign in.
+          we sent a link + 6-digit code to <strong style={{ opacity: 0.9 }}>{emailInput}</strong>.
         </div>
+
+        {/* Code input */}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+          <input
+            style={{ ...inputStyle, textAlign: "center", fontSize: 28, letterSpacing: "0.25em", fontFamily: "'Space Mono', monospace" }}
+            type="text"
+            inputMode="numeric"
+            placeholder="000000"
+            maxLength={6}
+            value={codeInput}
+            onChange={(e) => { setCodeInput(e.target.value.replace(/\D/g, "")); setError("") }}
+            onKeyDown={(e) => e.key === "Enter" && handleVerifyCode()}
+            autoFocus
+          />
+          {error && <div style={{ fontSize: 12, color: "#e07070", textAlign: "center" }}>{error}</div>}
+          <button
+            style={{ ...btn(), opacity: verifying || codeInput.length !== 6 ? 0.5 : 1 }}
+            onClick={handleVerifyCode}
+            disabled={verifying || codeInput.length !== 6}
+          >
+            {verifying ? "verifying…" : "confirm code"}
+          </button>
+        </div>
+
         <div style={{
           width: "100%", background: "rgba(240,200,80,0.1)", border: "1px solid rgba(240,200,80,0.3)",
           borderRadius: 6, padding: "10px 14px", display: "flex", alignItems: "flex-start", gap: 8,
@@ -203,7 +255,8 @@ export function Onboarding({ onComplete }: Props) {
             not seeing it? check your <strong>spam folder</strong>.
           </div>
         </div>
-        <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setError("") }}>
+
+        <button style={{ ...btn("secondary"), fontSize: 13 }} onClick={() => { setStep("email"); setCodeInput(""); setError("") }}>
           use a different email
         </button>
       </div>
