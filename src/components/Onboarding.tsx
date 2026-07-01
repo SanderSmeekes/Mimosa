@@ -151,7 +151,7 @@ export function Onboarding({ onComplete }: Props) {
       const { error } = await supabase.auth.verifyOtp({
         email: emailInput.trim().toLowerCase(),
         token,
-        type: "magiclink",
+        type: "email",
       })
       if (error) throw new Error(error.message)
     } catch (err) {
