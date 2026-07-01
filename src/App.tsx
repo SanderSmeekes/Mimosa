@@ -1753,7 +1753,7 @@ export default function App() {
                           </a>
                         </p>
                         <p style={{ margin: "6px 0 0" }}>
-                          Last updated: 30 June 2026, 22:01
+                          Last updated: 1 July 2026, 12:00
                         </p>
                       </div>
                     </>
