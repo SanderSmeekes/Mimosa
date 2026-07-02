@@ -265,9 +265,28 @@ function EventCard({
       </div>
 
       {!compact && (
-        <span style={{ fontSize: 10, opacity: 0.55, flexShrink: 0, letterSpacing: 0 }}>
-          {slot.start_time}–{slot.end_time}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+          <span style={{ fontSize: 10, opacity: 0.55, letterSpacing: 0 }}>
+            {slot.start_time}–{slot.end_time}
+          </span>
+          {slot.live && (
+            <span style={{
+              fontSize: 8, fontWeight: 600, letterSpacing: "0.08em",
+              color: "hsl(var(--muted-foreground))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: 3, padding: "1px 4px", flexShrink: 0,
+            }}>live</span>
+          )}
+        </div>
+      )}
+      {compact && slot.live && (
+        <span style={{
+          position: "absolute", bottom: 3, right: 6,
+          fontSize: 7, fontWeight: 600, letterSpacing: "0.08em",
+          color: "hsl(var(--muted-foreground))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: 3, padding: "1px 3px",
+        }}>live</span>
       )}
     </div>
   )
